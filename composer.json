@@ -1,0 +1,21 @@
+{
+  "name" : "icatholic/iwebsite2",
+  "description" : "国泰标准化建站框架2.0版本",
+  "version" : "1.0",
+  "require" : {
+    "php" : ">=5.2.11",
+    "mobiledetect/mobiledetectlib" : ">=2.6.9",
+    "codeplex/phpexcel" : ">=1.7.8",
+    "lukaszr/matrixcode" : "dev-master",
+    "firephp/firephp-core" : "dev-master",
+    "phpmailer/phpmailer" : "v5.2.7",
+    "browscap/browscap-php": "1.0.*@dev",
+    "icatholic/weixin": "dev-master"
+  },
+  "keywords" : [ "iwebsite2", "zf1.12" ],
+  "config" : {
+    "process-timeout" : 3600
+  },
+  "license" : "BSD-3-Clause",
+  "homepage" : "http://iwebsitetwo.umaman.com"
+}

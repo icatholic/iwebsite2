@@ -1,0 +1,85 @@
+<div align="center">
+	<h2 align="center">提交到快钱页面</h2>
+	<font color="#ff0000"></font>
+	<table width="500" border="1" style="border-collapse: collapse"
+		bordercolor="green" align="center">
+		<tr>
+			<td id="orderId">订单号</td>
+			<td>123456789</td>
+		</tr>
+		<tr>
+			<td id="orderAmount">订单金额</td>
+			<td>
+						<?PHP echo $this->orderAmount; ?>
+					</td>
+		</tr>
+		<tr>
+			<td id="orderTime">下单时间</td>
+			<td>
+						<?PHP echo date('Y-m-d H:i:s'); ?>
+					</td>
+		</tr>
+		<tr>
+			<td id="productName">商品名称</td>
+			<td>XXXXXXXX</td>
+		</tr>
+		<tr>
+			<td id="productNum">商品数量</td>
+			<td>2</td>
+		</tr>
+	</table>
+</div>
+<div align="center" style="font-weight: bold;">
+	<form name="kqPay"
+		action="https://sandbox.99bill.com/gateway/recvMerchantInfoAction.htm"
+		method="post">
+		<input type="hidden" name="inputCharset"
+			value="<?PHP echo $this->result['inputCharset']; ?>" />
+		<input type="hidden" name="pageUrl"
+			value="<?PHP echo $this->result['pageUrl']; ?>" />
+		<input type="hidden" name="bgUrl"
+			value="<?PHP echo $this->result['bgUrl']; ?>" />
+		<input type="hidden" name="version"
+			value="<?PHP echo $this->result['version']; ?>" />
+		<input type="hidden" name="language"
+			value="<?PHP echo $this->result['language']; ?>" />
+		<input type="hidden" name="signType"
+			value="<?PHP echo $this->result['signType']; ?>" />
+		<input type="hidden" name="signMsg"
+			value="<?PHP echo $this->result['signMsg']; ?>" />
+		<input type="hidden" name="merchantAcctId"
+			value="<?PHP echo $this->result['merchantAcctId']; ?>" />
+		<input type="hidden" name="payerName"
+			value="<?PHP echo $this->result['payerName']; ?>" />
+		<input type="hidden" name="payerContactType"
+			value="<?PHP echo $this->result['payerContactType']; ?>" />
+		<input type="hidden" name="payerContact"
+			value="<?PHP echo $this->result['payerContact']; ?>" />
+		<input type="hidden" name="orderId"
+			value="<?PHP echo $this->result['orderId']; ?>" />
+		<input type="hidden" name="orderAmount"
+			value="<?PHP echo $this->result['orderAmount']; ?>" />
+		<input type="hidden" name="orderTime"
+			value="<?PHP echo $this->result['orderTime']; ?>" />
+		<input type="hidden" name="productName"
+			value="<?PHP echo $this->result['productName']; ?>" />
+		<input type="hidden" name="productNum"
+			value="<?PHP echo $this->result['productNum']; ?>" />
+		<input type="hidden" name="productId"
+			value="<?PHP echo $this->result['productId']; ?>" />
+		<input type="hidden" name="productDesc"
+			value="<?PHP echo $this->result['productDesc']; ?>" />
+		<input type="hidden" name="ext1"
+			value="<?PHP echo $this->result['ext1']; ?>" />
+		<input type="hidden" name="ext2"
+			value="<?PHP echo $this->result['ext2']; ?>" />
+		<input type="hidden" name="payType"
+			value="<?PHP echo $this->result['payType']; ?>" />
+		<input type="hidden" name="bankId"
+			value="<?PHP echo $this->result['bankId']; ?>" />
+		<input type="hidden" name="redoFlag"
+			value="<?PHP echo $this->result['redoFlag']; ?>" />
+		<input type="hidden" name="pid" value="<?PHP echo $this->result['pid']; ?>" />
+		<input type="submit" name="submit" value="提交到快钱">
+	</form>
+</div>

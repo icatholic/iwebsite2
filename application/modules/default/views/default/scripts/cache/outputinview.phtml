@@ -1,0 +1,20 @@
+<?php
+$cache = $this->cache;
+?>
+<?php if (!($cache->start('part1'))) {?>
+	<?php echo $this->partial('cache/output_part.phtml',array('dataList'=>$this->dataList1)); ?>
+	<?php 
+	echo 'This part1 is cached ('.date("Y-m-d H:i:s").') '."<br/>";
+	$cache->end(); // output buffering ends
+	?>
+<?php }?>
+
+<h2>no cache part's changeTime:<?php echo $this->changedPart;?><br/></h2>
+
+<?php if (!($cache->start('part2'))) {?>
+	<?php echo $this->partial('cache/output_part.phtml',array('dataList'=>$this->dataList2)); ?>
+	<?php 
+	echo 'This part12 is cached ('.date("Y-m-d H:i:s").') '."<br/>";
+	$cache->end(); // output buffering ends
+	?>
+<?php }?>

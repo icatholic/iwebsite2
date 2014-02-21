@@ -1,0 +1,18 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+	<div id="welcome">
+		<h1>脸部识别测试</h1>
+		<div>
+			<form action="/default/test/face" method="post" enctype="multipart/form-data">
+				<input type="file" name="image" value="" />
+				<input type="submit" value="上传"/>
+			</form>
+		</div>
+		<h2>识别人脸数量:<?php echo $this->face_number;?></h2>
+		<h2>识别人脸位置:<img src="<?php echo $this->face_image_data;?>" /></h2>
+	</div>
+</body>
+</html>

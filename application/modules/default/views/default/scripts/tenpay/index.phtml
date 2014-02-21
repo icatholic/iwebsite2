@@ -1,0 +1,156 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>财付通付款通道</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=utf-8">
+<META 
+content=网上购物/网上支付/安全支付/安全购物/购物，安全/支付,安全/财付通/安全,支付/安全，购物/支付,在线/付款,收款/网上,贸易/网上贸易. 
+name=description>
+<META 
+content=网上购物/网上支付/安全支付/安全购物/购物，安全/支付,安全/财付通/安全,支付/安全，购物/支付,在线/付款,收款/网上,贸易/网上贸易. 
+name=keywords>
+<META content="MSHTML 6.00.3790.2577" name=GENERATOR>
+
+<style type="text/css">
+<!--
+a:link {
+	color: #003399;
+}
+.px12 {
+	font-size: 12px;
+}
+a:visited {
+	color: #003399;
+}
+a:hover {
+	color: #FF6600;
+}
+.px14 {
+	font-size: 14px;
+}
+.px12hui {
+	font-size: 12px;
+	color: #999999;
+}
+.STYLE2 {font-size: 14px; font-weight: bold; }
+-->
+</style>
+<script type='text/javascript' src='http://union.tenpay.com/bankList/jquery.js'></script>
+<link rel="stylesheet" type="text/css" href="http://union.tenpay.com/bankList/css_col2.css" />
+</HEAD>
+<BODY topMargin=0>
+
+
+<div align="center">
+
+  <table width="760" height="25" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+  </table>
+  <table width="760" height="406" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" valign="top">
+
+
+        <table width="760" border="0" align="center" cellpadding="0" cellspacing="0">
+                        <script language="javascript">
+	function payFrm()
+	{
+		if (directFrm.order_no.value=="")
+		{
+			alert("提醒：请填写订单编号；");
+			directFrm.order_no.focus();
+			return false;
+		}
+		if (directFrm.product_name.value=="")
+		{
+			alert("提醒：请填写商品名称(付款项目)！");
+			directFrm.product_name.focus();
+			return false;
+		}
+		if (directFrm.order_price.value=="")
+		{
+			alert("提醒：请填写订单的交易金额！");
+			directFrm.order_price.focus();
+			return false;
+		}
+		
+		if (directFrm.remarkexplain.value=="")
+		{
+			alert("提醒：请填写您的简要说明！");
+			directFrm.remarkexplain.focus();
+			return false;
+		}
+		if (directFrm.remarkexplain.value.length>31)
+		{
+			alert("提醒：超出规定的字数,请重新输入");
+  			event.returnValue=false;   
+  			return   false;   
+		}
+		
+		return true;
+	}
+  </script>
+
+<form action='http://27.115.13.122/iwebsite/tenpay' method='post' name='directFrm' onSubmit="return payFrm();">
+            <tr>
+              <td align="left"><table width="760" height="30" border="0" align="left" cellpadding="0" cellspacing="1" bgcolor="#FFCC00">
+                  <tr>
+                    <td align="center" valign="top" bgcolor="#FFFFEE"><table width="760" height="351" border="0" cellpadding="6" cellspacing="0" class="px14">
+                        <tr>
+                          <td height="26" align="right" valign="top">&nbsp;</td>
+                          <td valign="top"> 　 </td>
+                          <td width="269" rowspan="8" valign="top"></td>
+                        </tr>
+                        <tr>
+                        <td width="102" height="26" align="right" valign="top">收款方：</td>
+                        <td width="353" valign="top"></td>
+                        </tr> 
+                      <tr>
+                        <td align="right" valign="top">订单编号：</td>
+                        <td valign="top">
+			              <input type="text" name="out_trade_no" maxlength="50" size="18" readonly="readonly" value="<?php echo time();?>" font style="color:#000000;font-size:14px;"></td>
+                      </tr>
+                      <tr>
+                        <td align="right" valign="top">付款项目：</td>
+                        <td valign="top"><span style="color:#000000;font-size:12px;">
+                          <input name="subject" type="text" size="18" maxlength="50" font style="color:#000000;font-size:14px;">
+                        </span></td>
+                      </tr>
+                      <tr>
+                        <td align="right" valign="top">付款金额：</td>
+                        <td valign="top"><input type="text" name="total_fee" maxlength="50" size="18" onKeyUp="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" font style="color:#000000;font-size:14px;"> 
+                        元（格式：500.01）</td>
+                      </tr>
+
+                      <tr>
+                        <td height="99" align="right" valign="top">简要说明：</td>
+                        <td valign="top"><textarea name="body" cols="48" rows="5" id="remark2"  font style="color:#000000;font-size:14px;"></textarea>
+                          <br>
+                          请填写您订单的简要说明（30字以内）</td></tr>
+						   <tr>
+                        <td align="right" valign="top">支付方式：</td>
+                        <td valign="top"><div id="tenpayBankList"></div>
+                        <input type="hidden" name="bank_type" value="0"  id="bank_type_value">
+						<script>$.getScript("http://union.tenpay.com/bankList/bank.js");</script> 
+						</td>
+                        </tr>
+                      <tr>
+                        <td align="right" valign="top">&nbsp;</td>
+                        <td valign="top"><b>
+                          <input name="submit" type="image" src="image/next.gif" alt="使用财付通安全支付" width="103" height="27">
+                        </b></td>
+                        <td valign="top">&nbsp;</td>
+                      </tr>
+                    </table></td>
+                  </tr>
+              </table></td>
+            </tr> </form>
+        </table>
+        </td>
+    </tr>
+  </table>
+</div><HR width=760 SIZE=1>
+</CENTER>
+</CENTER></body>
+</html>

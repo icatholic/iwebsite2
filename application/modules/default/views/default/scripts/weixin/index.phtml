@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>微信</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=utf-8">
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type="text/javascript">
+		var web_path = "<?php echo $this->config['global']['path']?>";
+		var source = 2;//weixin
+</script>
+</HEAD>
+
+<BODY topMargin=0>
+<br/><br/><br/>
+<button  id="authorize1" >微信授权snsapi_userinfo</button><br/><br/><br/>
+<button  id="authorize2" >微信授权snsapi_base</button><br/><br/><br/>
+
+<button  id="getSnsUserInfo" >获取用户信息</button><br/><br/><br/>
+<button  id="post1" >POST</button><br/><br/><br/>
+<button  id="get1" >GET</button><br/><br/><br/>
+</body>
+
+<script language="javascript">
+	var App = {
+	    init : function(){
+	    	 // 用户微信授权snsapi_userinfo
+	        $("#authorize1").size() && authorize1Test();
+		     // 用户微信授权snsapi_base
+	        $("#authorize2").size() && authorize2Test();
+	        // 获取用户信息
+	        $("#getSnsUserInfo").size() && getSnsUserInfoTest();
+		     // 用户微信POST
+	        $("#post1").size() && postTest();	
+		     // 用户微信POST
+	        $("#get1").size() && getTest();       
+	    }
+	};
+
+	$(document).ready(App.init);
+
+	//用户微信授权snsapi_userinfo
+	function authorize1Test(){
+	    $("#authorize1").on("click",
+	        function(){
+	    		window.location.href = "http://27.115.13.122/test4weixin/weixin/campaign/authorize?scope=snsapi_userinfo&state=1234&callbackUrl=http://27.115.13.122/test4weixin/default/weixin/index";
+	        }
+	    )
+	}
+
+	//用户微信授权snsapi_base
+	function authorize2Test(){
+	    $("#authorize2").on("click",
+	        function(){
+	    		window.location.href = "http://27.115.13.122/test4weixin/weixin/campaign/authorize?scope=snsapi_base&state=1234&callbackUrl=http://27.115.13.122/test4weixin/default/weixin/index";
+	        }
+	    )
+	}
+	
+	//用户微信Post
+	function postTest(){
+	    $("#post1").on("click",
+	        function(){
+	            var params = {};
+	            params['umaId'] ='52df57d54a9619bd218b4c60';//$.cookie('umaId');
+	            params['url'] = 'statuses/update';
+	            params['multi'] = 'false';
+	            params['parameters'] = {status:'用户post测试',visible:0};	    		
+	            $.ajax(
+	            {
+	                url:web_path+'weixin/campaign/post',
+	                type:'POST',
+	                data:params,
+	                dataType: "json",
+	                success:function(data) {
+	                    console.info(data);
+	                    if(data.success) {
+	                    	alert(data.result);
+	                    }
+	                    else {
+	                        alert(data.message);
+	                    }
+	                }
+	            });
+	        }
+	    )
+	}
+
+	//用户微信Get
+	function getTest(){
+	    $("#get1").on("click",
+	        function(){
+	            var params = {};
+	            params['umaId'] = '52df57d54a9619bd218b4c60';//$.cookie('umaId');
+	            params['url'] = 'sns/userinfo';
+	            params['multi'] = 'false';
+	            params['parameters'] = {openid:'1596822015',scope:'snsapi_userinfo'};           
+	            $.ajax(
+	            {
+	                url:web_path+'weixin/campaign/get',
+	                type:'POST',
+	                data:params,
+	                dataType: "json",
+	                success:function(data) {
+	                    console.info(data);
+	                    if(data.success) {
+	                    	alert(data.result);
+	                    }
+	                    else {
+	                        alert(data.message);
+	                    }
+	                }
+	            });
+	        }
+	    )
+	}
+		
+	//获取用户信息
+	function getSnsUserInfoTest(){
+	    $("#getSnsUserInfo").on("click",
+	        function(){
+	            var params = {};
+	            params['umaId'] = '52df57d54a9619bd218b4c60';//$.cookie('umaId');
+	            params['openid'] = 'oosvgjvqK6r51ce7wpyy1DyG97oc';
+	            params['scope'] = 'snsapi_userinfo';
+	            $.ajax(
+	            {
+	                url:web_path+'weixin/campaign/get-sns-user-info',
+	                type:'POST',
+	                data:params,
+	                dataType: "json",
+	                success:function(data) {
+	                    console.info(data);
+	                    if(data.success) {
+	                    	alert(data.result);
+	                    }
+	                    else {
+	                        alert(data.message);
+	                    }
+	                }
+	            });
+	        }
+	    )
+	}
+  </script>
+</html>
