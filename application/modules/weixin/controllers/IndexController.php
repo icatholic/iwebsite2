@@ -52,18 +52,19 @@ class Weixin_IndexController extends Zend_Controller_Action
     public function callbackAction()
     {
         $onlyRevieve = false;
-        
-        if (empty($this->_appConfig['verify_token'])) {
+        $verifyToken = isset($this->_appConfig['verify_token']) ? $this->_appConfig['verify_token'] : '';
+        if (empty($verifyToken)) {
             throw new Exception('application verify_token is null');
         }
-        // 合法性校验
-        $this->_weixin->verify($this->_appConfig['verify_token']);
         
-        if (! $this->_weixin->checkSignature()) {
+        // 合法性校验
+        $this->_weixin->verify($verifyToken);
+        
+        if (! $this->_weixin->checkSignature($verifyToken)) {
             throw new Exception('签名错误');
         }
         
-        // 将接受到的xml转化为数组数据
+        // 签名正确，将接受到的xml转化为数组数据并记录数据
         $datas = $this->revieve();
         
         // 调试接口信息
