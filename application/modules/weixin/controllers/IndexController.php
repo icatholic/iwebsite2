@@ -189,7 +189,7 @@ class Weixin_IndexController extends Zend_Controller_Action
     public function syncMenuAction()
     {
         $menus = $this->_menu->buildMenu();
-        var_dump($this->_weixin->getWeixinMenuManager()->create($menus));
+        var_dump($this->_weixin->getMenuManager()->create($menus));
         return true;
     }
 
