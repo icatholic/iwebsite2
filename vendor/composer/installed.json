@@ -238,50 +238,6 @@
         ]
     },
     {
-        "name": "icatholic/weixin",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/icatholic/weixin.git",
-            "reference": "13c07523c807f9f698355ee0f664bbf538cb2db8"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/icatholic/weixin/zipball/13c07523c807f9f698355ee0f664bbf538cb2db8",
-            "reference": "13c07523c807f9f698355ee0f664bbf538cb2db8",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.2.11"
-        },
-        "time": "2014-02-21 09:30:13",
-        "type": "library",
-        "installation-source": "source",
-        "autoload": {
-            "psr-0": {
-                "Weixin": "lib/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "icatholic",
-                "email": "youngyang@icatholic.net.cn",
-                "homepage": "http://github.com/icatholic/"
-            }
-        ],
-        "description": "A simple PHP client library for weixin",
-        "homepage": "http://github.com/icatholic/weixin",
-        "keywords": [
-            "icatholic",
-            "weixin"
-        ]
-    },
-    {
         "name": "mobiledetect/mobiledetectlib",
         "version": "2.7.8",
         "version_normalized": "2.7.8.0",
@@ -333,6 +289,50 @@
             "mobile detect",
             "mobile detector",
             "php mobile detect"
+        ]
+    },
+    {
+        "name": "icatholic/weixin",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/icatholic/weixin.git",
+            "reference": "45aeb6eccdf548d4c71bced9ceb5987bbb5c334e"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/icatholic/weixin/zipball/45aeb6eccdf548d4c71bced9ceb5987bbb5c334e",
+            "reference": "45aeb6eccdf548d4c71bced9ceb5987bbb5c334e",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.2.11"
+        },
+        "time": "2014-02-24 06:33:56",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-0": {
+                "Weixin": "lib/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "icatholic",
+                "email": "youngyang@icatholic.net.cn",
+                "homepage": "http://github.com/icatholic/"
+            }
+        ],
+        "description": "A simple PHP client library for weixin",
+        "homepage": "http://github.com/icatholic/weixin",
+        "keywords": [
+            "icatholic",
+            "weixin"
         ]
     }
 ]
