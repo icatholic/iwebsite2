@@ -1,4 +1,5 @@
 <?php
+use Weixin\Client;
 
 class Weixin_Model_Reply extends iWebsite_Plugin_Mongo
 {
@@ -21,7 +22,7 @@ class Weixin_Model_Reply extends iWebsite_Plugin_Mongo
 
     const IMAGE = 6;
 
-    public function setWeixinInstance(iWeixin $weixin)
+    public function setWeixinInstance(Client $weixin)
     {
         $this->_weixin = $weixin;
     }
@@ -32,7 +33,7 @@ class Weixin_Model_Reply extends iWebsite_Plugin_Mongo
         if (empty($replys)) {
             return false;
         }
-
+        
         switch ($match['reply_type']) {
             case self::MULTI:
                 $articles = array();
@@ -44,36 +45,36 @@ class Weixin_Model_Reply extends iWebsite_Plugin_Mongo
                         'url' => $reply['url']
                     ));
                 }
-                return $this->_weixin->getWeixinMsgManager()
-                    ->getWeixinReplyMsgSender()
+                return $this->_weixin->getMsgManager()
+                    ->getReplySender()
                     ->replyGraphText($articles);
                 break;
             case self::MUSIC:
-                return $this->_weixin->getWeixinMsgManager()
-                    ->getWeixinReplyMsgSender()
+                return $this->_weixin->getMsgManager()
+                    ->getReplySender()
                     ->replyMusic($replys[0]['title'], $replys[0]['description'], $replys[0]['music']);
                 break;
             case self::TEXT:
-                return $this->_weixin->getWeixinMsgManager()
-                    ->getWeixinReplyMsgSender()
+                return $this->_weixin->getMsgManager()
+                    ->getReplySender()
                     ->replyText($replys[0]['description']);
                 break;
             case self::VOICE:
                 $media_id = $this->getMediaId('voice', $replys[0]);
-                return $this->_weixin->getWeixinMsgManager()
-                    ->getWeixinReplyMsgSender()
+                return $this->_weixin->getMsgManager()
+                    ->getReplySender()
                     ->replyVoice($media_id);
                 break;
             case self::VIDEO:
                 $media_id = $this->getMediaId('video', $replys[0]);
-                return $this->_weixin->getWeixinMsgManager()
-                    ->getWeixinReplyMsgSender()
-                    ->replyVideo($media_id, $replys[0]['title'], $replys[0]['description']);
+                return $this->_weixin->getMsgManager()
+                    ->getReplySender()
+                    ->replyVideo($replys[0]['title'], $replys[0]['description'], $media_id);
                 break;
             case self::IMAGE:
                 $media_id = $this->getMediaId('image', $replys[0]);
-                return $this->_weixin->getWeixinMsgManager()
-                    ->getWeixinReplyMsgSender()
+                return $this->_weixin->getMsgManager()
+                    ->getReplySender()
                     ->replyImage($media_id);
                 break;
         }
@@ -88,7 +89,7 @@ class Weixin_Model_Reply extends iWebsite_Plugin_Mongo
         }
         
         if ($created_at + 24 * 3600 * 3 < time()) {
-            $media_result = $this->_weixin->getWeixinMediaManager()->upload($type, $reply[$type]);
+            $media_result = $this->_weixin->getMediaManager()->upload($type, $reply[$type]);
             $this->update(array(
                 '_id' => $reply['_id']
             ), array(

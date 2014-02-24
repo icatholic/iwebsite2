@@ -13,7 +13,7 @@ class Weixin_IndexController extends Zend_Controller_Action
 
     private $_app;
 
-    private $_token;
+    private $_accessToken;
 
     private $_user;
 
@@ -34,16 +34,10 @@ class Weixin_IndexController extends Zend_Controller_Action
         $this->_not_keyword = new Weixin_Model_NotKeyword();
         $this->_menu = new Weixin_Model_Menu();
         
-        // 可以考虑添加缓存
-        $this->_source->setDebug(true);
-        $this->_token = $this->_app->getToken();
-        if ($this->_token == null) {
-            throw new Exception('应用管理信息未设定');
-        }
-        // 判断access token是否过期，如果过期更新token
-        $accessToken = $this->updateAccessToken();
-        if (! empty($accessToken)) {
-            $this->_weixin = new iWeixin($accessToken);
+        $this->_appConfig = $this->_app->getToken();
+        $this->_weixin = new Weixin\Client();
+        if (! empty($this->_appConfig['access_token'])) {
+            $this->_weixin->setAccessToken($this->_appConfig['access_token']);
         }
     }
 
@@ -59,10 +53,13 @@ class Weixin_IndexController extends Zend_Controller_Action
     {
         $onlyRevieve = false;
         
+        if (empty($this->_appConfig['verify_token'])) {
+            throw new Exception('application verify_token is null');
+        }
         // 合法性校验
-        $this->verify();
+        $this->_weixin->verify($this->_appConfig['verify_token']);
         
-        if (! $this->checkSignature()) {
+        if (! $this->_weixin->checkSignature()) {
             throw new Exception('签名错误');
         }
         
@@ -229,9 +226,5 @@ class Weixin_IndexController extends Zend_Controller_Action
         $this->_source->save($this->_sourceDatas);
         return true;
     }
-
-
-
-
 }
 

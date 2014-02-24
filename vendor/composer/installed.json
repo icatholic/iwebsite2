@@ -298,18 +298,18 @@
         "source": {
             "type": "git",
             "url": "https://github.com/icatholic/weixin.git",
-            "reference": "45aeb6eccdf548d4c71bced9ceb5987bbb5c334e"
+            "reference": "1eb6eda5116997541903e7d221aa0ad5f985cb16"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/icatholic/weixin/zipball/45aeb6eccdf548d4c71bced9ceb5987bbb5c334e",
-            "reference": "45aeb6eccdf548d4c71bced9ceb5987bbb5c334e",
+            "url": "https://api.github.com/repos/icatholic/weixin/zipball/1eb6eda5116997541903e7d221aa0ad5f985cb16",
+            "reference": "1eb6eda5116997541903e7d221aa0ad5f985cb16",
             "shasum": ""
         },
         "require": {
             "php": ">=5.2.11"
         },
-        "time": "2014-02-24 06:33:56",
+        "time": "2014-02-24 07:40:41",
         "type": "library",
         "installation-source": "source",
         "autoload": {

@@ -28,26 +28,29 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
         }, $schema);
     }
 
+    /**
+     * 获取有效的token信息
+     * @throws Exception
+     * @return mixed|unknown
+     */
     public function getToken()
     {
-        return $this->findOne(array(
+        $token = $this->findOne(array(
             'is_product' => true
         ));
-    }
-
-    /**
-     * 保持access token的有效性
-     */
-    public function updateAccessToken()
-    {
-        if (isset($this->_token['access_token_expire']) && ! empty($this->_token['is_advanced'])) {
-            if ($this->_token['access_token_expire']->sec <= time()) {
-                if (empty($this->_token['appid']) || empty($this->_token['appid'])) {
+        
+        if($token==null) {
+            return null;
+        }
+        
+        if (isset($token['access_token_expire']) && ! empty($token['is_advanced'])) {
+            if ($token['access_token_expire']->sec <= time()) {
+                if (empty($token['appid']) || empty($token['appid'])) {
                     throw new Exception('应用编号和密钥未设定');
                 }
                 
-                $objToken = new iWeixinAccessToken($this->_token['appid'], $this->_token['secret']);
-                $arrToken = $objToken->get();
+                $objToken = new Weixin\Token\Server($token['appid'], $token['secret']);
+                $arrToken = $objToken->getAccessToken();
                 $cmd = array();
                 $cmd['query'] = array(
                     '_id' => $this->_token['_id']
@@ -58,10 +61,15 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
                         'access_token_expire' => new MongoDate(time() + 7200)
                     )
                 );
-                $this->_app->findAndModify($cmd);
-                return $arrToken['access_token'];
+                $rst = $this->findAndModify($cmd);
+                if($rst['ok']==1) {
+                    return $rst['value'];
+                }
+                else {
+                    throw new Exception(json_encode($rst));
+                }
             }
         }
-        return $this->_token['access_token'];
+        return $token;
     }
 }
