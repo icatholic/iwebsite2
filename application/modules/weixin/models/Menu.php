@@ -36,16 +36,14 @@ class Weixin_Model_Menu extends iWebsite_Plugin_Mongo
             'url' => true
         ));
         if (! empty($menus)) {
-            
+            $menus = convertToPureArray($menus);
             $parent = array();
             $new = array();
             foreach ($menus as $a) {
                 if (empty($a['parent']))
                     $parent[] = $a;
-                $a['_id'] = $a['_id']->__toString();
                 $new[$a['parent']][] = $a;
             }
-            print_r($new);
             $tree = $this->buildTree($new, $parent);
         }
         return array(
@@ -64,7 +62,6 @@ class Weixin_Model_Menu extends iWebsite_Plugin_Mongo
         $tree = array();
         foreach ($parent as $k => $l) {
             $type = $l['type'];
-            var_dump($l);
             if (isset($menus[$l['_id']])) {
                 $l['sub_button'] = $this->buildTree($menus, $menus[$l['_id']]);
                 unset($l['type'], $l['key'], $l['url'], $l['_id']);
