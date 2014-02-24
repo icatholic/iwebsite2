@@ -26,7 +26,7 @@ class Weixin_IndexController extends Zend_Controller_Action
     public function init()
     {
         $this->getHelper('viewRenderer')->setNoRender(true);
-        $this->_source = new Weixin_Model_Index();
+        $this->_source = new Weixin_Model_Source();
         $this->_keyword = new Weixin_Model_Keyword();
         $this->_reply = new Weixin_Model_Reply();
         $this->_app = new Weixin_Model_Application();
@@ -65,7 +65,8 @@ class Weixin_IndexController extends Zend_Controller_Action
         }
         
         // 签名正确，将接受到的xml转化为数组数据并记录数据
-        $datas = $this->revieve();
+        $datas = $this->_source->revieve();
+        $this->_sourceDatas = $datas;
         
         // 调试接口信息
         // $datas['Content'] = '图片';
@@ -192,20 +193,6 @@ class Weixin_IndexController extends Zend_Controller_Action
         $menus = $this->_menu->buildMenu();
         var_dump($this->_weixin->getMenuManager()->create($menus));
         return true;
-    }
-
-    /**
-     * 获取信息接收信息
-     *
-     * @return array
-     */
-    private function revieve()
-    {
-        $postStr = file_get_contents('php://input');
-        $datas = (array) simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
-        $this->_source->save($datas);
-        $this->_sourceDatas = $datas;
-        return $datas;
     }
 
     /**
