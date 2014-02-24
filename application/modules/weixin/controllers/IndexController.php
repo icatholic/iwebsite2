@@ -230,67 +230,8 @@ class Weixin_IndexController extends Zend_Controller_Action
         return true;
     }
 
-    /**
-     * 签名校验
-     *
-     * @return boolean
-     */
-    private function checkSignature()
-    {
-        $signature = isset($_GET['signature']) ? $_GET['signature'] : '';
-        $timestamp = isset($_GET['timestamp']) ? $_GET['timestamp'] : '';
-        $nonce = isset($_GET['nonce']) ? $_GET['nonce'] : '';
-        $tmpArr = array(
-            $this->_token['verify_token'],
-            $timestamp,
-            $nonce
-        );
-        sort($tmpArr);
-        $tmpStr = sha1(implode($tmpArr));
-        return $tmpStr === $signature ? true : false;
-    }
 
-    /**
-     * 有效性校验
-     */
-    public function verify()
-    {
-        $echoStr = isset($_GET["echostr"]) ? trim($_GET["echostr"]) : '';
-        if (! empty($echoStr)) {
-            if ($this->checkSignature()) {
-                exit($echoStr);
-            }
-        }
-    }
 
-    /**
-     * 保持access token的有效性
-     */
-    public function updateAccessToken()
-    {
-        if (isset($this->_token['access_token_expire']) && ! empty($this->_token['is_advanced'])) {
-            if ($this->_token['access_token_expire']->sec <= time()) {
-                if (empty($this->_token['appid']) || empty($this->_token['appid'])) {
-                    throw new Exception('应用编号和密钥未设定');
-                }
-                
-                $objToken = new iWeixinAccessToken($this->_token['appid'], $this->_token['secret']);
-                $arrToken = $objToken->get();
-                $cmd = array();
-                $cmd['query'] = array(
-                    '_id' => $this->_token['_id']
-                );
-                $cmd['update'] = array(
-                    '$set' => array(
-                        'access_token' => $arrToken['access_token'],
-                        'access_token_expire' => new MongoDate(time() + 7200)
-                    )
-                );
-                $this->_app->findAndModify($cmd);
-                return $arrToken['access_token'];
-            }
-        }
-        return $this->_token['access_token'];
-    }
+
 }
 
