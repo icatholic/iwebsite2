@@ -53,7 +53,7 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
                 $arrToken = $objToken->getAccessToken();
                 $cmd = array();
                 $cmd['query'] = array(
-                    '_id' => $this->_token['_id']
+                    '_id' => $token['_id']
                 );
                 $cmd['update'] = array(
                     '$set' => array(

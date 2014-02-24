@@ -152,12 +152,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/icatholic/weixin.git",
-                "reference": "ccf31066432d9cdd7107e63a38065b0c84eebb26"
+                "reference": "cbed8b4ded013b3d135dc9776215313623fa0c78"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/icatholic/weixin/zipball/ccf31066432d9cdd7107e63a38065b0c84eebb26",
-                "reference": "ccf31066432d9cdd7107e63a38065b0c84eebb26",
+                "url": "https://api.github.com/repos/icatholic/weixin/zipball/cbed8b4ded013b3d135dc9776215313623fa0c78",
+                "reference": "cbed8b4ded013b3d135dc9776215313623fa0c78",
                 "shasum": ""
             },
             "require": {
@@ -186,7 +186,7 @@
                 "icatholic",
                 "weixin"
             ],
-            "time": "2014-02-24 08:56:04"
+            "time": "2014-02-24 09:17:19"
         },
         {
             "name": "lukaszr/matrixcode",

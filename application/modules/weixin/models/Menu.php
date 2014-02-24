@@ -28,7 +28,7 @@ class Weixin_Model_Menu extends iWebsite_Plugin_Mongo
         $menus = $this->findAll(array(), array(
             'priority' => - 1
         ), array(
-            '_id' => false,
+            '_id' => true,
             'parent' => true,
             'type' => true,
             'name' => true,
@@ -42,10 +42,10 @@ class Weixin_Model_Menu extends iWebsite_Plugin_Mongo
             foreach ($menus as $a) {
                 if (empty($a['parent']))
                     $parent[] = $a;
-                
+                $a['_id'] = $a['_id']->__toString();
                 $new[$a['parent']][] = $a;
             }
-            
+            print_r($new);
             $tree = $this->buildTree($new, $parent);
         }
         return array(
@@ -64,15 +64,16 @@ class Weixin_Model_Menu extends iWebsite_Plugin_Mongo
         $tree = array();
         foreach ($parent as $k => $l) {
             $type = $l['type'];
-            if (isset($menus[$l['key']])) {
-                $l['sub_button'] = $this->buildTree($menus, $menus[$l['key']]);
-                unset($l['type'], $l['key'], $l['url']);
+            var_dump($l);
+            if (isset($menus[$l['_id']])) {
+                $l['sub_button'] = $this->buildTree($menus, $menus[$l['_id']]);
+                unset($l['type'], $l['key'], $l['url'], $l['_id']);
             }
             if ($type == 'view' && isset($l['key']))
                 unset($l['key']);
             if ($type == 'click' && isset($l['url']))
                 unset($l['url']);
-            unset($l['parent'], $l['priority']);
+            unset($l['parent'], $l['priority'], $l['_id']);
             $tree[] = $l;
         }
         return $tree;
