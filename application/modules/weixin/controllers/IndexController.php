@@ -181,12 +181,12 @@ class Weixin_IndexController extends Zend_Controller_Action
         // 不同项目特定的业务逻辑结束
         if ($onlyRevieve)
             return false;
-        
+
         return $this->anwser($content);
     }
 
     /**
-     * 同步菜单选项
+     * 同步菜单选项的Hook
      */
     public function syncMenuAction()
     {
