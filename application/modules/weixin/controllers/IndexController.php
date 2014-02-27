@@ -181,7 +181,7 @@ class Weixin_IndexController extends Zend_Controller_Action
         // 不同项目特定的业务逻辑结束
         if ($onlyRevieve)
             return false;
-
+        
         return $this->anwser($content);
     }
 
@@ -210,7 +210,7 @@ class Weixin_IndexController extends Zend_Controller_Action
         }
         echo $response = $this->_reply->answer($match);
         fastcgi_finish_request();
-        //以下部分执行的操作，不影响执行速度，但是也将无法输出到返回结果中
+        // 以下部分执行的操作，不影响执行速度，但是也将无法输出到返回结果中
         $this->_sourceDatas['response'] = $response;
         $this->_sourceDatas['response_time'] = new MongoDate();
         $this->_source->save($this->_sourceDatas);
