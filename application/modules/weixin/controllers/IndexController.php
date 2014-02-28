@@ -23,6 +23,8 @@ class Weixin_IndexController extends Zend_Controller_Action
 
     private $_weixin;
 
+    private $_qrcode;
+
     public function init()
     {
         $this->getHelper('viewRenderer')->setNoRender(true);
@@ -33,6 +35,7 @@ class Weixin_IndexController extends Zend_Controller_Action
         $this->_user = new Weixin_Model_User();
         $this->_not_keyword = new Weixin_Model_NotKeyword();
         $this->_menu = new Weixin_Model_Menu();
+        $this->_qrcode = new Weixin_Model_Qrcode();
         
         $this->_appConfig = $this->_app->getToken();
         $this->_weixin = new Weixin\Client();
@@ -51,6 +54,11 @@ class Weixin_IndexController extends Zend_Controller_Action
      */
     public function callbackAction()
     {
+        /**
+         *  ==================================================================================
+         *  ====================================以下逻辑请勿修改===================================
+         *  ==================================================================================
+         */
         $onlyRevieve = false;
         $verifyToken = isset($this->_appConfig['verify_token']) ? $this->_appConfig['verify_token'] : '';
         if (empty($verifyToken)) {
@@ -81,14 +89,26 @@ class Weixin_IndexController extends Zend_Controller_Action
         $MsgType = isset($datas['MsgType']) ? trim($datas['MsgType']) : '';
         $Event = isset($datas['Event']) ? trim($datas['Event']) : '';
         $EventKey = isset($datas['EventKey']) ? trim($datas['EventKey']) : '';
-        $media_id = isset($datas['media_id']) ? trim($datas['media_id']) : '';
+        $MediaId = isset($datas['MediaId']) ? trim($datas['MediaId']) : '';
         $Ticket = isset($datas['Ticket']) ? trim($datas['Ticket']) : '';
         
+        // 获取微信用户的个人信息
+        if (! empty($this->_appConfig['access_token'])) {
+            $this->_user->setWeixinInstance($this->_weixin);
+            $this->_user->updateUserInfoByAction($FromUserName);
+        }
         // 设定来源和目标用户的openid
         $this->_weixin->setFromAndTo($FromUserName, $ToUserName);
         
         // 为回复的Model装载weixin对象
         $this->_reply->setWeixinInstance($this->_weixin);
+        
+        /**
+         *  ==================================================================================
+         *  ====================================以上逻辑请勿修改===================================
+         *  ==================================================================================
+         */
+        
         
         // 转化为关键词方式，表示关注
         if ($MsgType == 'event') { // 接收事件推送
@@ -96,22 +116,25 @@ class Weixin_IndexController extends Zend_Controller_Action
                                          // EventKey 事件KEY值，qrscene_为前缀，后面为二维码的参数值
                                          // Ticket 二维码的ticket，可用来换取二维码图片
                 if (! empty($Ticket) || ! empty($EventKey)) { // 扫描带参数二维码事件 用户未关注时，进行关注后的事件推送
-                                                                  // 不同项目特定的业务逻辑开始
-                                                                  // 不同项目特定的业务逻辑结束
+                    $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
+                    // 不同项目特定的业务逻辑开始
+                    // 不同项目特定的业务逻辑结束
                 }
                 $content = 'Hello2BizUser';
-            } elseif ($Event == 'scan') { // 扫描带参数二维码事件 用户已关注时的事件推送
-                                              // EventKey 事件KEY值，是一个32位无符号整数
-                                              // Ticket 二维码的ticket，可用来换取二维码图片
-                                              // 不同项目特定的业务逻辑开始
-                                              // 不同项目特定的业务逻辑结束
+            } elseif ($Event == 'SCAN') { // 扫描带参数二维码事件 用户已关注时的事件推送
+                $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
+                $onlyRevieve = true;
+                // EventKey 事件KEY值，是一个32位无符号整数
+                // Ticket 二维码的ticket，可用来换取二维码图片
+                // 不同项目特定的业务逻辑开始
+                // 不同项目特定的业务逻辑结束
             } elseif ($Event == 'unsubscribe') { // 取消关注事件
-                                                     // 不同项目特定的业务逻辑开始
-                                                     // 不同项目特定的业务逻辑结束
+                // 不同项目特定的业务逻辑开始
+                // 不同项目特定的业务逻辑结束
             } elseif ($Event == 'LOCATION') { // 上报地理位置事件
-                                              // Latitude 地理位置纬度
-                                              // Longitude 地理位置经度
-                                              // Precision 地理位置精度
+                // Latitude 地理位置纬度
+                // Longitude 地理位置经度
+                // Precision 地理位置精度
                 $Latitude = isset($datas['Latitude']) ? trim($datas['Latitude']) : 0;
                 $Longitude = isset($datas['Longitude']) ? trim($datas['Longitude']) : 0;
                 $Precision = isset($datas['Precision']) ? trim($datas['Precision']) : 0;
@@ -119,16 +142,16 @@ class Weixin_IndexController extends Zend_Controller_Action
                 // 不同项目特定的业务逻辑开始
                 // 不同项目特定的业务逻辑结束
             } elseif ($Event == 'CLICK') { // 自定义菜单事件推送
-                                           // 相对点击事件做特别处理，请在这里，并删除$content = $EventKey;
+                // 相对点击事件做特别处理，请在这里，并删除$content = $EventKey;
                 $content = $EventKey;
             }
         }
         
         // 语音逻辑开始
         if ($MsgType == 'voice') { // 接收普通消息----语音消息 或者接收语音识别结果
-                                   // MediaID 语音消息媒体id，可以调用多媒体文件下载接口拉取该媒体
-                                   // Format 语音格式：amr
-                                   // Recognition 语音识别结果，UTF8编码
+            // MediaID 语音消息媒体id，可以调用多媒体文件下载接口拉取该媒体
+            // Format 语音格式：amr
+            // Recognition 语音识别结果，UTF8编码
             $Recognition = isset($datas['Recognition']) ? trim($datas['Recognition']) : '';
             // 不同项目特定的业务逻辑开始
             // 不同项目特定的业务逻辑结束
@@ -138,9 +161,14 @@ class Weixin_IndexController extends Zend_Controller_Action
         
         // 图片逻辑开始
         if ($MsgType == 'image') { // 接收普通消息----图片消息
-                                   // PicUrl 图片链接
-                                   // MediaId 图片消息媒体id，可以调用多媒体文件下载接口拉取数据。
+            // PicUrl 图片链接
+            // MediaId 图片消息媒体id，可以调用多媒体文件下载接口拉取数据。
             $PicUrl = isset($datas['PicUrl']) ? trim($datas['PicUrl']) : '';
+            if (! empty($this->_appConfig['access_token'])) {
+                $mediaInfo = $this->_weixin->getMediaManager()->download($MediaId);
+            }
+            
+            $this->_weixin->getMsgManager()->getReplySender()->replyText(json_encode($mediaInfo));
             
             return $this->anwser('默认图片回复');
         }
@@ -153,17 +181,17 @@ class Weixin_IndexController extends Zend_Controller_Action
         
         // 不同项目特定的业务逻辑开始
         if ($MsgType == 'video') { // 接收普通消息----视频消息
-                                   // MediaId 视频消息媒体id，可以调用多媒体文件下载接口拉取数据。
-                                   // ThumbMediaId 视频消息缩略图的媒体id，可以调用多媒体文件下载接口拉取数据。
+            // MediaId 视频消息媒体id，可以调用多媒体文件下载接口拉取数据。
+            // ThumbMediaId 视频消息缩略图的媒体id，可以调用多媒体文件下载接口拉取数据。
             $ThumbMediaId = isset($datas['ThumbMediaId']) ? trim($datas['ThumbMediaId']) : '';
         }
         // 不同项目特定的业务逻辑结束
         
         // 处理地理位置信息开始
         if ($MsgType == 'location') { // 接收普通消息----地理位置消息
-                                      // Location_X 地理位置维度
-                                      // Location_Y 地理位置精度
-                                      // Scale 地图缩放大小
+            // Location_X 地理位置维度
+            // Location_Y 地理位置精度
+            // Scale 地图缩放大小
             $Location_X = isset($datas['Location_X']) ? trim($datas['Location_X']) : 0;
             $Location_Y = isset($datas['Location_Y']) ? trim($datas['Location_Y']) : 0;
             $Scale = isset($datas['Scale']) ? trim($datas['Scale']) : 0;
@@ -171,18 +199,29 @@ class Weixin_IndexController extends Zend_Controller_Action
         
         // 不同项目特定的业务逻辑开始
         if ($MsgType == 'link') { // 接收普通消息----链接消息
-                                  // Title 消息标题
-                                  // Description 消息描述
-                                  // Url 消息链接
+            // Title 消息标题
+            // Description 消息描述
+            // Url 消息链接
             $Title = isset($datas['Title']) ? trim($datas['Title']) : '';
             $Description = isset($datas['Description']) ? trim($datas['Description']) : '';
             $Url = isset($datas['Url']) ? trim($datas['Url']) : '';
         }
-        // 不同项目特定的业务逻辑结束
+        
+        
+        
+        /**
+         *  ==================================================================================
+         *  ====================================以下逻辑请勿修改===================================
+         *  ==================================================================================
+         */
         if ($onlyRevieve)
             return false;
         
-        return $this->anwser($content);
+        try {
+            return $this->anwser($content);
+        } catch (Exception $e) {
+            echo exceptionMsg($e);
+        }
     }
 
     /**
@@ -208,6 +247,7 @@ class Weixin_IndexController extends Zend_Controller_Action
             $this->_not_keyword->record($content);
             $match = $this->_keyword->matchKeyWord('默认回复');
         }
+        
         echo $response = $this->_reply->answer($match);
         fastcgi_finish_request();
         // 以下部分执行的操作，不影响执行速度，但是也将无法输出到返回结果中

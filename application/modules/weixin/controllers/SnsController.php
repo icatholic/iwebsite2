@@ -73,12 +73,18 @@ class Weixin_SnsController extends Zend_Controller_Action
             // 授权成功后，记录该微信用户的基本信息
             if ($arrAccessToken['scope'] === 'snsapi_userinfo') {
                 $this->_weixin->setSnsAccessToken($arrAccessToken['access_token']);
-                $this->_weixin->getSnsManager()->getSnsUserInfo($arrAccessToken['openid']);
-                $this->_user->update(array());
+                $userInfo = $this->_weixin->getSnsManager()->getSnsUserInfo($arrAccessToken['openid']);
+                if (! isset($userInfo['errcode'])) {
+                    $userInfo['access_token'] = $arrAccessToken;
+                    $this->_user->updateUserInfoBySns($arrAccessToken['openid'], $userInfo);
+                } else {
+                    throw new Exception("获取用户信息失败，原因:" . json_encode($userInfo, JSON_UNESCAPED_UNICODE));
+                }
             }
             header("location:{$redirect}");
             exit();
         } else {
+            // 如果用户未授权登录，点击取消，自行设定取消的业务逻辑
             throw new Exception("获取token失败,原因:" . json_encode($arrAccessToken, JSON_UNESCAPED_UNICODE));
         }
     }
