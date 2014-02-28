@@ -368,12 +368,13 @@ class iDatabase
      *
      * @param array $criteria            
      * @param array $object            
+     * @param array $options            
      * @return array boolean
      */
-    public function update(array $criteria, array $object)
+    public function update(array $criteria, array $object, array $options = array())
     {
         try {
-            return $this->result($this->_client->update(serialize($criteria), serialize($object)));
+            return $this->result($this->_client->update(serialize($criteria), serialize($object), serialize($options)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -490,8 +491,7 @@ class iDatabase
             } else {
                 throw new Exception("请求未成功");
             }
-        }
-        else {
+        } else {
             throw new Exception("文件上传未成功，请检查文件是否超过服务器额定限制或者网络是否正常");
         }
     }
