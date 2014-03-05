@@ -48,7 +48,8 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
      */
     public function updateUserInfoBySns($openid, $userInfo)
     {
-        return $this->_user->update(array(
+        $userInfo['access_token'] = isset($_SESSION['iWeixin']['accessToken']) ? $_SESSION['iWeixin']['accessToken'] : false;
+        return $this->update(array(
             'openid' => $openid
         ), array(
             '$set' => $userInfo

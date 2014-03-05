@@ -28,7 +28,6 @@ class Weixin_Model_Source extends iWebsite_Plugin_Mongo
     {
         $postStr = file_get_contents('php://input');
         $datas = (array) simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
-        $this->save($datas);
         return $datas;
     }
 }
