@@ -568,8 +568,8 @@ class iDatabase
             throw new Exception("返回结果无法进行反序列化");
         }
         
-        return isset($unserialize['result']) ? $unserialize['result'] : array(
-            'err' => $rst
+        return array_key_exists('result', $unserialize) ? $unserialize['result'] : array(
+            'err' => $unserialize
         );
     }
 
