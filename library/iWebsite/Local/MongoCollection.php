@@ -33,7 +33,7 @@ defined('MONGOS_DEFAULT_03') || define('MONGOS_DEFAULT_03', '10.0.0.13:27017');
 
 defined('MONGOS_LOCAL') || define('MONGOS_LOCAL', '127.0.0.1:27017');
 
-class iWebsite_MongoCollection extends \MongoCollection
+class iWebsite_Local_MongoCollection extends \MongoCollection
 {
 
     /**
@@ -264,7 +264,6 @@ class iWebsite_MongoCollection extends \MongoCollection
          * MongoClient::RP_SECONDARY 只读从db优先
          * MongoClient::RP_SECONDARY_PREFERRED 读取从db优先
          */
-        // $this->db->setReadPreference(\MongoClient::RP_SECONDARY_PREFERRED);
         $this->db->setReadPreference(\MongoClient::RP_PRIMARY_PREFERRED);
     }
 
@@ -418,7 +417,7 @@ class iWebsite_MongoCollection extends \MongoCollection
         // throw new \Exception('ICC deny execute "drop()" collection operation');
         // 做法2：复制整个集合的数据到新的集合中，用于备份，备份数据不做片键，不做索引以便节约空间，仅出于安全考虑，原有_id使用保留字__OLD_ID__进行保留
         $targetCollection = 'bak_' . date('YmdHis') . '_' . $this->_collection;
-        $target = new \MongoCollection($this->_backup, $targetCollection);
+        $target = new self($this->_backup, $targetCollection);
         // 变更为重命名某个集合或者复制某个集合的操作作为替代。
         $cursor = $this->find(array());
         while ($cursor->hasNext()) {
@@ -915,7 +914,7 @@ class iWebsite_MongoCollection extends \MongoCollection
                 ), array(
                     '$set' => array(
                         'isRunning' => false,
-                        'rst' => is_string($rst) ? $rst : Json::encode($rst)
+                        'rst' => is_string($rst) ? $rst : json_encode($rst)
                     )
                 ));
             };
@@ -923,7 +922,7 @@ class iWebsite_MongoCollection extends \MongoCollection
             $failure = function ($code, $msg)
             {
                 if (is_array($msg)) {
-                    $msg = Json::encode($msg);
+                    $msg = json_encode($msg);
                 }
                 return array(
                     'ok' => 0,

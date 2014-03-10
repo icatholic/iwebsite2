@@ -227,7 +227,6 @@ class iDatabase
             $this->connect();
         } else {
             $map = $this->getCollectionMap($project_id);
-            $this->_client = new iWebsite_Plugin_Mongo_Local($map[$alias]);
         }
     }
 

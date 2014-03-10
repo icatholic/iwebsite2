@@ -17,7 +17,7 @@ class iWebsite_Plugin_Mongo_Local
     public function __construct($alias)
     {
         
-        $this->_client = new MongoCollection();
+        $this->_client = new iWebsite_MongoCollection();
     }
 
 }
