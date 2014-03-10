@@ -109,12 +109,20 @@ class iDatabase
      * @var string
      */
     private $_error;
-    
+
     /**
      * 启用缓存对象
+     *
      * @var string
      */
-    private $_cache;
+    private $_cache = null;
+
+    /**
+     * 开启直接连接mongodb的模式
+     *
+     * @var string
+     */
+    private $_local = false;
 
     /**
      *
@@ -139,6 +147,16 @@ class iDatabase
     public function setDebug($debug = false)
     {
         $this->_debug = is_bool($debug) ? $debug : false;
+    }
+
+    /**
+     * 开启直连MongoDB模式
+     *
+     * @param string $local            
+     */
+    public function setLocal($local = false)
+    {
+        $this->_local = is_bool($local) ? $local : false;
     }
 
     /**
@@ -204,8 +222,13 @@ class iDatabase
      */
     public function setCollection($alias)
     {
-        $this->_collection_alias = $alias;
-        $this->connect();
+        if (! $this->_local) {
+            $this->_collection_alias = $alias;
+            $this->connect();
+        } else {
+            $map = $this->getCollectionMap($project_id);
+            $this->_client = new iWebsite_Plugin_Mongo_Local($map[$alias]);
+        }
     }
 
     /**
@@ -216,6 +239,51 @@ class iDatabase
     private function sign()
     {
         return md5($this->_project_id . $this->_rand . $this->_password);
+    }
+
+    /**
+     * 通过项目编号或者各个集合的数据结构
+     *
+     * @param string $project_id            
+     */
+    public function getCollectionMapByProject($project_id)
+    {
+        try {
+            return $this->result($this->_client->count(serialize($query)));
+        } catch (SoapFault $e) {
+            $this->soapFaultMsg($e);
+            return false;
+        }
+    }
+
+    /**
+     * 设定cache对象
+     */
+    public function setCache($cache)
+    {
+        $this->_cache = $cache;
+    }
+
+    /**
+     * 获取映射关系
+     *
+     * @param string $project_id            
+     * @param string $expire            
+     */
+    private function getCollectionMap($project_id, $expire = 300)
+    {
+        $datas = false;
+        if ($this->_cache != null) {
+            $cacheKey = crc32(__FILE__ . $project_id);
+            $datas = $this->_cache->load($cacheKey);
+            if ($datas === false) {
+                $datas = $this->getCollectionMapByProject($project_id);
+                $this->_cache->save($datas, $cacheKey, array(), $expire);
+            }
+        } else {
+            $datas = $this->getCollectionMapByProject($project_id);
+        }
+        return $datas;
     }
 
     /**
@@ -353,11 +421,11 @@ class iDatabase
             return false;
         }
     }
-    
+
     /**
      * 执行insert操作
      *
-     * @param array $datas
+     * @param array $datas            
      * @return array boolean
      */
     public function insertRef(array &$datas)
@@ -618,7 +686,6 @@ class iDatabase
         }
     }
 }
-
 
 /**
  * iDatabase异常处理函数
