@@ -1,191 +1,112 @@
 <?php
+
+/**
+ * 中奖纪录表
+ * @author Young
+ *
+ */
 class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
 {
-    protected $name = 'exchange';
-    protected $dbName = 'lottery_sample';
-    
-    //是否中过 $prize_num 次奖
-    public function isPrized($lotteryIdentity,$prize_source=1,$prize_num=1,array $prizes=array(), $is_today=false)
-    {
-    	$query=array();
-    	$query['is_valid'] = 1;//生效
-    	$query['prize_source'] = $prize_source;//用途：抽奖
-    	$query['identity_id'] = $lotteryIdentity['_id'];    	
-    	if(!empty($prizes)){//奖品code列表
-    		$query['prize_code'] = array('$in'=>$prizes);
-    	}
-    	if($is_today){//当天
-    		$query['createTime'] = array('$gte'=>date('Y-m-d').' 00:00:00','$lte'=>date('Y-m-d').' 23:59:59');
-    	}
-    	$count = $this->count($query);
-    	return array('isPrized'=>($count > ($prize_num-1)),'prizeNum'=>$count);
-    }
-    
-    //获取奖品列表
-    public function getPrizeList($lotteryIdentity=null,$skip=0, $limit=10,$needShuffle=false,$nameNeedhidden =false,$prize_source=0)
-    {
-    	$modelPrize = new Lottery_Model_Prize();
-    	$prize_list = $modelPrize->getPrizeList();
-    	
-    	$sort  = array('_id'=>-1);
-    	$query = array();
-    	$query['is_valid'] = 1;//生效
-    	if(!empty($prize_source)){
-    		$query['prize_source'] = $prize_source;//用途：抽奖
-    	}
-    	if(!empty($lotteryIdentity)){
-    		$query['identity_id'] = $lotteryIdentity['_id'];
-    	}
-    	    	
-    	$rst = $this->find($query, $sort, $skip, $limit);
-    	$datas = array();
-    	$datas['total'] = $rst['total'];
-    	$datas['datas'] = array();
-    	if(!empty($rst['datas'])){
-	    	foreach($rst['datas'] as $row) {
-	    		$row['prize_name'] = $prize_list[$row['prize_code']];
-	    		if($nameNeedhidden){
-	    			//以下代码根据具体业务可能需要修改
-	    			$row['weibo_screen_name'] = mb_substr($row['weibo_screen_name'],0,2,'utf-8').'***'.mb_substr($row['weibo_screen_name'],-2,2,'utf-8');
-	    		}
-	    		$datas['datas'][]  = $row;
-	    	}
-	    	if($needShuffle){//是否要打乱顺序
-	    		shuffle($datas['datas']);
-	    	}
-    	}
-    	return $datas;
-    }
-    //处理奖品
-    public function handle($p,$lotteryIdentity,$prize_source=1,$source=1,$is_passon=0,$is_valid=1)
-    {
-    	//消耗一个奖品
-    	$modelCode = new Lottery_Model_Code();
-    	$result = $modelCode->handlePrize($p['prize_code'],$prize_source);
-    	
-    	//记录中奖信息
-    	$datas = array();
-    	$datas['prize_code']  = $p['prize_code'];
-    	if($result) {
-    		$datas['exchange_code'] = $result['code'];
-    		$datas['exchange_pwd'] = $result['pwd'];
-    	}else{
-    		$datas['exchange_code'] = '';
-    		$datas['exchange_pwd'] = '';
-    	}
-    	$datas['identity_id'] = $lotteryIdentity['_id'];
-    	$datas['weibo_uid'] = $lotteryIdentity['weibo_uid'];
-    	$datas['weibo_screen_name'] = $lotteryIdentity['weibo_screen_name'];
-    	$datas['FromUserName'] = $lotteryIdentity['FromUserName'];
-    	
-    	$datas['exchange_name']     = $lotteryIdentity['name'];
-    	$datas['exchange_mobile']   = $lotteryIdentity['mobile'];
-    	$datas['exchange_address']  = $lotteryIdentity['address'];
-    	
-    	$datas['is_passon']  = $is_passon;//是否转送
-    	$datas['is_valid']  = $is_valid;//是否生效
-    	
-    	$datas['source'] = $source;
-    	$datas['prize_source'] = $prize_source;//用途
-    	$exchangeInfo = $this->insert($datas);
-    	$exchangeInfo['prize_info'] = $p;//奖品信息
-    	return $exchangeInfo;
-    }
-    
-    //根据ID获取中奖信息
-    public function getInfoById($id)
-    {
-    	$info = $this->findOne(array('_id'=>$id));
-    	if($info){
-    		$modelPrize = new Lottery_Model_Prize();
-    		$prizeInfo =$modelPrize->findOne(array('prize_code'=>$info['prize_code']));
-    		if($prizeInfo){
-    			$info['prizeInfo'] = $prizeInfo;
-    		}else{
-    			throw new Exception('奖品的信息有误');
-    		}
-    	}
-    	return $info;
-    }
-    
-    //记录中奖人的信息
-    public function updateExchangeInfo($exchangeId,$name,$mobile,$address,$is_passon=0,$is_valid=1)
-    {
-    	$query =array('_id'=>$exchangeId);
-    	$datas = array();
-    	$datas['exchange_name']     = $name;
-    	$datas['exchange_mobile']   = $mobile;
-    	$datas['exchange_address']  = $address;
-    	$datas['is_passon']  = $is_passon;
-    	$datas['is_valid']  = $is_valid;//是否生效
-    	$rst = $this->update($query,array('$set'=>$datas));
-    	if(isset($rst['err'])) {
-    		throw new Exception($rst['err']);
-    	}
-    	return $rst;
-    }
-    
-    /*
-     * 中奖生效
+
+    protected $name = 'iLottery_exchange';
+
+    protected $dbName = 'lottery';
+
+    private $_exchanges = null;
+
+    /**
+     * 获取指定用户的全部中奖纪录
+     *
+     * @param string $identity_id            
      */
-    public function doPrizeValidation($exchangeId)
+    public function getExchangeBy($identity_id)
     {
-    	$query =array('_id'=>$exchangeId);
-    	$datas = array();
-    	$datas['is_valid']  = 1;//生效
-    	$rst = $this->update($query,array('$set'=>$datas));
-    	if(isset($rst['err'])) {
-    		throw new Exception($rst['err']);
-    	}
+        if ($this->_exchanges == null) {
+            $this->_exchanges = $this->findAll(array(
+                'identity_id' => $identity_id
+            ));
+        }
+        return $this->_exchanges;
     }
-    
-    /*
-     * 获取中奖数量
-    */
-    public function getPrizedNum($lotteryIdentity=null,$prize_source=1,array $prizes=array(), $is_today=false)
+
+    /**
+     * 在全部数据结果中过滤有效数据
+     */
+    public function filterExchangeByGroup($identity_id, MongoDate $startTime = null, MongoDate $endTime = null)
     {
-    	$query=array();
-    	$query['is_valid'] = 1;//生效
-    	$query['prize_source'] = $prize_source;//用途：抽奖
-    	if($lotteryIdentity){
-    		$query['identity_id'] = $lotteryIdentity['_id'];
-    	}
-    	if(!empty($prizes)){//奖品code列表
-    		$query['prize_code'] = array('$in'=>$prizes);
-    	}
-    	if($is_today){//当天
-    		$query['createTime'] = array('$gte'=>date('Y-m-d').' 00:00:00','$lte'=>date('Y-m-d').' 23:59:59');
-    	}
-    	$count = $this->count($query);
-    	return $count;
+        $rst = array();
+        $exchanges = $this->getExchangeBy($identity_id);
+        if (! empty($exchanges)) {
+            $exchanges = array_filter($exchanges, function ($exchange) use($startTime, $endTime)
+            {
+                $startTime = $startTime == null ? new MongoDate(0) : $startTime;
+                $endTime = $endTime == null ? new MongoDate() : $endTime;
+                if ($exchange['__CREATE_TIME__'] >= $startTime && $exchange['__CREATE_TIME__'] <= $endTime) {
+                    return true;
+                }
+                return false;
+            });
+            if (! empty($exchanges)) {
+                foreach ($exchanges as $key => $exchange) {
+                    if (! empty($exchange['prize_id'])) {
+                        $rst[$exchange['prize_id']] += 1;
+                    }
+                }
+                $rst['all'] = count($exchanges);
+                return $rst;
+            }
+        }
+        return $rst;
     }
-    
-    /*
-     * 获取最高纪录信息
-    */
-    public function getTopInfo($lotteryIdentity=null,$prize_source=0)
+
+    /**
+     *
+     * @param string $identity_id            
+     * @param MongoDate $startTime            
+     * @param MongoDate $endTime            
+     * @return array boolean
+     */
+    public function getExchangeByGroup($identity_id, MongoDate $startTime = null, MongoDate $endTime = null)
     {
-    	$query=array();
-    	$query['is_valid']=1;//生效
-    	if(!empty($lotteryIdentity)){
-    		$query['identity_id']=$lotteryIdentity['_id'];
-    	}
-    	if(!empty($prize_source)){
-    		$query['prize_source']=$prize_source;
-    	}
-    	$rst = $this->find($query,array('prize_code'=>-1),0,1);
-    	if(empty($rst['datas'])){
-    		return null;
-    	}else{
-    		$info=$rst['datas'][0];
-    		$modelPrize = new Lottery_Model_Prize();
-    		$prizeInfo =$modelPrize->findOne(array('prize_code'=>$info['prize_code']));
-    		if($prizeInfo){
-    			$info['prizeInfo'] = $prizeInfo;
-    		}else{
-    			throw new Exception('奖品的信息有误');
-    		}
-    		return $info;
-    	}
+        $match = array(
+            'identity_id' => $identity_id,
+            'is_valid' => true
+        );
+        if ($startTime != null) {
+            $match['__CREATE_TIME__']['$gt'] = $startTime;
+        }
+        if ($endTime != null) {
+            $match['__CREATE_TIME__']['$lt'] = $endTime;
+        }
+        
+        $ops = array(
+            array(
+                '$match' => $match
+            ),
+            array(
+                '$group' => array(
+                    '_id' => '$prize_id',
+                    'total' => array(
+                        '$sum' => 1
+                    )
+                )
+            )
+        );
+        
+        $rst = $this->aggregate($ops);
+        if (! empty($rst['result'])) {
+            return $rst['result'];
+        }
+        
+        if ($rst['ok'] == 0) {
+            throw new Exception("脚本执行失败，原因:" . json_encode($rst));
+        }
+        
+        return false;
+    }
+
+    public function __destruct()
+    {
+        $this->_exchanges = null;
     }
 }
