@@ -37,15 +37,17 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         $this->_rule = new Lottery_Model_Rule();
         $this->_source = new Lottery_Model_Source();
     }
-    
+
     /**
      * 使用一个极简的签名算法，做安全处理
-     * @param string $uniqueId
-     * @param string $key
+     *
+     * @param string $uniqueId            
+     * @param string $key            
      * @return string
      */
-    private function checkSign($uniqueId,$key) {
-        return md5($uniqueId.$key);
+    private function checkSign($uniqueId, $key)
+    {
+        return md5($uniqueId . $key);
     }
 
     /**
@@ -73,15 +75,15 @@ class Lottery_IndexController extends iWebsite_Controller_Action
                         $this->_identity->setSource(Lottery_Model_Identity::SOURCE_OTHERS);
                     }
         
-        //通过ajax请求时，不校验签名
-//         if(empty($sign) || $this->checkSign($uniqueId, $key)!==$sign) {
-//             return $this->error(505, "签名错误");
-//         }   
-
-        //如果使用微信，可能需要校验FromUserName是否有效
-                    
-        //校验结束
-                   
+        // 通过ajax请求时，不校验签名
+        // if(empty($sign) || $this->checkSign($uniqueId, $key)!==$sign) {
+        // return $this->error(505, "签名错误");
+        // }
+        
+        // 如果使用微信，可能需要校验FromUserName是否有效
+        
+        // 校验结束
+        
         try {
             if (! $this->_activity->checkActivityActive($activity_id)) {
                 echo $this->error(500, "活动尚未开始");
@@ -99,7 +101,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             }
             
             // 检查中奖规则，检测用户是否中奖
-            $this->_rule->setLimitModel($this->_limit);//装在limit,不再重新加载数据
+            $this->_rule->setLimitModel($this->_limit); // 装在limit,不再重新加载数据
             $rule = $this->_rule->lottery($activity_id, $identity_id);
             if ($rule == false) {
                 echo $this->error(502, "很遗憾，您没有中奖");
@@ -115,22 +117,27 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             // 竞争到奖品，根据奖品的属性标记状态
             $prizeInfo = $this->_prize->getPrizeInfo($rule['prize_id']);
             
-            if($prizeInfo['is_virtual']) {
-                //虚拟物品，标记为有效或者无效
-                if(empty($prizeInfo['immediately'])) {
-                    //标记状态为无效，有效后方可使用
-                    
-                }
-                else {
-                    //直接发放并有效
-                }
-            }
-            else {
-                //实物类奖品，引导用户去完善个人信息
-            }
+            $result = array();
+            $result['identity_id'] = $identity_id;
+            $result['prizeInfo'] = $prizeInfo;
             
+            if ($prizeInfo['is_virtual']) {
+                // 虚拟物品，标记为有效或者无效
+                if (empty($prizeInfo['immediately'])) {
+                    // 标记状态为无效，有效后方可使用
+                    $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $identity_id, false);
+                } else {
+                    // 直接发放并有效
+                    $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $identity_id, true);
+                }
+            } else {
+                // 实物类奖品，引导用户去完善个人信息
+                $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $identity_id, false);
+            }
+            echo $this->result("OK", $result);
+            return false;
         } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
+            exit($this->error(505, $e->getMessage()));
         }
     }
 
