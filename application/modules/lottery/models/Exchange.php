@@ -105,27 +105,40 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
         return false;
     }
 
+
     /**
-     * 记录错误信息
+     * 记录数据
      * @param string $activity_id
      * @param string $prize_id
-     * @param array $prize_info
+     * @param array $prizeInfo
+     * @param array $prizeCode
      * @param string $identity_id
-     * @param array $identity_info
-     * @param string $is_valid
+     * @param array $identityInfo
+     * @param array $identityContact
+     * @param string $isValid
      * @param string $source
      */
-    public function record($activity_id, $prize_id, $prize_info, $identity_id, $identity_info, $is_valid, $source)
+    public function record($activity_id, $prize_id, $prizeInfo, $prizeCode, $identity_id, $identityInfo, $identityContact, $isValid, $source)
     {
         return $this->insert(array(
             'activity_id' => $activity_id,
             'prize_id' => $prize_id,
-            'prize_info' => $prize_info,
+            'prize_info' => $prizeInfo,
+            'prize_code' => $prizeCode,
             'identity_id' => $identity_id,
-            'identity_info' => $identity_info,
-            'is_valid' => $is_valid,
+            'identity_info' => $identityInfo,
+            'identity_contact' => $identityContact,
+            'is_valid' => $isValid,
             'source' => $source
         ));
+    }
+    
+    /**
+     * 获取中奖记录信息
+     * @param string $_id
+     */
+    public function getExchangeInfoBy($exchange_id) {
+        
     }
 
     public function __destruct()

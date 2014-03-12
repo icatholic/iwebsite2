@@ -27,7 +27,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
     {
         $this->getHelper('viewRenderer')->setNoRender(true);
         $this->_activity = new Lottery_Model_Activity();
-        $this->_code = new Lottery_Model_Exchange();
+        $this->_code = new Lottery_Model_Code();
         $this->_exchange = new Lottery_Model_Exchange();
         $this->_identity = new Lottery_Model_Identity();
         $this->_limit = new Lottery_Model_Limit();
@@ -60,19 +60,19 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         
         if (isset($_GET['FromUserName'])) {
             $uniqueId = trim($_GET['FromUserName']);
-            $this->_identity->setSource(Lottery_Model_Identity::SOURCE_WEIXIN);
+            $source = Lottery_Model_Identity::SOURCE_WEIXIN;
         } else 
             if (isset($_GET['weibo_id'])) {
                 $uniqueId = trim($_GET['weibo_id']);
-                $this->_identity->setSource(Lottery_Model_Identity::SOURCE_WEIBO);
+                $source = Lottery_Model_Identity::SOURCE_WEIBO;
             } else 
                 if (isset($_GET['other_id'])) {
                     $uniqueId = intval($_GET['other_id']);
-                    $this->_identity->setSource(Lottery_Model_Identity::SOURCE_OTHERS);
+                    $source = Lottery_Model_Identity::SOURCE_OTHERS;
                 } else 
                     if (isset($_GET['other_string_id'])) {
                         $uniqueId = intval($_GET['other_string_id']);
-                        $this->_identity->setSource(Lottery_Model_Identity::SOURCE_OTHERS);
+                        $source = Lottery_Model_Identity::SOURCE_OTHERS;
                     }
         
         // 通过ajax请求时，不校验签名
@@ -85,12 +85,15 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         // 校验结束
         
         try {
+            //
             if (! $this->_activity->checkActivityActive($activity_id)) {
                 echo $this->error(500, "活动尚未开始");
                 return false;
             }
             
             // 产生用户身份信息
+            $this->_identity->setSource($source);
+            $info = array();
             $identity_id = $this->_identity->record($uniqueId, $info);
             
             // 检查中奖情况和中奖限制条件的关系
@@ -121,77 +124,87 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             $result['identity_id'] = $identity_id;
             $result['prizeInfo'] = $prizeInfo;
             
-            if ($prizeInfo['is_virtual']) {
-                // 虚拟物品，标记为有效或者无效
-                if (empty($prizeInfo['immediately'])) {
-                    // 标记状态为无效，有效后方可使用
-                    $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $identity_id, false);
-                } else {
-                    // 直接发放并有效
-                    $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $identity_id, true);
+            // 奖品类型与状态
+            $isReal = false;
+            $isFinished = false; // true表示立即有效 false
+            if (! empty($prizeInfo['is_virtual'])) {
+                // 虚拟物品
+                if (! empty($prizeInfo['immediately'])) {
+                    // 虚拟物品且立即生效的
+                    $isFinished = true;
+                }
+                $code = $this->_code->getCode($activity_id, $rule['prize_id']);
+                if ($code == false) {
+                    echo $this->error(504, "该活动的该类型虚拟奖品已经发完");
+                    return false;
                 }
             } else {
-                // 实物类奖品，引导用户去完善个人信息
-                $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $identity_id, false);
+                $isReal = true;
             }
+            
+            // 记录中奖记录
+            $prizeCode = ! empty($code) ? $code : array();
+            $identityInfo = $this->_identity->getIdentityById($indentity_id);
+            $identityContact = array();
+            
+            // 记录信息
+            $exchangeInfo = $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $prizeCode, $identity_id, $identityInfo, $identityContact, $isFinished, $source);
+            
+            // 生成抽奖结果
+            $result = $this->lotteryResult($isReal, $isProcessed, $exchangeInfo);
+            
             echo $this->result("OK", $result);
             return false;
+            
         } catch (Exception $e) {
             exit($this->error(505, $e->getMessage()));
         }
     }
 
     /**
+     * 格式化返回结果
+     *
+     * @param array $exchangeInfo            
+     * @param array $prizeInfo            
+     * @param array $code            
+     * @return array
+     */
+    private function lotteryResult($isReal, $isProcessed, $prizeInfo, $exchangeInfo, $identityInfo, $code = array())
+    {
+        return convertToPureArray(array(
+            'isReal' => $isReal,
+            'isProcessed' => $isProcessed,
+            'prizeInfo' => $prizeInfo,
+            'exchangeInfo' => $exchangeInfo,
+            'identityInfo' => $identityInfo,
+            'code' => $code
+        ));
+    }
+
+    private function lotteryError($code)
+    {}
+
+    /**
      * 记录中奖用户的信息
      */
     public function recordAction()
     {
-        // http://iwebsite.umaman.com/Lottery/index/record?jsonpcallback=?&exchangeId=123&name=guo&mobile=1233&address=232323
-        try {
-            $name = trim($this->get('name'));
-            $mobile = trim($this->get('mobile'));
-            $address = trim($this->get('address'));
-            $exchangeId = trim($this->get('exchangeId'));
+        $name = trim($this->get('name'));
+        $mobile = trim($this->get('mobile'));
+        $address = trim($this->get('address'));
+        $exchange_id = trim($this->get('exchange_id'));
+        
+        if($exchange_id) {
             
-            if (empty($mobile)) {
-                exit($this->response(false, '请填写手机号码或电话号码'));
-            }
-            if (! isValidMobile($mobile)) {
-                exit($this->response(false, '手机格式不正确'));
-            }
-            
-            if (empty($exchangeId)) {
-                exit($this->response(false, '中奖ID为空'));
-            }
-            $modelExchange = new Lottery_Model_Exchange();
-            $exchangeInfo = $modelExchange->getInfoById($exchangeId);
-            if (empty($exchangeInfo)) {
-                exit($this->response(false, '您今天未获得奖品'));
-            }
-            if (empty($address)) {
-                if ($exchangeInfo['prizeInfo']['is_real']) { // 如果中奖的奖品是实体奖
-                    exit($this->response(false, '请填写寄送地址'));
-                }
-            }
-            if (empty($name)) {
-                if ($exchangeInfo['prize_code']) { // 如果中奖的奖品是实体奖
-                    exit($this->response(false, '请填写你的联系人姓名'));
-                }
-            }
-            // 更新中奖人信息
-            $modelExchange->updateExchangeInfo($exchangeId, $name, $mobile, $address);
-            exit($this->response(true, "记录处理结束"));
-        } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
         }
     }
 
     /**
      * 获取我的中奖的信息
+     * http://iwebsite.umaman.com/Lottery/index/my-prize?jsonpcallback=?&identity_id=232323
      */
     public function myPrizeAction()
     {
-        // http://iwebsite.umaman.com/Lottery/index/my-prize?jsonpcallback=?&identity_id=232323
         try {
             $identity_id = trim($this->get('identity_id'));
             if (empty($identity_id)) {
@@ -214,84 +227,18 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             exit($this->response(false, $e->getMessage()));
         }
     }
-    /*
-     * 获取中奖名单
+
+    /**
+     * http://iwebsite.umaman.com/Lottery/index/winner?jsonpcallback=?&skip=0&limit=10
      */
     public function winnerAction()
     {
-        // http://iwebsite.umaman.com/Lottery/index/winner?jsonpcallback=?&skip=0&limit=10
         try {
             $skip = intval($this->get('skip', '0'));
             $limit = intval($this->get('limit', '10'));
             $modelExchange = new Lottery_Model_Exchange();
             $datas = $modelExchange->getPrizeList(null, $skip, $limit, true, true);
             exit($this->response(true, '获取处理结束', $datas));
-        } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
-        }
-    }
-
-    /**
-     * 兑换码短信发送
-     */
-    public function sendAction()
-    {
-        try {
-            $mobile = trim($this->get('mobile'));
-            $message = trim($this->get('message'));
-            $exchange_id = trim($this->get('exchange_id'));
-            if (empty($mobile)) {
-                exit($this->response(false, '手机号码为空'));
-            }
-            if (! isValidMobile($mobile)) {
-                exit($this->response(false, '手机格式不正确'));
-            }
-            if (empty($message)) {
-                exit($this->response(false, '内容为空'));
-            }
-            if (empty($exchange_id)) {
-                exit($this->response(false, 'exchange_id为空'));
-            }
-            
-            // 中奖记录
-            $modelExchange = new Lottery_Model_Exchange();
-            $exchangeInfo = $modelExchange->getInfoById($exchange_id);
-            if (empty($exchangeInfo)) {
-                exit($this->response(false, '对不起，您今天没有中奖！'));
-            }
-            // 短信
-            $modelSmsLog = new Lottery_Model_SmsLog();
-            $user_id = $exchangeInfo['weibo_uid'];
-            $user_name = $exchangeInfo['weibo_screen_name'];
-            $modelSmsLog->sendSms($user_id, $user_name, $mobile, $message);
-            exit($this->response(true, '短信发送处理结束', array()));
-        } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
-        }
-    }
-
-    /**
-     * 中奖生效
-     */
-    public function doPrizeValidationAction()
-    {
-        // http://iwebsite.umaman.com/lottery/index/do-prize-validation?jsonpcallback=?&exchangeId=1233
-        try {
-            $exchangeId = trim($this->get('exchangeId'));
-            if (empty($exchangeId)) {
-                exit($this->response(false, '中奖ID为空'));
-            }
-            $modelExchange = new Lottery_Model_Exchange();
-            $exchangeInfo = $modelExchange->getInfoById($exchangeId);
-            if (empty($exchangeInfo)) {
-                exit($this->response(false, '您今天未获得奖品'));
-            }
-            if (! empty($exchangeInfo['is_valid'])) {
-                exit($this->response(false, '中奖已经生效'));
-            }
-            // 中奖生效
-            $modelExchange->doPrizeValidation($exchangeId);
-            exit($this->response(true, "处理结束"));
         } catch (Exception $e) {
             exit($this->response(false, $e->getMessage()));
         }
