@@ -26,11 +26,11 @@ class Lottery_Model_Identity extends iWebsite_Plugin_Mongo
         'others',
         'source_data'
     );
-    
-    const SOURCE_WEIXIN ='weixin';
-    
+
+    const SOURCE_WEIXIN = 'weixin';
+
     const SOURCE_WEIBO = 'weibo';
-    
+
     const SOURCE_OTHERS = 'others';
 
     /**
@@ -117,10 +117,23 @@ class Lottery_Model_Identity extends iWebsite_Plugin_Mongo
     {
         $info = $this->formatInfo($info);
         $query = $this->queryUnique($uniqueId);
-        $this->update($query, array(
+        return $this->update($query, array(
             '$set' => $info
         ), array(
             'upsert' => true
+        ));
+    }
+
+    /**
+     * 更新用户个人信息
+     */
+    public function updateIdentityInfo($identity_id, $info)
+    {
+        $identity_id = $identity_id instanceof MongoId ? $identity_id : myMongoId($identity_id);
+        return $this->update(array(
+            '_id' => $identity_id
+        ), array(
+            '$set' => $info
         ));
     }
 }

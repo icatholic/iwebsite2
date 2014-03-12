@@ -15,6 +15,18 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
     private $_exchanges = null;
 
     /**
+     * 检测当前信息是否存在
+     */
+    public function checkExchangeBy($indentity_id, $exchange_id)
+    {
+        $exchange_id = $exchange_id instanceof MongoId ? $exchange_id : myMongoId($exchange_id);
+        return $this->findOne(array(
+            '_id' => $exchange_id,
+            'indentity_id' => $indentity_id
+        ));
+    }
+
+    /**
      * 获取指定用户的全部中奖纪录
      *
      * @param string $identity_id            
@@ -23,10 +35,25 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
     {
         if ($this->_exchanges == null) {
             $this->_exchanges = $this->findAll(array(
-                'identity_id' => $identity_id
+                'identity_id' => $identity_id,
+                'is_valid' => true
             ));
         }
         return $this->_exchanges;
+    }
+
+    /**
+     * 获取之前已经中奖，但是未被确认掉的奖品
+     *
+     * @param
+     *            string
+     */
+    public function getExchangeInvalidById($identity_id)
+    {
+        return $this->_exchanges->findOne(array(
+            'identity_id' => $identity_id,
+            'is_valid' => false
+        ));
     }
 
     /**
@@ -105,18 +132,18 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
         return false;
     }
 
-
     /**
      * 记录数据
-     * @param string $activity_id
-     * @param string $prize_id
-     * @param array $prizeInfo
-     * @param array $prizeCode
-     * @param string $identity_id
-     * @param array $identityInfo
-     * @param array $identityContact
-     * @param string $isValid
-     * @param string $source
+     *
+     * @param string $activity_id            
+     * @param string $prize_id            
+     * @param array $prizeInfo            
+     * @param array $prizeCode            
+     * @param string $identity_id            
+     * @param array $identityInfo            
+     * @param array $identityContact            
+     * @param string $isValid            
+     * @param string $source            
      */
     public function record($activity_id, $prize_id, $prizeInfo, $prizeCode, $identity_id, $identityInfo, $identityContact, $isValid, $source)
     {
@@ -134,13 +161,34 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
     }
     
     /**
-     * 获取中奖记录信息
-     * @param string $_id
+     * 更新兑换信息
+     * @param string $exchange_id
+     * @param array $info
      */
-    public function getExchangeInfoBy($exchange_id) {
-        
+    public function updateExchangeInfo($exchange_id,$info) {
+        $exchange_id = $exchange_id instanceof MongoId ? $exchange_id : myMongoId($exchange_id);
+        return $this->update(array(
+            '_id' => $exchange_id
+        ), array('$set'=>$info));
     }
 
+    /**
+     * 获取中奖记录信息
+     *
+     * @param string $_id            
+     */
+    public function getExchangeInfoBy($exchange_id)
+    {
+        $exchange_id = $exchange_id instanceof MongoId ? $exchange_id : myMongoId($exchange_id);
+        return $this->findOne(array(
+            '_id' => $exchange_id
+        ));
+    }
+
+    
+    /**
+     * 析构函数
+     */
     public function __destruct()
     {
         $this->_exchanges = null;

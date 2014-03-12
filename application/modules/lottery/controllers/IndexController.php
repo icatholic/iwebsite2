@@ -85,7 +85,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         // 校验结束
         
         try {
-            //
+            // 检查活动信息
             if (! $this->_activity->checkActivityActive($activity_id)) {
                 echo $this->error(500, "活动尚未开始");
                 return false;
@@ -95,6 +95,13 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             $this->_identity->setSource($source);
             $info = array();
             $identity_id = $this->_identity->record($uniqueId, $info);
+            
+            // 检测是否存在未领取或者未激活的中奖奖品，有的话，再次让其中同样的奖品完善个人信息。
+            $invalidExchange = $this->_exchange->getExchangeInvalidById($identity_id);
+            if (! empty($invalidExchange)) {
+                echo $this->result("OK", convertToPureArray($invalidExchange));
+                return true;
+            }
             
             // 检查中奖情况和中奖限制条件的关系
             $limit = $this->_limit->checkLimit($activity_id, $identity_id, 'all');
@@ -150,125 +157,63 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             // 记录信息
             $exchangeInfo = $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $prizeCode, $identity_id, $identityInfo, $identityContact, $isFinished, $source);
             
-            // 生成抽奖结果
-            $result = $this->lotteryResult($isReal, $isProcessed, $exchangeInfo);
-            
-            echo $this->result("OK", $result);
-            return false;
-            
+            echo $this->result("OK", convertToPureArray($exchangeInfo));
+            return true;
         } catch (Exception $e) {
             exit($this->error(505, $e->getMessage()));
         }
     }
 
     /**
-     * 格式化返回结果
-     *
-     * @param array $exchangeInfo            
-     * @param array $prizeInfo            
-     * @param array $code            
-     * @return array
-     */
-    private function lotteryResult($isReal, $isProcessed, $prizeInfo, $exchangeInfo, $identityInfo, $code = array())
-    {
-        return convertToPureArray(array(
-            'isReal' => $isReal,
-            'isProcessed' => $isProcessed,
-            'prizeInfo' => $prizeInfo,
-            'exchangeInfo' => $exchangeInfo,
-            'identityInfo' => $identityInfo,
-            'code' => $code
-        ));
-    }
-
-    private function lotteryError($code)
-    {}
-
-    /**
      * 记录中奖用户的信息
      */
     public function recordAction()
     {
-        $name = trim($this->get('name'));
-        $mobile = trim($this->get('mobile'));
-        $address = trim($this->get('address'));
-        $exchange_id = trim($this->get('exchange_id'));
+        $diaplay_name = trim($this->get('diaplay_name', ''));
+        $name = trim($this->get('name', ''));
+        $mobile = trim($this->get('mobile', ''));
+        $tel = trim($this->get('tel', ''));
+        $address = trim($this->get('address', ''));
+        $zip = trim($this->get('zip', ''));
+        $id_number = trim($this->get('id_number', ''));
+        $address = trim($this->get('address', ''));
+        $exchange_id = trim($this->get('exchange_id', ''));
+        $indentity_id = trim($this->get('indentity_id', ''));
         
-        if($exchange_id) {
-            
+        $exchangeInfo = $this->_exchange->checkExchangeBy($indentity_id, $exchange_id);
+        if ($exchangeInfo == null) {
+            echo $this->error(506, "该用户无此兑换信息");
+            return false;
         }
-    }
-
-    /**
-     * 获取我的中奖的信息
-     * http://iwebsite.umaman.com/Lottery/index/my-prize?jsonpcallback=?&identity_id=232323
-     */
-    public function myPrizeAction()
-    {
-        try {
-            $identity_id = trim($this->get('identity_id'));
-            if (empty($identity_id)) {
-                exit($this->response(false, '抽奖用户ID为空'));
-            }
-            $modelLotteryIdentity = new Lottery_Model_LotteryIdentity();
-            $lotteryIdentity = $modelLotteryIdentity->findOne(array(
-                '_id' => $identity_id
-            ));
-            if (empty($lotteryIdentity)) {
-                exit($this->response(false, '抽奖用户ID不正确'));
-            }
-            $skip = intval($this->get('skip', '0'));
-            $limit = intval($this->get('limit', '1000'));
-            $modelExchange = new Lottery_Model_Exchange();
-            
-            $datas = $modelExchange->getPrizeList($lotteryIdentity, $skip, $limit, false, false);
-            exit($this->response(true, '获取处理结束', $datas));
-        } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
-        }
-    }
-
-    /**
-     * http://iwebsite.umaman.com/Lottery/index/winner?jsonpcallback=?&skip=0&limit=10
-     */
-    public function winnerAction()
-    {
-        try {
-            $skip = intval($this->get('skip', '0'));
-            $limit = intval($this->get('limit', '10'));
-            $modelExchange = new Lottery_Model_Exchange();
-            $datas = $modelExchange->getPrizeList(null, $skip, $limit, true, true);
-            exit($this->response(true, '获取处理结束', $datas));
-        } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
-        }
-    }
-
-    /**
-     * 中奖的最高纪录
-     */
-    public function topAction()
-    {
-        // http://iwebsite.umaman.com/lottery/index/top?jsonpcallback=?&hid=1233
-        try {
-            $hid = trim($this->get('hid')); // HID
-            if (empty($hid)) {
-                exit($this->response(false, '$hid为空'));
-            }
-            // 获取抽奖参与人信息
-            $modelLotteryIdentity = new Lottery_Model_LotteryIdentity();
-            // 根据HID生成一个抽奖的身份凭证
-            $lotteryIdentity = $modelLotteryIdentity->getIdentity("", "", "", "", "", "", $hid);
-            // 用途
-            $modelPrizeSource = new Lottery_Model_PrizeSource();
-            $prize_source = $modelPrizeSource->getCaiquan();
-            
-            $modelExchange = new Lottery_Model_Exchange();
-            $info = $modelExchange->getTopInfo($lotteryIdentity, $prize_source);
-            exit($this->response(true, '获取处理结束', $info));
-        } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
-        }
+        
+        $info = array();
+        
+        if (! empty($diaplay_name))
+            $info['name'] = $diaplay_name;
+        
+        if (! empty($name))
+            $info['name'] = $name;
+        
+        if (! empty($mobile))
+            $info['mobile'] = $mobile;
+        
+        if (! empty($tel))
+            $info['tel'] = $tel;
+        
+        if (! empty($address))
+            $info['address'] = $address;
+        
+        if (! empty($zip))
+            $info['zip'] = $zip;
+        
+        if (! empty($id_number))
+            $info['id_number'] = $id_number;
+        
+        $this->_identity->updateIdentityInfo($indentity_id, $info);
+        
+        $this->_exchange->updateExchangeInfo($exchange_id, $datas);
+        
+        $this->result('OK',"提交成功");
     }
 }
 
