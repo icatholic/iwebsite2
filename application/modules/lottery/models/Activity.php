@@ -38,9 +38,6 @@ class Lottery_Model_Activity extends iWebsite_Plugin_Mongo
                 if ($activityInfo['start_time']->sec <= $now && $now <= $activityInfo['end_time']->sec) {
                     return true;
                 } else {
-                    fb(date("Y-m-d H:i:s", $now),'LOG');
-                    fb(date("Y-m-d H:i:s", $activityInfo['start_time']->sec),'LOG');
-                    fb(date("Y-m-d H:i:s", $activityInfo['end_time']->sec),'LOG');
                     return false;
                 }
             } else {
