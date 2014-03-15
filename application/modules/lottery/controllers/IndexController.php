@@ -258,21 +258,6 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             
             $this->_exchange->updateExchangeInfo($exchange_id, $datas);
             
-            if (isset($exchangeInfo['activity_id']) && $exchangeInfo['activity_id'] == "532058de489619f50d7eb1b7") {
-                // 写入优惠券信息
-                $exchange_id = $exchangeInfo['_id']->__toString();
-                $openid = $exchangeInfo['identity_info']['weixin_openid'];
-                $activityInfo = $this->_activity->getActivityInfo($exchangeInfo['activity_id']);
-                $activity_name = $activityInfo['name'];
-                $coupon_name = $exchangeInfo['prize_info']['prize_name'];
-                $code = $exchangeInfo['prize_code']['code'];
-                $pwd = $exchangeInfo['prize_code']['pwd'];
-                $start_time = $exchangeInfo['prize_code']['start_time'];
-                $end_time = $exchangeInfo['prize_code']['end_time'];
-                $couponModel = new Campaign_Model_User_Coupon();
-                $couponModel->record($openid, $activity_name, $coupon_name, $code, $pwd, $start_time, $end_time, $exchange_id);
-            }
-            
             echo $this->result('OK', "提交成功");
             return true;
         } catch (Exception $e) {
