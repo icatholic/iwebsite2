@@ -16,14 +16,44 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
     }
 
     /**
+     * 检测用户是否已经关注或者曾经关注过微信账号
+     *
+     * @param string $openid            
+     * @return boolean
+     */
+    public function checkOpenId($openid)
+    {
+        $rst = $this->findOne(array(
+            'openid' => $openid
+        ));
+        if ($rst == null) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 获取用户信息
+     *
+     * @param string $openid            
+     */
+    public function getUserInfoById($openid)
+    {
+        return $this->findOne(array(
+            'openid' => $openid
+        ));
+    }
+
+    /**
      * 根据用户的互动行为，通过服务器端token获取该用户的个人信息
      * openid不存在或者随机10次执行一次更新用户信息
      */
     public function updateUserInfoByAction($openid)
     {
-        if ($this->count(array(
+        $check = $this->findOne(array(
             'openid' => $openid
-        )) == 0 || rand(0, 10) == 5) {
+        ));
+        if ($check == null || empty($check['subscribe']) || rand(0,100)==1) {
             $userInfo = $this->_weixin->getUserManager()->getUserInfo($openid);
             if (! isset($userInfo['errcode'])) {
                 $userInfo['subscribe'] = $userInfo['subscribe'] == 1 ? true : false;

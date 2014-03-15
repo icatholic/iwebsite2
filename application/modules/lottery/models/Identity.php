@@ -40,11 +40,13 @@ class Lottery_Model_Identity extends iWebsite_Plugin_Mongo
      */
     public function setSource($source)
     {
-        $sources = new Lottery_Model_Source();
+        $sourceModel = new Lottery_Model_Source();
+        $sources = $sourceModel->getSource();
         if (in_array($source, $sources)) {
             $this->_source = $source;
+        } else {
+            throw new Exception("活动来源类型不存在");
         }
-        throw new Exception("活动来源类型不存在");
     }
 
     /**
@@ -104,7 +106,9 @@ class Lottery_Model_Identity extends iWebsite_Plugin_Mongo
     {
         $rst = array();
         foreach ($this->_keys as $key) {
-            $rst[$key] = isset($info[$key]) ? $info[$key] : '';
+            if (isset($info[$key])) {
+                $rst[$key] = $info[$key];
+            }
         }
         return $rst;
     }
@@ -117,11 +121,19 @@ class Lottery_Model_Identity extends iWebsite_Plugin_Mongo
     {
         $info = $this->formatInfo($info);
         $query = $this->queryUnique($uniqueId);
-        return $this->update($query, array(
+        $info = array_merge($info, $query);
+        $options = array();
+        $options['query'] = $query;
+        $options['update'] = array(
             '$set' => $info
-        ), array(
-            'upsert' => true
-        ));
+        );
+        $options['new'] = true;
+        $options['upsert'] = true;
+        $rst = $this->findAndModify($options);
+        if (! empty($rst['value'])) {
+            return $rst['value'];
+        }
+        return false;
     }
 
     /**
@@ -130,10 +142,14 @@ class Lottery_Model_Identity extends iWebsite_Plugin_Mongo
     public function updateIdentityInfo($identity_id, $info)
     {
         $identity_id = $identity_id instanceof MongoId ? $identity_id : myMongoId($identity_id);
-        return $this->update(array(
+        $options = array();
+        $options['query'] = array(
             '_id' => $identity_id
-        ), array(
+        );
+        $options['update'] = array(
             '$set' => $info
-        ));
+        );
+        $rst = $this->findAndModify($options);
+        return $rst['value'];
     }
 }

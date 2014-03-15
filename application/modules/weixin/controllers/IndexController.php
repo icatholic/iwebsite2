@@ -37,7 +37,7 @@ class Weixin_IndexController extends Zend_Controller_Action
         $this->_menu = new Weixin_Model_Menu();
         $this->_qrcode = new Weixin_Model_Qrcode();
         
-        $this->_app->setTokenCache(300); // 设定token缓存
+        $this->_app->setTokenCache(60); // 设定token缓存
         $this->_appConfig = $this->_app->getToken();
         
         $this->_weixin = new Weixin\Client();
@@ -89,7 +89,7 @@ class Weixin_IndexController extends Zend_Controller_Action
                 $datas = $this->_app->debug($__DEBUG__);
             }
             // 开始处理相关的业务逻辑
-            $content = isset($datas['Content']) ? trim($datas['Content']) : '';
+            $content = isset($datas['Content']) ? strtolower(trim($datas['Content'])) : '';
             
             $FromUserName = isset($datas['FromUserName']) ? trim($datas['FromUserName']) : '';
             Zend_Registry::set('__FROM_USER_NAME__', $FromUserName);
@@ -128,17 +128,19 @@ class Weixin_IndexController extends Zend_Controller_Action
                     $userPoint = function () use($FromUserName)
                     {
                         $modelUserPoint = new Campaign_Model_User_Point();
-                        $modelUserPoint->subscribe($FromUserName);
+                        // $modelUserPoint->subscribe($FromUserName);
+                        $modelUserPoint->setWeixinInstance($this->_weixin);
                         $modelUserPoint->incInvitePoint($FromUserName);
                     };
                     
                     // Ticket 二维码的ticket，可用来换取二维码图片
                     if (! empty($Ticket) || ! empty($EventKey)) { // 扫描带参数二维码事件 用户未关注时，进行关注后的事件推送
+                                                                  // var_dump($FromUserName, $Event, $EventKey, $Ticket);
                         $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
                         // 不同项目特定的业务逻辑开始
                         // 不同项目特定的业务逻辑结束
                     }
-                    $content = 'Hello2BizUser';
+                    $content = '首访回复';
                 } elseif ($Event == 'SCAN') { // 扫描带参数二维码事件 用户已关注时的事件推送
                     $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
                     $onlyRevieve = true;
@@ -243,7 +245,50 @@ class Weixin_IndexController extends Zend_Controller_Action
             if ($__DEBUG__) {
                 print_r($content);
             }
-            $response = followUrl($this->anwser($content),array('FromUserName'=>$FromUserName));
+            
+            if ($content == 'debug') {
+                echo $this->_weixin->getMsgManager()
+                    ->getReplySender()
+                    ->replyText(debugVar($datas));
+                return false;
+            }
+            
+            // 我的优惠券查询
+            $couponModel = new Campaign_Model_User_Coupon();
+            if ($content == '我的优惠') {
+                // 获取用户的优惠券
+                $msg = $couponModel->getCouponsMsg($FromUserName);
+                if ($msg !== false) {
+                    $response = $this->_weixin->getMsgManager()
+                        ->getReplySender()
+                        ->replyText($msg);
+                } else {
+                    $content = "没有优惠券";
+                    $response = followUrl($this->anwser($content), array(
+                        'FromUserName' => $FromUserName
+                    ));
+                }
+            }             // 获取优惠券的优惠码
+            elseif (preg_match("/^[a-y]{1}$/", $content)) {
+                // 查询优惠券信息
+                $msg = $couponModel->getCouponByAlpha($FromUserName, $content);
+                if ($msg !== false) {
+                    $response = $this->_weixin->getMsgManager()
+                        ->getReplySender()
+                        ->replyText($msg);
+                } else {
+                    $content = "默认回复";
+                    $response = followUrl($this->anwser($content), array(
+                        'FromUserName' => $FromUserName
+                    ));
+                }
+            } else {
+                $response = followUrl($this->anwser($content), array(
+                    'FromUserName' => $FromUserName
+                ));
+            }
+            
+            // 输出响应结果
             echo $response;
             
             // 以下部分执行的操作，不影响执行速度，但是也将无法输出到返回结果中
@@ -308,12 +353,11 @@ class Weixin_IndexController extends Zend_Controller_Action
         }
         return $this->_reply->answer($match);
     }
-    
+
     /**
      * 析构函数
      */
-    public function __destruct() {
-        
-    }
+    public function __destruct()
+    {}
 }
 

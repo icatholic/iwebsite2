@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 记录微信二维码扫描状况
  * 
@@ -14,21 +15,26 @@ class Weixin_Model_Qrcode extends iWebsite_Plugin_Mongo
 
     public function record($openid, $event, $eventKey, $ticket)
     {
-        if ($event === 'subscribe') {
-            $sence_id = str_ireplace('qrscene_', '', $eventKey);
+        try {
+            if ($event === 'subscribe') {
+                $sence_id = str_ireplace('qrscene_', '', $eventKey);
+            } else 
+                if ($event === 'SCAN') {
+                    $sence_id = $eventKey;
+                } else {
+                    throw new Exception("无效的事件类型");
+                }
+            
+            $datas = array(
+                'sence_id' => $sence_id,
+                'openid' => $openid,
+                'Event' => $event,
+                'EventKey' => $eventKey,
+                'Ticket' => $ticket
+            );
+            return $this->insert($datas);
+        } catch (Exception $e) {
+            return exceptionMsg($e);
         }
-        else if($event==='SCAN') {
-            $sence_id = $eventKey;
-        }
-        else {
-            throw new Exception("无效的事件类型");
-        }
-        $this->insert(array(
-            'sence_id' => $sence_id,
-            'openid' => $openid,
-            'Event' => $event,
-            'EventKey' => $eventKey,
-            'Ticket' => $ticket
-        ));
     }
 }

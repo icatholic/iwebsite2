@@ -51,10 +51,10 @@ class Lottery_Model_Rule extends iWebsite_Plugin_Mongo
             $this->_rules = $this->findAll(array(
                 'activity_id' => $activity_id,
                 'allow_start_time' => array(
-                    '$gte' => $now
+                    '$lte' => $now
                 ),
                 'allow_end_time' => array(
-                    '$lte' => $now
+                    '$gte' => $now
                 )
             ));
         }
@@ -83,7 +83,7 @@ class Lottery_Model_Rule extends iWebsite_Plugin_Mongo
         $resultList = array();
         foreach ($groupList as $key => $rows) {
             shuffle($rows);
-            array_push($resultList, $rows);
+            $resultList = array_merge($resultList, $rows);
         }
         return $resultList;
     }

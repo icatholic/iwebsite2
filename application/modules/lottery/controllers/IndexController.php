@@ -23,6 +23,8 @@ class Lottery_IndexController extends iWebsite_Controller_Action
 
     private $_source;
 
+    private $_user;
+
     public function init()
     {
         $this->getHelper('viewRenderer')->setNoRender(true);
@@ -36,6 +38,9 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         $this->_result_msg = new Lottery_Model_ResultMsg();
         $this->_rule = new Lottery_Model_Rule();
         $this->_source = new Lottery_Model_Source();
+        
+        // 额外增加的业务处理逻辑
+        $this->_user = new Weixin_Model_User();
     }
 
     /**
@@ -93,12 +98,33 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             
             // 产生用户身份信息
             $this->_identity->setSource($source);
-            $info = array();
-            $identity_id = $this->_identity->record($uniqueId, $info);
             
+            // 增加微信昵称等信息
+            $info = array();
+            $userInfo = $this->_user->getUserInfoById($uniqueId);
+            if (! empty($userInfo)) {
+                $info = array(
+                    'diaplay_name' => $userInfo['nickname'],
+                    'nickname' => $userInfo['nickname']
+                );
+            } else {
+                echo $this->error(508, "您需要从高洁丝官方微信参与本活动");
+                return false;
+            }
+            
+            $identityInfo = $this->_identity->record($uniqueId, $info);
+            if ($identityInfo == false) {
+                echo $this->error(507, "创建用户信息失败");
+                return false;
+            }
+            
+            $identity_id = $identityInfo['_id']->__toString();
             // 检测是否存在未领取或者未激活的中奖奖品，有的话，再次让其中同样的奖品完善个人信息。
             $invalidExchange = $this->_exchange->getExchangeInvalidById($identity_id);
             if (! empty($invalidExchange)) {
+                if (isset($invalidExchange['_id'])) {
+                    $invalidExchange['exchange_id'] = $invalidExchange['_id'] instanceof MongoId ? $invalidExchange['_id']->__toString() : $invalidExchange['_id'];
+                }
                 echo $this->result("OK", convertToPureArray($invalidExchange));
                 return true;
             }
@@ -106,7 +132,8 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             // 检查中奖情况和中奖限制条件的关系
             $limit = $this->_limit->checkLimit($activity_id, $identity_id, 'all');
             if ($limit == false) {
-                echo $this->error(501, "到达今日抽奖限制的上限制");
+                $this->_record->record($activity_id, $identity_id, 501, $source);
+                echo $this->error(501, "到达抽奖限制的上限制");
                 return false;
             }
             
@@ -114,12 +141,14 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             $this->_rule->setLimitModel($this->_limit); // 装在limit,不再重新加载数据
             $rule = $this->_rule->lottery($activity_id, $identity_id);
             if ($rule == false) {
+                $this->_record->record($activity_id, $identity_id, 502, $source);
                 echo $this->error(502, "很遗憾，您没有中奖");
                 return false;
             }
             
             // 更新中奖信息
             if (! $this->_rule->updateRemain($rule)) {
+                $this->_record->record($activity_id, $identity_id, 503, $source);
                 echo $this->error(503, "竞争争夺奖品失败");
                 return false;
             }
@@ -142,6 +171,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
                 }
                 $code = $this->_code->getCode($activity_id, $rule['prize_id']);
                 if ($code == false) {
+                    $this->_record->record($activity_id, $identity_id, 504, $source);
                     echo $this->error(504, "该活动的该类型虚拟奖品已经发完");
                     return false;
                 }
@@ -151,16 +181,20 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             
             // 记录中奖记录
             $prizeCode = ! empty($code) ? $code : array();
-            $identityInfo = $this->_identity->getIdentityById($indentity_id);
+            $identityInfo = $this->_identity->getIdentityById($identity_id);
             $identityContact = array();
             
             // 记录信息
             $exchangeInfo = $this->_exchange->record($activity_id, $rule['prize_id'], $prizeInfo, $prizeCode, $identity_id, $identityInfo, $identityContact, $isFinished, $source);
-            
+            if (isset($exchangeInfo['_id'])) {
+                $exchangeInfo['exchange_id'] = $exchangeInfo['_id'] instanceof MongoId ? $exchangeInfo['_id']->__toString() : $exchangeInfo['_id'];
+            }
+            $this->_record->record($activity_id, $identity_id, 1, $source);
             echo $this->result("OK", convertToPureArray($exchangeInfo));
             return true;
         } catch (Exception $e) {
-            exit($this->error(505, $e->getMessage()));
+            $this->_record->record($activity_id, $identity_id, 505, $source);
+            exit($this->error(505, $e->getFile() . $e->getLine() . $e->getMessage()));
         }
     }
 
@@ -178,9 +212,9 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         $id_number = trim($this->get('id_number', ''));
         $address = trim($this->get('address', ''));
         $exchange_id = trim($this->get('exchange_id', ''));
-        $indentity_id = trim($this->get('indentity_id', ''));
+        $identity_id = trim($this->get('identity_id', ''));
         
-        $exchangeInfo = $this->_exchange->checkExchangeBy($indentity_id, $exchange_id);
+        $exchangeInfo = $this->_exchange->checkExchangeBy($identity_id, $exchange_id);
         if ($exchangeInfo == null) {
             echo $this->error(506, "该用户无此兑换信息");
             return false;
@@ -209,11 +243,42 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         if (! empty($id_number))
             $info['id_number'] = $id_number;
         
-        $this->_identity->updateIdentityInfo($indentity_id, $info);
-        
-        $this->_exchange->updateExchangeInfo($exchange_id, $datas);
-        
-        $this->result('OK',"提交成功");
+        try {
+            $identityInfo = array();
+            if (! empty($info)) {
+                $identityInfo = $this->_identity->updateIdentityInfo($identity_id, $info);
+            }
+            
+            $datas = array();
+            $datas['is_valid'] = true;
+            if (! empty($identityInfo)) {
+                $datas['identity_info'] = $identityInfo;
+            }
+            $datas['identity_contact'] = $info;
+            
+            $this->_exchange->updateExchangeInfo($exchange_id, $datas);
+            
+            if (isset($exchangeInfo['activity_id']) && $exchangeInfo['activity_id'] == "532058de489619f50d7eb1b7") {
+                // 写入优惠券信息
+                $exchange_id = $exchangeInfo['_id']->__toString();
+                $openid = $exchangeInfo['identity_info']['weixin_openid'];
+                $activityInfo = $this->_activity->getActivityInfo($exchangeInfo['activity_id']);
+                $activity_name = $activityInfo['name'];
+                $coupon_name = $exchangeInfo['prize_info']['prize_name'];
+                $code = $exchangeInfo['prize_code']['code'];
+                $pwd = $exchangeInfo['prize_code']['pwd'];
+                $start_time = $exchangeInfo['prize_code']['start_time'];
+                $end_time = $exchangeInfo['prize_code']['end_time'];
+                $couponModel = new Campaign_Model_User_Coupon();
+                $couponModel->record($openid, $activity_name, $coupon_name, $code, $pwd, $start_time, $end_time, $exchange_id);
+            }
+            
+            echo $this->result('OK', "提交成功");
+            return true;
+        } catch (Exception $e) {
+            exit($this->error(505, $e->getFile() . $e->getLine() . $e->getMessage()));
+        }
     }
+
 }
 
