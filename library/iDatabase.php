@@ -109,12 +109,6 @@ class iDatabase
      * @var string
      */
     private $_error;
-    
-    /**
-     * 启用缓存对象
-     * @var string
-     */
-    private $_cache;
 
     /**
      *
@@ -161,7 +155,7 @@ class iDatabase
             );
             
             ini_set('default_socket_timeout', $this->_maxConnectionTime);
-            $this->_client = new SoapClient($wsdl, $options);
+            $this->_client = new MySoapClient($wsdl, $options);
             return $this->_client;
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
@@ -609,16 +603,297 @@ class iDatabase
     }
 
     /**
+     * 保证异步操作全部完成
+     */
+    public function runAllAsync()
+    {
+        if (SoapClientSocketsRegistry::isRegistered('idbAsync')) {
+            $asyncs = SoapClientSocketsRegistry::get('idbAsync');
+            if (is_array($asyncs)) {
+                foreach ($asyncs as $async) {
+                    if ($async instanceof SoapClientAsync)
+                        $async->wait();
+                }
+            }
+            SoapClientSocketsRegistry::_unsetInstance();
+        }
+    }
+
+    /**
      * 析构函数
      */
     public function __destruct()
     {
+        // if ($this->_debug && !empty($this->_error)) {
         if ($this->_debug) {
             var_dump($this->_error, $this->_client->__getLastRequestHeaders(), $this->_client->__getLastRequest(), $this->_client->__getLastResponseHeaders(), $this->_client->__getLastResponse());
         }
     }
 }
 
+/**
+ * 扩展SOAP客户端增加异步处理模式
+ */
+class MySoapClient extends SoapClient
+{
+
+    public $asyncFunctionName = null;
+
+    protected $_asynchronous = false;
+
+    protected $_asyncResult = null;
+
+    protected $_asyncAction = null;
+
+    public function __construct($wsdl, $options)
+    {
+        parent::SoapClient($wsdl, $options);
+    }
+
+    public function __call($functionName, $arguments)
+    {
+        if ($this->_asyncResult == null) {
+            $this->_asynchronous = false;
+            $this->_asyncAction = null;
+            
+            if (preg_match('/Async$/', $functionName) == 1) {
+                $this->_asynchronous = true;
+                $functionName = str_replace('Async', '', $functionName);
+                $this->asyncFunctionName = $functionName;
+            }
+        }
+        
+        try {
+            $result = @parent::__call($functionName, $arguments);
+        } catch (SoapFault $e) {
+            throw new Exception(exceptionMsg($e));
+        }
+        
+        if ($this->_asynchronous == true) {
+            return $this->_asyncAction;
+        }
+        return $result;
+    }
+
+    public function __doRequest($request, $location, $action, $version, $one_way = false)
+    {
+        if ($this->_asyncResult != null) {
+            $result = $this->_asyncResult;
+            unset($this->_asyncResult);
+            return $result;
+        }
+        
+        if ($this->_asynchronous == false) {
+            $result = parent::__doRequest($request, $location, $action, $version, $one_way);
+            return $result;
+        } else {
+            $this->_asyncAction = new SoapClientAsync($this, $this->asyncFunctionName, $request, $location, $action);
+            
+            if (SoapClientSocketsRegistry::isRegistered('idbAsync'))
+                $idbAsync = SoapClientSocketsRegistry::get('idbAsync');
+            else
+                $idbAsync = array();
+            array_push($idbAsync, $this->_asyncAction);
+            SoapClientSocketsRegistry::set('idbAsync', $idbAsync);
+            
+            return '';
+        }
+    }
+
+    public function handleAsyncResult($functionName, $result)
+    {
+        $this->_asynchronous = false;
+        $this->_asyncResult = $result;
+        return $this->__call($functionName, array());
+    }
+}
+
+class SoapClientAsync
+{
+
+    /**
+     * 获取当前soapclient对象
+     */
+    protected $_soapClient;
+
+    /**
+     * 被叫方法名
+     *
+     * @var string
+     */
+    protected $_functionName;
+
+    /**
+     * 连接SOAP客户端的socket资源
+     *
+     * @var resource
+     */
+    protected $_socket;
+
+    protected $_soapResult = '';
+
+    public function __construct($soapClient, $functionName, $request, $location, $action)
+    {
+        preg_match('%^(http(?:s)?)://(.*?)(/.*?)$%', $location, $matches);
+        
+        $this->_soapClient = $soapClient;
+        $this->_functionName = $functionName;
+        
+        $protocol = $matches[1];
+        $host = $matches[2];
+        $endpoint = $matches[3];
+        
+        $headers = array(
+            'POST ' . $endpoint . ' HTTP/1.1',
+            'Host: ' . $host,
+            'User-Agent: PHP-SOAP/' . phpversion(),
+            'Content-Type: text/xml; charset=utf-8',
+            'SOAPAction: "' . $action . '"',
+            'Content-Length: ' . strlen($request),
+            'Connection: close'
+        );
+        
+        if ($protocol == 'https') {
+            $host = 'ssl://' . $host;
+            $port = 443;
+        } else {
+            $port = 80;
+        }
+        
+        $data = implode("\r\n", $headers) . "\r\n\r\n" . $request . "\r\n";
+        $this->_socket = fsockopen($host, $port, $errorNumber, $errorMessage);
+        
+        if ($this->_socket === false) {
+            $this->_socket = null;
+            throw new Exception('Unable to make an asynchronous API call: ' . $errorNumber . ': ' . $errorMessage);
+        }
+        
+        if (fwrite($this->_socket, $data) === false) {
+            throw new Exception('Unable to write data to an asynchronous API call.');
+        }
+    }
+
+    public function wait()
+    {
+        while (! feof($this->_socket)) {
+            $this->_soapResult .= fread($this->_socket, 8192);
+        }
+        
+        list ($headers, $data) = explode("\r\n\r\n", $this->_soapResult);
+        return $this->rst($this->_soapClient->handleAsyncResult($this->_functionName, $data));
+    }
+
+    /**
+     * 格式化返回结果
+     *
+     * @param string $rst            
+     * @return array
+     */
+    private function rst($rst)
+    {
+        return isset($rst['result']) ? $rst['result'] : array(
+            'unset result async'
+        );
+    }
+
+    public function __destruct()
+    {
+        if ($this->_socket != null) {
+            fclose($this->_socket);
+        }
+    }
+}
+
+/**
+ * 使用静态方法保证变量的全局存储
+ *
+ * @author Young
+ *        
+ */
+class SoapClientSocketsRegistry extends ArrayObject
+{
+
+    private static $_registryClassName = 'SoapClientSocketsRegistry';
+
+    public static $_registry = null;
+
+    public static function getInstance()
+    {
+        if (self::$_registry === null) {
+            self::init();
+        }
+        
+        return self::$_registry;
+    }
+
+    public static function setInstance(SoapClientSocketsRegistry $registry)
+    {
+        if (self::$_registry !== null) {
+            throw new Exception('Registry is already initialized');
+        }
+        
+        self::setClassName(get_class($registry));
+        self::$_registry = $registry;
+    }
+
+    protected static function init()
+    {
+        self::setInstance(new self::$_registryClassName());
+    }
+
+    public static function isRegistered($index)
+    {
+        if (self::$_registry === null) {
+            return false;
+        }
+        return self::$_registry->offsetExists($index);
+    }
+
+    public static function setClassName($registryClassName = 'SoapClientSocketsRegistry')
+    {
+        if (self::$_registry !== null) {
+            throw new Exception('Registry is already initialized');
+        }
+        
+        if (! is_string($registryClassName)) {
+            throw new Exception("Argument is not a class name");
+        }
+        
+        self::$_registryClassName = $registryClassName;
+    }
+
+    public static function _unsetInstance()
+    {
+        self::$_registry = null;
+    }
+
+    public static function get($index)
+    {
+        $instance = self::getInstance();
+        
+        if (! $instance->offsetExists($index)) {
+            throw new Exception("No entry is registered for key '$index'");
+        }
+        
+        return $instance->offsetGet($index);
+    }
+
+    public static function set($index, $value)
+    {
+        $instance = self::getInstance();
+        $instance->offsetSet($index, $value);
+    }
+
+    public function __construct($array = array(), $flags = parent::ARRAY_AS_PROPS)
+    {
+        parent::__construct($array, $flags);
+    }
+
+    public function offsetExists($index)
+    {
+        return array_key_exists($index, $this);
+    }
+}
 
 /**
  * iDatabase异常处理函数

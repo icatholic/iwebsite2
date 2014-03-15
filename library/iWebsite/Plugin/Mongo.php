@@ -47,6 +47,11 @@ abstract class iWebsite_Plugin_Mongo
         return $this->_db->getSchema();
     }
 
+    public function insertRef(&$datas)
+    {
+        return $this->_db->insert($datas);
+    }
+
     public function save(&$datas)
     {
         return $this->_db->save($datas);
