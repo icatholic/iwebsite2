@@ -124,7 +124,7 @@ class iDatabase
      *
      * @var string
      */
-    private $_local = false;
+    private $_local = true;
 
     /**
      *
