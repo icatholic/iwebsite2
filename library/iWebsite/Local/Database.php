@@ -22,6 +22,7 @@ defined('IDATABASE_LOCK') || define('IDATABASE_LOCK', 'idatabase_lock');
 defined('IDATABASE_QUICK') || define('IDATABASE_QUICK', 'idatabase_quick');
 defined('IDATABASE_DASHBOARD') || define('IDATABASE_DASHBOARD', 'idatabase_dashboard');
 defined('IDATABASE_FILES') || define('IDATABASE_FILES', 'idatabase_files');
+defined('DOMAIN') || define('DOMAIN', 'http://cloud.umaman.com');
 
 class iWebsite_Local_Database
 {
