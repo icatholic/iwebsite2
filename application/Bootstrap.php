@@ -117,20 +117,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     protected function _initMongoDB()
     {
         // 支持连接多个idb数据库
-        $cache = Zend_Registry::get('cache');
         $db = array();
-        $db['default'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
-        $db['default']->setCache($cache);
-        $db['default']->setLocal(false);
-        
-        $db['weixin'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
-        $db['weixin']->setCache($cache);
-        $db['default']->setLocal(false);
-        
-        $db['lottery'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
-        $db['lottery']->setCache($cache);
-        $db['default']->setLocal(false);
-        
+        $db['default'] = new iDatabase('531acaa81fd1bed80e000029', '123123123', '5329b0731fd1be9409000029');   
         Zend_Registry::set('db', $db);
     }
 
