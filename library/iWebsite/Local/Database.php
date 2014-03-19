@@ -34,13 +34,6 @@ class iWebsite_Local_Database
     private $_model = null;
 
     /**
-     * 连接MongoDB的配置文件类
-     *
-     * @var Config
-     */
-    private $_config = null;
-
-    /**
      * 获取访问密钥的MongoCollection实例
      *
      * @var MongoCollection
@@ -110,7 +103,6 @@ class iWebsite_Local_Database
      */
     public function __construct()
     {
-        $this->_config = $config;
         $this->_key = new iWebsite_Local_MongoCollection(IDATABASE_KEYS);
     }
 
@@ -122,19 +114,19 @@ class iWebsite_Local_Database
      * @param string $rand            
      * @param string $sign            
      * @param string $key_id            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return boolean
      */
     public function authenticate($project_id, $rand, $sign, $key_id = null)
     {
         if (strlen($rand) < 8) {
-            throw new \SoapFault(411, '随机字符串长度过短，为了安全起见至少8位');
+            throw new \Exception(411, '随机字符串长度过短，为了安全起见至少8位');
         }
         $this->_project_id = $project_id;
         $key_id = ! empty($key_id) ? $key_id : null;
         $keyInfo = $this->getKeysInfo($project_id, $key_id);
         if (md5($project_id . $rand . $keyInfo['key']) !== strtolower($sign)) {
-            throw new \SoapFault(401, '身份认证校验失败');
+            throw new \Exception(401, '身份认证校验失败');
         }
         return true;
     }
@@ -144,7 +136,7 @@ class iWebsite_Local_Database
      *
      * @param string $project_id            
      * @param string $key_id            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return array
      */
     private function getKeysInfo($project_id, $key_id)
@@ -164,7 +156,7 @@ class iWebsite_Local_Database
             'key' => true
         ));
         if ($rst === null) {
-            throw new \SoapFault(404, '授权密钥无效');
+            throw new \Exception(404, '授权密钥无效');
         }
         return $rst;
     }
@@ -173,7 +165,7 @@ class iWebsite_Local_Database
      * 设定集合名称，请在SOAP HEADER部分进行设定
      *
      * @param string $collectionAlias            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return bool
      */
     public function setCollection($collectionAlias)
@@ -186,7 +178,7 @@ class iWebsite_Local_Database
             'alias' => $collectionAlias
         ));
         if ($collectionInfo === null) {
-            throw new \SoapFault(404, '访问集合不存在');
+            throw new \Exception(404, '访问集合不存在');
         }
         
         $this->_collection_id = myMongoId($collectionInfo['_id']);
@@ -208,16 +200,16 @@ class iWebsite_Local_Database
     /**
      * 获取当前集合的文档结构
      *
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function getSchema()
     {
         if ($this->_collection_id == null)
-            throw new \SoapFault(500, '$_collection_id不存在');
+            throw new \Exception(500, '$_collection_id不存在');
         
         if ($this->_project_id == null)
-            throw new \SoapFault(500, '$_project_id不存在');
+            throw new \Exception(500, '$_project_id不存在');
         
         $this->_structure = new iWebsite_Local_MongoCollection(IDATABASE_STRUCTURES);
         $cursor = $this->_structure->find(array(
@@ -225,7 +217,7 @@ class iWebsite_Local_Database
         ));
         
         if ($cursor->count() == 0)
-            throw new \SoapFault(500, '集合未定义文档结构');
+            throw new \Exception(500, '集合未定义文档结构');
         
         while ($cursor->hasNext()) {
             $row = $cursor->getNext();
@@ -361,7 +353,7 @@ class iWebsite_Local_Database
      * 保存数据，$datas中如果包含_id属性，那么将更新_id的数据，否则创建新的数据
      *
      * @param string $datas            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function save($datas)
@@ -373,7 +365,7 @@ class iWebsite_Local_Database
                 'datas' => $datas,
                 'rst' => $rst
             ));
-        } catch (\SoapFault $e) {
+        } catch (\Exception $e) {
             return $this->result(exceptionMsg($e));
         }
     }
@@ -382,7 +374,7 @@ class iWebsite_Local_Database
      * 插入数据
      *
      * @param string $datas            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function insert($datas)
@@ -396,7 +388,7 @@ class iWebsite_Local_Database
      * 批量插入
      *
      * @param string $a            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function batchInsert($a)
@@ -412,7 +404,7 @@ class iWebsite_Local_Database
      * @param string $criteria            
      * @param string $object            
      * @param string $options            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function update($criteria, $object, $options)
@@ -428,7 +420,7 @@ class iWebsite_Local_Database
      * 删除操作
      *
      * @param string $criteria            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function remove($criteria)
@@ -611,7 +603,7 @@ class iWebsite_Local_Database
      * 将字符串转化为数组
      *
      * @param string $string            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return array
      */
     private function toArray($string)
@@ -629,7 +621,7 @@ class iWebsite_Local_Database
             });
             return $rst;
         }
-        throw new \SoapFault(500, '参数格式错误:无法进行有效的反序列化');
+        throw new \Exception(500, '参数格式错误:无法进行有效的反序列化');
     }
 
     public function __destruct()

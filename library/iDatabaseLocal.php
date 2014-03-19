@@ -194,25 +194,32 @@ class iDatabase
      */
     private function connect()
     {
-        // 身份认证
-        $auth = array();
-        $auth['project_id'] = $this->_project_id;
-        $auth['rand'] = $this->_rand;
-        $auth['sign'] = $this->sign();
-        $auth['key_id'] = $this->_key_id;
-        $authenticate = new SoapHeader($this->_namespace, $this->_authenticate, new SoapVar($auth, SOAP_ENC_OBJECT), false);
-        
-        // 设定集合
-        $alias = array();
-        $alias['collectionAlias'] = $this->_collection_alias;
-        $setCollection = new SoapHeader($this->_namespace, $this->_set_collection, new SoapVar($alias, SOAP_ENC_OBJECT), false);
-        
-        $this->_client = $this->callSoap($this->_wsdl);
-        $this->_client->__setSoapHeaders(array(
-            $authenticate,
-            $setCollection
-        ));
-        return $this->_client;
+        if (! $this->_local) {
+            // 身份认证
+            $auth = array();
+            $auth['project_id'] = $this->_project_id;
+            $auth['rand'] = $this->_rand;
+            $auth['sign'] = $this->sign();
+            $auth['key_id'] = $this->_key_id;
+            $authenticate = new SoapHeader($this->_namespace, $this->_authenticate, new SoapVar($auth, SOAP_ENC_OBJECT), false);
+            
+            // 设定集合
+            $alias = array();
+            $alias['collectionAlias'] = $this->_collection_alias;
+            $setCollection = new SoapHeader($this->_namespace, $this->_set_collection, new SoapVar($alias, SOAP_ENC_OBJECT), false);
+            
+            $this->_client = $this->callSoap($this->_wsdl);
+            $this->_client->__setSoapHeaders(array(
+                $authenticate,
+                $setCollection
+            ));
+            return $this->_client;
+        } else {
+            $this->_client = new iWebsite_Local_Database();
+            $this->_client->authenticate($this->_project_id, $this->_rand, $this->sign());
+            $this->_client->setCollection($this->_collection_alias);
+            return $this->_client;
+        }
     }
 
     /**
@@ -222,12 +229,8 @@ class iDatabase
      */
     public function setCollection($alias)
     {
-        if (! $this->_local) {
-            $this->_collection_alias = $alias;
-            $this->connect();
-        } else {
-            $map = $this->getCollectionMap($project_id);
-        }
+        $this->_collection_alias = $alias;
+        $this->connect();
     }
 
     /**
@@ -238,51 +241,6 @@ class iDatabase
     private function sign()
     {
         return md5($this->_project_id . $this->_rand . $this->_password);
-    }
-
-    /**
-     * 通过项目编号或者各个集合的数据结构
-     *
-     * @param string $project_id            
-     */
-    public function getCollectionMapByProject($project_id)
-    {
-        try {
-            return $this->result($this->_client->count(serialize($query)));
-        } catch (SoapFault $e) {
-            $this->soapFaultMsg($e);
-            return false;
-        }
-    }
-
-    /**
-     * 设定cache对象
-     */
-    public function setCache($cache)
-    {
-        $this->_cache = $cache;
-    }
-
-    /**
-     * 获取映射关系
-     *
-     * @param string $project_id            
-     * @param string $expire            
-     */
-    private function getCollectionMap($project_id, $expire = 300)
-    {
-        $datas = false;
-        if ($this->_cache != null) {
-            $cacheKey = crc32(__FILE__ . $project_id);
-            $datas = $this->_cache->load($cacheKey);
-            if ($datas === false) {
-                $datas = $this->getCollectionMapByProject($project_id);
-                $this->_cache->save($datas, $cacheKey, array(), $expire);
-            }
-        } else {
-            $datas = $this->getCollectionMapByProject($project_id);
-        }
-        return $datas;
     }
 
     /**
