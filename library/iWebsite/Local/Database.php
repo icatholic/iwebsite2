@@ -609,6 +609,12 @@ class iWebsite_Local_Database
      */
     private function toArray($string)
     {
+        if (is_array($string)) {
+            $rst = array();
+        } else {
+            $rst = @unserialize(trim($string));
+        }
+        
         if ($rst !== false) {
             if (empty($rst)) {
                 return array();
