@@ -610,7 +610,7 @@ class iWebsite_Local_Database
     private function toArray($string)
     {
         if (is_array($string)) {
-            $rst = array();
+            return $string;
         } else {
             $rst = @unserialize(trim($string));
         }

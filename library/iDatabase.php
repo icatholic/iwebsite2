@@ -627,15 +627,19 @@ class iDatabase
      */
     private function result($rst)
     {
-        $unserialize = @unserialize($rst);
-        if ($unserialize === false) {
-            var_dump($rst);
-            throw new Exception("返回结果无法进行反序列化");
+        if (! $this->_local) {
+            $unserialize = @unserialize($rst);
+            if ($unserialize === false) {
+                var_dump($rst);
+                throw new Exception("返回结果无法进行反序列化");
+            }
+            
+            return array_key_exists('result', $unserialize) ? $unserialize['result'] : array(
+                'err' => $unserialize
+            );
+        } else {
+            return $rst;
         }
-        
-        return array_key_exists('result', $unserialize) ? $unserialize['result'] : array(
-            'err' => $unserialize
-        );
     }
 
     /**
