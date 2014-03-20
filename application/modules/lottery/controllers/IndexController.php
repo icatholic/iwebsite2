@@ -193,13 +193,8 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             echo $this->result("OK", convertToPureArray($exchangeInfo));
             return true;
         } catch (Exception $e) {
-<<<<<<< HEAD
-            var_dump($e);
-            exit($this->error(505, $e->getMessage()));
-=======
             $this->_record->record($activity_id, $identity_id, 505, $source);
             exit($this->error(505, $e->getFile() . $e->getLine() . $e->getMessage()));
->>>>>>> 38c886b318d95e04e18acb1321a89f3e24eeef4c
         }
     }
 
