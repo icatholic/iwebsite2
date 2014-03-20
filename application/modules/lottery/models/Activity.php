@@ -34,8 +34,8 @@ class Lottery_Model_Activity extends iWebsite_Plugin_Mongo
         $activityInfo = $this->getActivityInfo($activity_id);
         if (! empty($activityInfo['is_actived'])) {
             $now = time();
-            if (! empty($activity_id['start_time']) && ! empty($activity_id['end_time'])) {
-                if ($activity_id['start_time']->sec >= $now && $activity_id['end_time']->sec <= $now) {
+            if (! empty($activityInfo['start_time']) && ! empty($activityInfo['end_time'])) {
+                if ($activityInfo['start_time']->sec <= $now && $now <= $activityInfo['end_time']->sec) {
                     return true;
                 } else {
                     return false;

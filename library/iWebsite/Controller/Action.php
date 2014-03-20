@@ -25,7 +25,7 @@ abstract class iWebsite_Controller_Action extends Zend_Controller_Action
 
     /**
      * 获取网站配置文件数组
-     *
+     * 
      * @return mixed
      */
     public function getConfig()

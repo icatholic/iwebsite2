@@ -17,12 +17,12 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
     /**
      * 检测当前信息是否存在
      */
-    public function checkExchangeBy($indentity_id, $exchange_id)
+    public function checkExchangeBy($identity_id, $exchange_id)
     {
         $exchange_id = $exchange_id instanceof MongoId ? $exchange_id : myMongoId($exchange_id);
         return $this->findOne(array(
             '_id' => $exchange_id,
-            'indentity_id' => $indentity_id
+            'identity_id' => $identity_id
         ));
     }
 
@@ -50,9 +50,11 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
      */
     public function getExchangeInvalidById($identity_id)
     {
-        return $this->_exchanges->findOne(array(
+        return $this->findOne(array(
             'identity_id' => $identity_id,
-            'is_valid' => false
+            'is_valid' => array(
+                '$ne' => true
+            )
         ));
     }
 
@@ -68,7 +70,7 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
             {
                 $startTime = $startTime == null ? new MongoDate(0) : $startTime;
                 $endTime = $endTime == null ? new MongoDate() : $endTime;
-                if ($exchange['__CREATE_TIME__'] >= $startTime && $exchange['__CREATE_TIME__'] <= $endTime) {
+                if ($exchange['__CREATE_TIME__']->sec >= $startTime->sec && $exchange['__CREATE_TIME__']->sec <= $endTime->sec) {
                     return true;
                 }
                 return false;
@@ -76,9 +78,13 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
             if (! empty($exchanges)) {
                 foreach ($exchanges as $key => $exchange) {
                     if (! empty($exchange['prize_id'])) {
-                        $rst[$exchange['prize_id']] += 1;
+                        if(empty($rst[$exchange['prize_id']]))
+                            $rst[$exchange['prize_id']] = 1;
+                        else
+                            $rst[$exchange['prize_id']] += 1;
                     }
                 }
+                
                 $rst['all'] = count($exchanges);
                 return $rst;
             }
@@ -159,17 +165,21 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
             'source' => $source
         ));
     }
-    
+
     /**
      * 更新兑换信息
-     * @param string $exchange_id
-     * @param array $info
+     *
+     * @param string $exchange_id            
+     * @param array $info            
      */
-    public function updateExchangeInfo($exchange_id,$info) {
+    public function updateExchangeInfo($exchange_id, $info)
+    {
         $exchange_id = $exchange_id instanceof MongoId ? $exchange_id : myMongoId($exchange_id);
         return $this->update(array(
             '_id' => $exchange_id
-        ), array('$set'=>$info));
+        ), array(
+            '$set' => $info
+        ));
     }
 
     /**
@@ -185,7 +195,6 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
         ));
     }
 
-    
     /**
      * 析构函数
      */

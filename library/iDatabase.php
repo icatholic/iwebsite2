@@ -8,7 +8,8 @@ class iDatabase
      *
      * @var string
      */
-    private $_wsdl = 'http://cloud.umaman.com/service/database/index?wsdl';
+    //private $_wsdl = 'http://cloud.umaman.com/service/database/index?wsdl';
+    private $_wsdl = 'http://localhost/service/database/index?wsdl';
 
     /**
      * 是否每次加载WSDL 默认为false
@@ -22,7 +23,8 @@ class iDatabase
      *
      * @var string
      */
-    private $_namespace = 'http://cloud.umaman.com/service/database/index';
+    //private $_namespace = 'http://cloud.umaman.com/service/database/index';
+    private $_namespace = 'http://localhost/service/database/index';
 
     /**
      * 传统采用SOAP上传文件，如果文件过大，解析xml会出现问题
@@ -109,12 +111,20 @@ class iDatabase
      * @var string
      */
     private $_error;
-    
+
     /**
      * 启用缓存对象
+     *
      * @var string
      */
-    private $_cache;
+    private $_cache = null;
+
+    /**
+     * 开启直接连接mongodb的模式
+     *
+     * @var string
+     */
+    private $_local = false;
 
     /**
      *
@@ -139,6 +149,16 @@ class iDatabase
     public function setDebug($debug = false)
     {
         $this->_debug = is_bool($debug) ? $debug : false;
+    }
+
+    /**
+     * 开启直连MongoDB模式
+     *
+     * @param string $local            
+     */
+    public function setLocal($local = false)
+    {
+        $this->_local = is_bool($local) ? $local : false;
     }
 
     /**
@@ -176,25 +196,32 @@ class iDatabase
      */
     private function connect()
     {
-        // 身份认证
-        $auth = array();
-        $auth['project_id'] = $this->_project_id;
-        $auth['rand'] = $this->_rand;
-        $auth['sign'] = $this->sign();
-        $auth['key_id'] = $this->_key_id;
-        $authenticate = new SoapHeader($this->_namespace, $this->_authenticate, new SoapVar($auth, SOAP_ENC_OBJECT), false);
-        
-        // 设定集合
-        $alias = array();
-        $alias['collectionAlias'] = $this->_collection_alias;
-        $setCollection = new SoapHeader($this->_namespace, $this->_set_collection, new SoapVar($alias, SOAP_ENC_OBJECT), false);
-        
-        $this->_client = $this->callSoap($this->_wsdl);
-        $this->_client->__setSoapHeaders(array(
-            $authenticate,
-            $setCollection
-        ));
-        return $this->_client;
+        if (! $this->_local) {
+            // 身份认证
+            $auth = array();
+            $auth['project_id'] = $this->_project_id;
+            $auth['rand'] = $this->_rand;
+            $auth['sign'] = $this->sign();
+            $auth['key_id'] = $this->_key_id;
+            $authenticate = new SoapHeader($this->_namespace, $this->_authenticate, new SoapVar($auth, SOAP_ENC_OBJECT), false);
+            
+            // 设定集合
+            $alias = array();
+            $alias['collectionAlias'] = $this->_collection_alias;
+            $setCollection = new SoapHeader($this->_namespace, $this->_set_collection, new SoapVar($alias, SOAP_ENC_OBJECT), false);
+            
+            $this->_client = $this->callSoap($this->_wsdl);
+            $this->_client->__setSoapHeaders(array(
+                $authenticate,
+                $setCollection
+            ));
+            return $this->_client;
+        } else {
+            $this->_client = new iWebsite_Local_Database();
+            $this->_client->authenticate($this->_project_id, $this->_rand, $this->sign());
+            $this->_client->setCollection($this->_collection_alias);
+            return $this->_client;
+        }
     }
 
     /**
@@ -227,7 +254,7 @@ class iDatabase
     public function count($query)
     {
         try {
-            return $this->result($this->_client->count(serialize($query)));
+            return $this->result($this->_client->count($this->serialize($query)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -244,7 +271,7 @@ class iDatabase
     public function distinct($key, array $query)
     {
         try {
-            return $this->result($this->_client->distinct($key, serialize($query)));
+            return $this->result($this->_client->distinct($key, $this->serialize($query)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -264,7 +291,7 @@ class iDatabase
     public function find(array $query, array $sort = null, $skip = 0, $limit = 10, array $fields = array())
     {
         try {
-            return $this->result($this->_client->find(serialize($query), serialize($sort), $skip, $limit, serialize($fields)));
+            return $this->result($this->_client->find($this->serialize($query), $this->serialize($sort), $skip, $limit, $this->serialize($fields)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -280,7 +307,7 @@ class iDatabase
     public function findOne(array $query)
     {
         try {
-            return $this->result($this->_client->findOne(serialize($query)));
+            return $this->result($this->_client->findOne($this->serialize($query)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -298,7 +325,7 @@ class iDatabase
     public function findAll(array $query, array $sort = array('_id'=>-1), array $fields = array())
     {
         try {
-            return $this->result($this->_client->findAll(serialize($query), serialize($sort), serialize($fields)));
+            return $this->result($this->_client->findAll($this->serialize($query), $this->serialize($sort), $this->serialize($fields)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -314,7 +341,7 @@ class iDatabase
     public function findAndModify(array $options)
     {
         try {
-            return $this->result($this->_client->findAndModify(serialize($options)));
+            return $this->result($this->_client->findAndModify($this->serialize($options)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -330,7 +357,7 @@ class iDatabase
     public function remove(array $query)
     {
         try {
-            return $this->result($this->_client->remove(serialize($query)));
+            return $this->result($this->_client->remove($this->serialize($query)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -346,24 +373,24 @@ class iDatabase
     public function insert(array $datas)
     {
         try {
-            $datas = $this->result($this->_client->insert(serialize($datas)));
+            $datas = $this->result($this->_client->insert($this->serialize($datas)));
             return $datas;
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
         }
     }
-    
+
     /**
      * 执行insert操作
      *
-     * @param array $datas
+     * @param array $datas            
      * @return array boolean
      */
     public function insertRef(array &$datas)
     {
         try {
-            $datas = $this->result($this->_client->insert(serialize($datas)));
+            $datas = $this->result($this->_client->insert($this->serialize($datas)));
             return $datas;
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
@@ -380,7 +407,7 @@ class iDatabase
     public function batchInsert(array $datas)
     {
         try {
-            return $this->result($this->_client->batchInsert(serialize($datas)));
+            return $this->result($this->_client->batchInsert($this->serialize($datas)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -398,7 +425,7 @@ class iDatabase
     public function update(array $criteria, array $object, array $options = array())
     {
         try {
-            return $this->result($this->_client->update(serialize($criteria), serialize($object), serialize($options)));
+            return $this->result($this->_client->update($this->serialize($criteria), $this->serialize($object), $this->serialize($options)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -414,7 +441,7 @@ class iDatabase
     public function save(&$datas)
     {
         try {
-            $result = $this->result($this->_client->save(serialize($datas)));
+            $result = $this->result($this->_client->save($this->serialize($datas)));
             $datas = $result['datas'];
             return $result['rst'];
         } catch (SoapFault $e) {
@@ -440,7 +467,7 @@ class iDatabase
             if (empty($ops3)) {
                 $ops3 = array();
             }
-            return $this->result($this->_client->aggregate(serialize($ops1), serialize($ops2), serialize($ops3)));
+            return $this->result($this->_client->aggregate($this->serialize($ops1), $this->serialize($ops2), $this->serialize($ops3)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -457,7 +484,7 @@ class iDatabase
     public function ensureIndex($keys, $options)
     {
         try {
-            return $this->result($this->_client->ensureIndex(serialize($keys), serialize($options)));
+            return $this->result($this->_client->ensureIndex($this->serialize($keys), $this->serialize($options)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -473,7 +500,7 @@ class iDatabase
     public function deleteIndex($keys)
     {
         try {
-            return $this->result($this->_client->deleteIndex(serialize($keys)));
+            return $this->result($this->_client->deleteIndex($this->serialize($keys)));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -556,7 +583,7 @@ class iDatabase
     {
         $last = is_bool($last) ? $last : true;
         try {
-            return $this->result($this->_client->pipe(serialize($ops), $last));
+            return $this->result($this->_client->pipe($this->serialize($ops), $last));
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
@@ -575,6 +602,20 @@ class iDatabase
         } catch (SoapFault $e) {
             $this->soapFaultMsg($e);
             return false;
+        }
+    }
+
+    /**
+     * 序列化 
+     * @param array $arr            
+     * @return mixed
+     */
+    public function serialize($arr)
+    {
+        if (! $this->_local) {
+            return serialize($arr);
+        } else {
+            return $arr;
         }
     }
 
@@ -618,7 +659,6 @@ class iDatabase
         }
     }
 }
-
 
 /**
  * iDatabase异常处理函数

@@ -4,22 +4,49 @@
  * @author yangming
  * 
  */
+defined('IDATABASE_INDEXES') || define('IDATABASE_INDEXES', 'idatabase_indexes');
+defined('IDATABASE_COLLECTIONS') || define('IDATABASE_COLLECTIONS', 'idatabase_collections');
+defined('IDATABASE_STRUCTURES') || define('IDATABASE_STRUCTURES', 'idatabase_structures');
+defined('IDATABASE_PROJECTS') || define('IDATABASE_PROJECTS', 'idatabase_projects');
+defined('IDATABASE_PLUGINS') || define('IDATABASE_PLUGINS', 'idatabase_plugins');
+defined('IDATABASE_PLUGINS_COLLECTIONS') || define('IDATABASE_PLUGINS_COLLECTIONS', 'idatabase_plugins_collections');
+defined('IDATABASE_PLUGINS_STRUCTURES') || define('IDATABASE_PLUGINS_STRUCTURES', 'idatabase_plugins_structures');
+defined('IDATABASE_PROJECT_PLUGINS') || define('IDATABASE_PROJECT_PLUGINS', 'idatabase_project_plugins');
+defined('IDATABASE_VIEWS') || define('IDATABASE_VIEWS', 'idatabase_views');
+defined('IDATABASE_STATISTIC') || define('IDATABASE_STATISTIC', 'idatabase_statistic');
+defined('IDATABASE_PROMISSION') || define('IDATABASE_PROMISSION', 'idatabase_promission');
+defined('IDATABASE_KEYS') || define('IDATABASE_KEYS', 'idatabase_keys');
+defined('IDATABASE_COLLECTION_ORDERBY') || define('IDATABASE_COLLECTION_ORDERBY', 'idatabase_collection_orderby');
+defined('IDATABASE_MAPPING') || define('IDATABASE_MAPPING', 'idatabase_mapping');
+defined('IDATABASE_LOCK') || define('IDATABASE_LOCK', 'idatabase_lock');
+defined('IDATABASE_QUICK') || define('IDATABASE_QUICK', 'idatabase_quick');
+defined('IDATABASE_DASHBOARD') || define('IDATABASE_DASHBOARD', 'idatabase_dashboard');
+defined('IDATABASE_FILES') || define('IDATABASE_FILES', 'idatabase_files');
+defined('DOMAIN') || define('DOMAIN', 'http://cloud.umaman.com');
+
 class iWebsite_Local_Database
 {
 
     /**
-     * 操作集合的MongoCollection实例
+     * 操作集合的iWebsite_Local_MongoCollection实例
      *
-     * @var MongoCollection
+     * @var iWebsite_Local_MongoCollection
      */
     private $_model = null;
 
     /**
-     * 连接MongoDB的配置文件类
+     * 获取访问密钥的MongoCollection实例
      *
-     * @var Config
+     * @var MongoCollection
      */
-    private $_config = null;
+    private $_key = null;
+
+    /**
+     * 获取物理集合的映射关系
+     *
+     * @var MongoCollection
+     */
+    private $_mapping = null;
 
     /**
      * 获取idb集合信息
@@ -77,7 +104,141 @@ class iWebsite_Local_Database
      */
     public function __construct()
     {
+        $this->_key = new iWebsite_Local_MongoCollection(IDATABASE_KEYS);
+    }
 
+    /**
+     * 身份认证，请在SOAP HEADER部分请求该函数进行身份校验
+     * 签名算法:md5($project_id.$rand.$sign) 请转化为长度为32位的16进制字符串
+     *
+     * @param string $project_id            
+     * @param string $rand            
+     * @param string $sign            
+     * @param string $key_id            
+     * @throws \Exception
+     * @return boolean
+     */
+    public function authenticate($project_id, $rand, $sign, $key_id = null)
+    {
+        if (strlen($rand) < 8) {
+            throw new \Exception(411, '随机字符串长度过短，为了安全起见至少8位');
+        }
+        $this->_project_id = $project_id;
+        $key_id = ! empty($key_id) ? $key_id : null;
+        $keyInfo = $this->getKeysInfo($project_id, $key_id);
+        if (md5($project_id . $rand . $keyInfo['key']) !== strtolower($sign)) {
+            throw new \Exception(401, '身份认证校验失败');
+        }
+        return true;
+    }
+
+    /**
+     * 获取密钥信息
+     *
+     * @param string $project_id            
+     * @param string $key_id            
+     * @throws \Exception
+     * @return array
+     */
+    private function getKeysInfo($project_id, $key_id)
+    {
+        $query = array();
+        $query['project_id'] = $project_id;
+        if ($key_id !== null) {
+            $query['_id'] = myMongoId($key_id);
+        } else {
+            $query['default'] = true;
+        }
+        $query['expire'] = array(
+            '$gte' => new \MongoDate()
+        );
+        $query['active'] = true;
+        $rst = $this->_key->findOne($query, array(
+            'key' => true
+        ));
+        if ($rst === null) {
+            throw new \Exception(404, '授权密钥无效');
+        }
+        return $rst;
+    }
+
+    /**
+     * 设定集合名称，请在SOAP HEADER部分进行设定
+     *
+     * @param string $collectionAlias            
+     * @throws \Exception
+     * @return bool
+     */
+    public function setCollection($collectionAlias)
+    {
+        $this->_collection = new iWebsite_Local_MongoCollection(IDATABASE_COLLECTIONS);
+        $this->_mapping = new iWebsite_Local_MongoCollection(IDATABASE_MAPPING);
+        
+        $collectionInfo = $this->_collection->findOne(array(
+            'project_id' => $this->_project_id,
+            'alias' => $collectionAlias
+        ));
+        if ($collectionInfo === null) {
+            throw new \Exception(404, '访问集合不存在');
+        }
+        
+        $this->_collection_id = myMongoId($collectionInfo['_id']);
+        $mapping = $this->_mapping->findOne(array(
+            'project_id' => $this->_project_id,
+            'collection_id' => $this->_collection_id,
+            'active' => true
+        ));
+        if ($mapping === null) {
+            $this->_model = new iWebsite_Local_MongoCollection(iCollectionName($this->_collection_id));
+        } else {
+            $this->_model = new iWebsite_Local_MongoCollection($mapping['collection'], $mapping['database'], $mapping['cluster']);
+        }
+        
+        $this->getSchema();
+        return true;
+    }
+
+    /**
+     * 获取当前集合的文档结构
+     *
+     * @throws \Exception
+     * @return string
+     */
+    public function getSchema()
+    {
+        if ($this->_collection_id == null)
+            throw new \Exception(500, '$_collection_id不存在');
+        
+        if ($this->_project_id == null)
+            throw new \Exception(500, '$_project_id不存在');
+        
+        $this->_structure = new iWebsite_Local_MongoCollection(IDATABASE_STRUCTURES);
+        $cursor = $this->_structure->find(array(
+            'collection_id' => $this->_collection_id
+        ));
+        
+        if ($cursor->count() == 0)
+            throw new \Exception(500, '集合未定义文档结构');
+        
+        while ($cursor->hasNext()) {
+            $row = $cursor->getNext();
+            if (strpos($row['field'], '.') !== false) {
+                $exp = explode('.', $row['field']);
+                $subField = end($exp);
+                $this->_schema[$subField] = $row;
+                if ($row['type'] == 'filefield') {
+                    $this->_fileField[$subField] = $row;
+                }
+            }
+            $this->_schema[$row['field']] = $row;
+            $this->_fieldAndType[$row['field']] = $row['type'];
+            if ($row['type'] == 'filefield') {
+                $this->_fileField[$row['field']] = $row;
+            }
+        }
+        
+        $cursor->rewind();
+        return $this->result(iterator_to_array($cursor, false));
     }
 
     /**
@@ -111,7 +272,7 @@ class iWebsite_Local_Database
         $limit = intval($limit);
         $limit = $limit < 0 ? 10 : $limit;
         $limit = $limit > 1000 ? 1000 : $limit;
-        if (!empty($fields)) {
+        if (! empty($fields)) {
             $fields = $this->toArray($fields);
         } else {
             $fields = array();
@@ -142,7 +303,7 @@ class iWebsite_Local_Database
     public function findOne($query, $fields)
     {
         $query = $this->toArray($query);
-        if (!empty($fields)) {
+        if (! empty($fields)) {
             $fields = $this->toArray($fields);
         } else {
             $fields = array();
@@ -193,7 +354,7 @@ class iWebsite_Local_Database
      * 保存数据，$datas中如果包含_id属性，那么将更新_id的数据，否则创建新的数据
      *
      * @param string $datas            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function save($datas)
@@ -205,7 +366,7 @@ class iWebsite_Local_Database
                 'datas' => $datas,
                 'rst' => $rst
             ));
-        } catch (\SoapFault $e) {
+        } catch (\Exception $e) {
             return $this->result(exceptionMsg($e));
         }
     }
@@ -214,7 +375,7 @@ class iWebsite_Local_Database
      * 插入数据
      *
      * @param string $datas            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function insert($datas)
@@ -228,7 +389,7 @@ class iWebsite_Local_Database
      * 批量插入
      *
      * @param string $a            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function batchInsert($a)
@@ -242,9 +403,9 @@ class iWebsite_Local_Database
      * 更新操作
      *
      * @param string $criteria            
-     * @param string $object  
-     * @param string $options           
-     * @throws \SoapFault
+     * @param string $object            
+     * @param string $options            
+     * @throws \Exception
      * @return string
      */
     public function update($criteria, $object, $options)
@@ -260,7 +421,7 @@ class iWebsite_Local_Database
      * 删除操作
      *
      * @param string $criteria            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return string
      */
     public function remove($criteria)
@@ -290,13 +451,13 @@ class iWebsite_Local_Database
      */
     public function ensureIndex($keys, $options)
     {
-        if (!empty($keys)) {
+        if (! empty($keys)) {
             $keys = $this->toArray($keys);
         } else {
             $keys = trim($keys);
         }
         
-        if (!empty($options)) {
+        if (! empty($options)) {
             $options = $this->toArray($options);
         } else {
             $options = array(
@@ -443,11 +604,17 @@ class iWebsite_Local_Database
      * 将字符串转化为数组
      *
      * @param string $string            
-     * @throws \SoapFault
+     * @throws \Exception
      * @return array
      */
     private function toArray($string)
     {
+        if (is_array($string)) {
+            $rst = array();
+        } else {
+            $rst = @unserialize(trim($string));
+        }
+        
         if ($rst !== false) {
             if (empty($rst)) {
                 return array();
@@ -461,7 +628,7 @@ class iWebsite_Local_Database
             });
             return $rst;
         }
-        throw new \SoapFault(500, '参数格式错误:无法进行有效的反序列化');
+        throw new \Exception(500, '参数格式错误:无法进行有效的反序列化');
     }
 
     public function __destruct()

@@ -27,9 +27,9 @@ defined('DB_MAPREDUCE') || define('DB_MAPREDUCE', 'mapreduce');
 defined('DB_LOGS') || define('DB_LOGS', 'logs');
 defined('GRIDFS_PREFIX') || define('GRIDFS_PREFIX', 'icc');
 
-defined('MONGOS_DEFAULT_01') || define('MONGOS_DEFAULT_01', '10.0.0.11:27017');
-defined('MONGOS_DEFAULT_02') || define('MONGOS_DEFAULT_02', '10.0.0.12:27017');
-defined('MONGOS_DEFAULT_03') || define('MONGOS_DEFAULT_03', '10.0.0.13:27017');
+defined('MONGOS_DEFAULT_01') || define('MONGOS_DEFAULT_01', '10.0.0.30:57017');
+defined('MONGOS_DEFAULT_02') || define('MONGOS_DEFAULT_02', '10.0.0.31:57017');
+defined('MONGOS_DEFAULT_03') || define('MONGOS_DEFAULT_03', '10.0.0.32:57017');
 
 defined('MONGOS_LOCAL') || define('MONGOS_LOCAL', '127.0.0.1:27017');
 

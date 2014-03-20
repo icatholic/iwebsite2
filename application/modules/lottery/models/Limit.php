@@ -56,19 +56,22 @@ class Lottery_Model_Limit extends iWebsite_Plugin_Mongo
         $limits = $this->getLimits($activity_id);
         if (! empty($limits)) {
             foreach ($limits as $limit) {
-                $now = new MongoDate();
-                if ($limit['start_time'] > $now && $now < $limit['end_time']) {
+                $now = time();
+                if ($limit['start_time']->sec < $now && $now < $limit['end_time']->sec) {
                     $exchanges = $modelExchange->filterExchangeByGroup($identity_id, $limit['start_time'], $limit['end_time']);
                     if (! empty($exchanges)) {
-                        if (empty($limit['prize_id']) && $prize_id = 'all') {
+                        if (empty($limit['prize_id']) && $prize_id == 'all') {
                             if ($exchanges['all'] >= $limit['limit']) {
                                 return false;
                             }
-                        }
-                        
-                        if (isset($exchanges[$limit['prize_id']]) && ! empty($limit['prize_id']) && $prize_id == $limit['prize_id']) {
-                            if ($exchanges[$limit['prize_id']] >= $limit['limit']) {
-                                return false;
+                        } else {
+                            if (isset($exchanges[$limit['prize_id']]) && ! empty($limit['prize_id']) && $prize_id == $limit['prize_id']) {
+                                if ($exchanges[$limit['prize_id']] >= $limit['limit']) {
+                                    fb($exchanges, 'LOG');
+                                    fb($exchanges[$limit['prize_id']], 'LOG');
+                                    fb($limit['limit'], 'LOG');
+                                    return false;
+                                }
                             }
                         }
                     }

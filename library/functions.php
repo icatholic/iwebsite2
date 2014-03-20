@@ -5,7 +5,7 @@
  *
  * @param string $dir
  */
-function forceDirectory ($dir)
+function forceDirectory($dir)
 {
     return is_dir($dir) or (forceDirectory(dirname($dir)) and mkdir($dir, 0777));
 }
@@ -15,7 +15,7 @@ function forceDirectory ($dir)
  *
  * @param string $info            
  */
-function logError ($info)
+function logError($info)
 {
     if (is_string($info))
         error_log($info);
@@ -28,14 +28,13 @@ function logError ($info)
  *
  * @param mixed $var            
  */
-function debugVar ($var)
+function debugVar()
 {
     ob_start();
-    var_dump($var);
+    print_r(func_get_args());
     $info = ob_get_contents();
     ob_get_clean();
-    logError($info);
-    return true;
+    return $info;
 }
 
 /**
@@ -47,10 +46,9 @@ function debugVar ($var)
  * @return bool true/false
  *        
  */
-function isValidEmail ($email, $getmxrr = 0)
+function isValidEmail($email, $getmxrr = 0)
 {
-    if ((strpos($email, '..') !== false) or
-             (! preg_match('/^(.+)@([^@]+)$/', $email, $matches))) {
+    if ((strpos($email, '..') !== false) or (! preg_match('/^(.+)@([^@]+)$/', $email, $matches))) {
         return false;
     }
     $_localPart = $matches[1];
@@ -59,8 +57,7 @@ function isValidEmail ($email, $getmxrr = 0)
         return false;
     }
     $atext = 'a-zA-Z0-9\x21\x23\x24\x25\x26\x27\x2a\x2b\x2d\x2f\x3d\x3f\x5e\x5f\x60\x7b\x7c\x7d\x7e';
-    if (! preg_match('/^[' . $atext . ']+(\x2e+[' . $atext . ']+)*$/', 
-            $_localPart)) {
+    if (! preg_match('/^[' . $atext . ']+(\x2e+[' . $atext . ']+)*$/', $_localPart)) {
         return false;
     }
     if ($getmxrr == 1) {
@@ -79,7 +76,7 @@ function isValidEmail ($email, $getmxrr = 0)
  * @param string $mobile            
  * @return bool true/false
  */
-function isValidMobile ($mobile)
+function isValidMobile($mobile)
 {
     if (preg_match("/^1[3,4,5,8]{1}[0-9]{9}$/", $mobile))
         return true;
@@ -91,7 +88,7 @@ function isValidMobile ($mobile)
  *
  * @return string
  */
-function createRandNumber10 ()
+function createRandNumber10()
 {
     return sprintf("%010d", abs(crc32(uniqid())));
 }
@@ -102,11 +99,10 @@ function createRandNumber10 ()
  * @param $ip string            
  * @return string
  */
-function convertIp ($ip)
+function convertIp($ip)
 {
     // IP数据文件路径
-    $dat_path = ROOT_PATH . DIRECTORY_SEPARATOR . 'datas' . DIRECTORY_SEPARATOR .
-             'qqwry.dat';
+    $dat_path = ROOT_PATH . DIRECTORY_SEPARATOR . 'datas' . DIRECTORY_SEPARATOR . 'qqwry.dat';
     // 检查IP地址
     if (! preg_match("/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/", $ip)) {
         return 'IP Address Error';
@@ -250,11 +246,11 @@ function convertIp ($ip)
  * @param string $name            
  * @param array $datas            
  */
-function arrayToCVS ($name, $datas)
+function arrayToCVS($name, $datas)
 {
     resetTimeMemLimit();
     $result = array_merge(array(
-            $datas['title']
+        $datas['title']
     ), $datas['result']);
     $tmpname = tempnam(sys_get_temp_dir(), 'export_cvs_');
     $fp = fopen($tmpname, 'w');
@@ -274,7 +270,7 @@ function arrayToCVS ($name, $datas)
 /**
  * 计算cell所在的位置
  */
-function excelTitle ($i)
+function excelTitle($i)
 {
     $str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $divisor = floor($i / 26);
@@ -298,7 +294,7 @@ function excelTitle ($i)
  * @return 直接浏览器输出excel表格 注意这个函数前不能有任何形式的输出
  *        
  */
-function arrayToExcel ($name, $datas)
+function arrayToExcel($name, $datas)
 {
     resetTimeMemLimit();
     include_once ("PHPExcel/PHPExcel.php");
@@ -317,8 +313,7 @@ function arrayToExcel ($name, $datas)
         $objPHPExcel->getActiveSheet()
             ->getColumnDimension(excelTitle($i))
             ->setAutoSize(true);
-        $objPHPExcel->getActiveSheet()->SetCellValue(excelTitle($i) . '1', 
-                $datas['title'][$i]);
+        $objPHPExcel->getActiveSheet()->SetCellValue(excelTitle($i) . '1', $datas['title'][$i]);
     }
     $i = 2;
     foreach ($datas['result'] as $data) {
@@ -340,10 +335,8 @@ function arrayToExcel ($name, $datas)
                     $objDrawing->setName($cellName);
                     $objDrawing->setDescription($cellDesc);
                     $objDrawing->setImageResource($image);
-                    $objDrawing->setRenderingFunction(
-                            PHPExcel_Worksheet_MemoryDrawing::RENDERING_JPEG);
-                    $objDrawing->setMimeType(
-                            PHPExcel_Worksheet_MemoryDrawing::MIMETYPE_DEFAULT);
+                    $objDrawing->setRenderingFunction(PHPExcel_Worksheet_MemoryDrawing::RENDERING_JPEG);
+                    $objDrawing->setMimeType(PHPExcel_Worksheet_MemoryDrawing::MIMETYPE_DEFAULT);
                     $objDrawing->setHeight($cellHeight);
                     $objDrawing->setCoordinates($coordinate); // 填充到某个单元格
                     $objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
@@ -351,9 +344,7 @@ function arrayToExcel ($name, $datas)
                         ->getRowDimension($i)
                         ->setRowHeight($cellHeight);
                 } else {
-                    $objPHPExcel->getActiveSheet()->setCellValueExplicit(
-                            $coordinate, $cellName, 
-                            PHPExcel_Cell_DataType::TYPE_STRING);
+                    $objPHPExcel->getActiveSheet()->setCellValueExplicit($coordinate, $cellName, PHPExcel_Cell_DataType::TYPE_STRING);
                 }
                 // 添加链接
                 $objPHPExcel->getActiveSheet()
@@ -366,21 +357,16 @@ function arrayToExcel ($name, $datas)
                     ->setTooltip($cellName . ':' . $cellDesc);
             } else 
                 if (is_array($cell)) {
-                    $objPHPExcel->getActiveSheet()->setCellValueExplicit(
-                            excelTitle($j) . $i, json_encode($cell), 
-                            PHPExcel_Cell_DataType::TYPE_STRING);
+                    $objPHPExcel->getActiveSheet()->setCellValueExplicit(excelTitle($j) . $i, json_encode($cell), PHPExcel_Cell_DataType::TYPE_STRING);
                 } else {
-                    $objPHPExcel->getActiveSheet()->setCellValueExplicit(
-                            excelTitle($j) . $i, $cell, 
-                            PHPExcel_Cell_DataType::TYPE_STRING);
+                    $objPHPExcel->getActiveSheet()->setCellValueExplicit(excelTitle($j) . $i, $cell, PHPExcel_Cell_DataType::TYPE_STRING);
                 }
             $j ++;
         }
         $i ++;
     }
     $objPHPExcel->getActiveSheet()->setTitle($name);
-    header(
-            'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment;filename="' . $name . '.xlsx"');
     header('Cache-Control: max-age=0');
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
@@ -393,7 +379,7 @@ function arrayToExcel ($name, $datas)
  * @param string $email            
  * @return mixed string|bool
  */
-function getEmailName ($email)
+function getEmailName($email)
 {
     if (isValidEmail($email, 0)) {
         $tmp = explode('@', $email);
@@ -412,7 +398,7 @@ function getEmailName ($email)
  * @param string $type
  *            默认是html邮件
  */
-function sendEmail ($to, $subject, $content, $type = 'html')
+function sendEmail($to, $subject, $content, $type = 'html')
 {
     try {
         $config = Zend_Registry::get('config');
@@ -425,8 +411,7 @@ function sendEmail ($to, $subject, $content, $type = 'html')
         $smtpConfig['port'] = $config['smtp']['port'];
         $smtpConfig['username'] = $config['smtp']['username'];
         $smtpConfig['password'] = $config['smtp']['password'];
-        $transport = new Zend_Mail_Transport_Smtp($config['smtp']['server'], 
-                $smtpConfig);
+        $transport = new Zend_Mail_Transport_Smtp($config['smtp']['server'], $smtpConfig);
         $mail = new Zend_Mail('UTF-8');
         $mail->setHeaderEncoding(Zend_Mime::ENCODING_BASE64);
         $mail->setFrom($config['smtp']['username'], $config['smtp']['username']);
@@ -458,7 +443,7 @@ function sendEmail ($to, $subject, $content, $type = 'html')
  *
  * @return int
  */
-function getIp ()
+function getIp()
 {
     if (getenv('HTTP_X_REAL_IP') != '')
         return getenv('HTTP_X_REAL_IP');
@@ -468,7 +453,7 @@ function getIp ()
 /**
  * 针对需要长时间执行的代码，放宽执行时间和内存的限制
  */
-function resetTimeMemLimit ()
+function resetTimeMemLimit()
 {
     set_time_limit(3600);
     ini_set('memory_limit', '2048M');
@@ -480,11 +465,11 @@ function resetTimeMemLimit ()
  * @param string $msg            
  * @return array
  */
-function soapError ($msg)
+function soapError($msg)
 {
     return array(
-            'error' => true,
-            'msg' => $msg
+        'error' => true,
+        'msg' => $msg
     );
 }
 
@@ -493,15 +478,15 @@ function soapError ($msg)
  *
  * @param string $wsdl            
  */
-function callSoap ($wsdl, $refresh = false)
+function callSoap($wsdl, $refresh = false)
 {
     try {
         ini_set('default_socket_timeout', '3600'); // 保持与SOAP服务器的连接状态
         $options = array(
-                'soap_version' => SOAP_1_2,
-                'exceptions' => true,
-                'trace' => true,
-                'connection_timeout' => 120
+            'soap_version' => SOAP_1_2,
+            'exceptions' => true,
+            'trace' => true,
+            'connection_timeout' => 120
         );
         if ($refresh == true) {
             $options['cache_wsdl'] = WSDL_CACHE_NONE;
@@ -527,7 +512,7 @@ function callSoap ($wsdl, $refresh = false)
  *            int outId 是否输出ID 还是url路径 默认为输出url路径
  * @return url
  */
-function dealUploadFileBySoap ($fileName, $filePath, $outId = 0)
+function dealUploadFileBySoap($fileName, $filePath, $outId = 0)
 {
     $config = Zend_Registry::get('config');
     if ($fileName == '')
@@ -537,13 +522,12 @@ function dealUploadFileBySoap ($fileName, $filePath, $outId = 0)
         $fileByte = base64_encode(file_get_contents($filePath));
         $explode = explode('.', $fileName);
         $ext = end($explode);
-        if (in_array(strtolower($ext), 
-                array(
-                        'jpg',
-                        'png',
-                        'gif',
-                        'jpeg'
-                ))) {
+        if (in_array(strtolower($ext), array(
+            'jpg',
+            'png',
+            'gif',
+            'jpeg'
+        ))) {
             $_id = $client->storeImage($fileName, $fileByte);
             if ($outId == 0)
                 return $config['uma']['server'] . '/soa/image/get/id/' . $_id;
@@ -563,7 +547,7 @@ function dealUploadFileBySoap ($fileName, $filePath, $outId = 0)
  *
  * @param array $arr            
  */
-function convertToPureArray ($arr)
+function convertToPureArray($arr)
 {
     if (! is_array($arr) || count($arr) == 0)
         return array();
@@ -572,11 +556,9 @@ function convertToPureArray ($arr)
         if (is_array($value)) {
             $newArr[$key] = convertToPureArray($value);
         } else {
-            if ($value instanceof MongoId || $value instanceof MongoInt64 ||
-                     $value instanceof MongoInt32) {
+            if ($value instanceof MongoId || $value instanceof MongoInt64 || $value instanceof MongoInt32) {
                 $value = $value->__toString();
-            } elseif ($value instanceof MongoDate ||
-                     $value instanceof MongoTimestamp) {
+            } elseif ($value instanceof MongoDate || $value instanceof MongoTimestamp) {
                 $value = date("Y-m-d H:i:s", $value->sec);
             }
             $newArr[$key] = $value;
@@ -590,7 +572,7 @@ function convertToPureArray ($arr)
  *
  * @param int $expireTime            
  */
-function setHeaderExpires ($expireTime = 31536000)
+function setHeaderExpires($expireTime = 31536000)
 {
     $expireTime = (int) $expireTime;
     if ($expireTime == 0)
@@ -608,7 +590,7 @@ function setHeaderExpires ($expireTime = 31536000)
  * @param string $string            
  * @return true/false
  */
-function isJson ($string)
+function isJson($string)
 {
     if (strpos($string, "{") !== false) {
         json_decode($string);
@@ -623,7 +605,7 @@ function isJson ($string)
  *
  * @return string
  */
-function cacheKey ()
+function cacheKey()
 {
     $args = func_get_args();
     return md5(serialize($args));
@@ -634,7 +616,7 @@ function cacheKey ()
  *
  * @param double $percent            
  */
-function getProbability ($percent)
+function getProbability($percent)
 {
     if (rand(0, pow(10, 6)) <= $percent * pow(10, 4)) {
         return true;
@@ -648,7 +630,7 @@ function getProbability ($percent)
  * @param string $file
  *            文件名
  */
-function rangeDownload ($file)
+function rangeDownload($file)
 {
     $fp = @fopen($file, 'rb');
     
@@ -659,14 +641,7 @@ function rangeDownload ($file)
                       // Now that we've gotten so far without errors we send
                       // the accept range header
     /*
-     * At the moment we only support single ranges. Multiple ranges requires
-     * some more work to ensure it works correctly and comply with the
-     * spesifications:
-     * http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html#sec19.2 Multirange
-     * support annouces itself with: header('Accept-Ranges: bytes'); Multirange
-     * content must be sent with multipart/byteranges mediatype, (mediatype =
-     * mimetype) as well as a boundry header to indicate the various chunks of
-     * data.
+     * At the moment we only support single ranges. Multiple ranges requires some more work to ensure it works correctly and comply with the spesifications: http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html#sec19.2 Multirange support annouces itself with: header('Accept-Ranges: bytes'); Multirange content must be sent with multipart/byteranges mediatype, (mediatype = mimetype) as well as a boundry header to indicate the various chunks of data.
      */
     header("Accept-Ranges: 0-$length");
     // header('Accept-Ranges: bytes');
@@ -703,8 +678,7 @@ function rangeDownload ($file)
             $c_end = (isset($range[1]) && is_numeric($range[1])) ? $range[1] : $size;
         }
         /*
-         * Check the range and make sure it's treated according to the specs.
-         * http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+         * Check the range and make sure it's treated according to the specs. http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
          */
         // End bytes can not be larger than $end.
         $c_end = ($c_end > $end) ? $end : $c_end;
@@ -750,18 +724,17 @@ function rangeDownload ($file)
  *
  * @param Exception $e            
  */
-function exceptionMsg ($e)
+function exceptionMsg($e)
 {
     if (is_subclass_of($e, 'Exception') || $e instanceof Exception)
-        return $e->getFile() . $e->getLine() . $e->getMessage() .
-                 $e->getTraceAsString();
+        return $e->getFile() . $e->getLine() . $e->getMessage() . $e->getTraceAsString();
     return false;
 }
 
 /**
  * 处理mime type
  */
-function dealMimeType ($mime)
+function dealMimeType($mime)
 {
     $mime = strtolower($mime);
     if (strpos($mime, 'image/jpg') !== false)
@@ -789,7 +762,7 @@ function dealMimeType ($mime)
  * @param array $params            
  * @return string
  */
-function doGet ($url, $params = array())
+function doGet($url, $params = array())
 {
     try {
         $url = trim($url);
@@ -802,10 +775,9 @@ function doGet ($url, $params = array())
         $client->setUri($url);
         $client->setParameterGet($params);
         $client->setEncType(Zend_Http_Client::ENC_URLENCODED);
-        $client->setConfig(
-                array(
-                        'maxredirects' => 5
-                ));
+        $client->setConfig(array(
+            'maxredirects' => 5
+        ));
         $response = $client->request('GET');
         return $response->getBody();
     } catch (Exception $e) {
@@ -821,7 +793,7 @@ function doGet ($url, $params = array())
  * @param array $params            
  * @return string
  */
-function doPost ($url, $params = array())
+function doPost($url, $params = array())
 {
     try {
         $url = trim($url);
@@ -834,10 +806,9 @@ function doPost ($url, $params = array())
         $client->setUri($url);
         $client->setParameterPost($params);
         $client->setEncType(Zend_Http_Client::ENC_URLENCODED);
-        $client->setConfig(
-                array(
-                        'maxredirects' => 5
-                ));
+        $client->setConfig(array(
+            'maxredirects' => 5
+        ));
         $response = $client->request('POST');
         return $response->getBody();
     } catch (Exception $e) {
@@ -854,7 +825,7 @@ function doPost ($url, $params = array())
  * @param array $post            
  * @return Zend_Http_Response false
  */
-function doRequest ($url, $get = array(), $post = array())
+function doRequest($url, $get = array(), $post = array())
 {
     try {
         $url = trim($url);
@@ -872,10 +843,9 @@ function doRequest ($url, $get = array(), $post = array())
             $client->setParameterPost($post);
         
         $client->setEncType(Zend_Http_Client::ENC_URLENCODED);
-        $client->setConfig(
-                array(
-                        'maxredirects' => 5
-                ));
+        $client->setConfig(array(
+            'maxredirects' => 5
+        ));
         if (! empty($post))
             $response = $client->request('POST');
         else
@@ -919,7 +889,7 @@ function doRequest ($url, $get = array(), $post = array())
  *         }
  *         }
  */
-function addrToGeo ($address, $city = '')
+function addrToGeo($address, $city = '')
 {
     try {
         $params = array();
@@ -947,7 +917,7 @@ function addrToGeo ($address, $city = '')
  *            是否为单个变量获取 直接返回变量的值 而不是数组
  * @return array
  */
-function getRequestDatas ($fields, $onlyOne = false)
+function getRequestDatas($fields, $onlyOne = false)
 {
     $datas = array();
     if (is_array($fields) && count($fields) > 0) {
@@ -1011,7 +981,7 @@ function getRequestDatas ($fields, $onlyOne = false)
  * @param string $dir            
  * @return number
  */
-function dirmtime ($dir)
+function dirmtime($dir)
 {
     $last_modified = 0;
     $files = glob($dir . '/*');
@@ -1033,7 +1003,7 @@ function dirmtime ($dir)
  */
 if (! function_exists("fastcgi_finish_request")) {
 
-    function fastcgi_finish_request ()
+    function fastcgi_finish_request()
     {}
 }
 
@@ -1043,7 +1013,7 @@ if (! function_exists("fastcgi_finish_request")) {
  * @param string $str            
  * @return Array
  */
-function scws ($str)
+function scws($str)
 {
     if (! function_exists('scws_open'))
         return false;
@@ -1076,7 +1046,7 @@ function scws ($str)
  *            这表示返回的词性必须在列表中，如果以~开头，则表示取反，词性必须不在列表中，缺省为NULL，返回全部词性，不过滤。
  * @return multitype:
  */
-function scwsTop ($str, $limit = 10, $attr = null)
+function scwsTop($str, $limit = 10, $attr = null)
 {
     if (! function_exists('scws_open'))
         return false;
@@ -1103,7 +1073,7 @@ function scwsTop ($str, $limit = 10, $attr = null)
  * @param int $year            
  * @return array
  */
-function getWeekRange ($week, $year)
+function getWeekRange($week, $year)
 {
     $timestamp = mktime(1, 0, 0, 1, 1, $year);
     $firstday = date("N", $timestamp);
@@ -1119,8 +1089,8 @@ function getWeekRange ($week, $year)
     $end = date("Y-m-d", $sunday);
     
     return array(
-            $start,
-            $end
+        $start,
+        $end
     );
 }
 
@@ -1129,7 +1099,7 @@ function getWeekRange ($week, $year)
  *
  * @param string $dir            
  */
-function requireDir ($dir)
+function requireDir($dir)
 {
     if (! is_dir($dir))
         return false;
@@ -1149,13 +1119,12 @@ function requireDir ($dir)
 /**
  * 获取脚本的运行时间信息
  */
-function getScriptExecuteInfo ()
+function getScriptExecuteInfo()
 {
     $rst = array();
     $rst['cpuTimeSec'] = 0.000000; // CPU计算时间
     $rst['scriptTimeSec'] = 0.000000; // 脚本运行时间
-    $rst['memoryPeakMb'] = (double) sprintf("%.6f", 
-            memory_get_peak_usage() / 1024 / 1024); // 内存使用峰值
+    $rst['memoryPeakMb'] = (double) sprintf("%.6f", memory_get_peak_usage() / 1024 / 1024); // 内存使用峰值
     
     $scriptTime = 0.000000;
     $cpuTime = 0.000000;
@@ -1166,8 +1135,7 @@ function getScriptExecuteInfo ()
         // 计算CPU的使用时间
     if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
         $systemInfo = getrusage();
-        $cpuTime = ($systemInfo["ru_utime.tv_sec"] +
-                 $systemInfo["ru_utime.tv_usec"] / 1e6) - PHP_CPU_RUSAGE;
+        $cpuTime = ($systemInfo["ru_utime.tv_sec"] + $systemInfo["ru_utime.tv_usec"] / 1e6) - PHP_CPU_RUSAGE;
         
         $rst['cpuTimeSec'] = (double) sprintf("%.6f", $cpuTime);
         $rst['scriptTimeSec'] = (double) sprintf("%.6f", $scriptTime);
@@ -1182,16 +1150,15 @@ function getScriptExecuteInfo ()
  * @param string $url            
  * @return string
  */
-function getContentFromUrl ($url)
+function getContentFromUrl($url)
 {
     // 先通过路径获取图片资源,解决file_get_content不发送connect：close
     // 导致获取某些特定服务器资源缓慢的问题
     if (filter_var($url, FILTER_VALIDATE_URL) !== false) {
-        $client = new Zend_Http_Client($url, 
-                array(
-                        'maxredirects' => 3,
-                        'timeout' => 300
-                ));
+        $client = new Zend_Http_Client($url, array(
+            'maxredirects' => 3,
+            'timeout' => 300
+        ));
         $response = $client->request('GET');
         if ($response->isError())
             throw new Exception($url . ', $response is error！');
@@ -1219,7 +1186,7 @@ function getContentFromUrl ($url)
  *         "新疆移动全球通卡"
  *         }
  */
-function getMobileFrom ($mobile)
+function getMobileFrom($mobile)
 {
     $url = "http://life.tenpay.com/cgi-bin/mobile/MobileQueryAttribution.cgi?chgmobile=$mobile";
     $back = simplexml_load_file($url);
@@ -1240,11 +1207,10 @@ function getMobileFrom ($mobile)
  * @param string $cacheKey            
  * @return boolean
  */
-function lockForGenerateCache ($cacheKey)
+function lockForGenerateCache($cacheKey)
 {
     try {
-        $lockFile = sys_get_temp_dir() . '/cache_lock_' .
-                 md5($_SERVER['HTTP_HOST'] . $cacheKey);
+        $lockFile = sys_get_temp_dir() . '/cache_lock_' . md5($_SERVER['HTTP_HOST'] . $cacheKey);
         if (! file_exists($lockFile)) {
             file_put_contents($lockFile, time());
             return true;
@@ -1254,9 +1220,7 @@ function lockForGenerateCache ($cacheKey)
                 unlink($lockFile);
                 return false;
             } else {
-                exit(
-                        'please wait generate cache, left time:' .
-                                 (time() - $lockTime));
+                exit('please wait generate cache, left time:' . (time() - $lockTime));
             }
         }
     } catch (Exception $e) {
@@ -1271,11 +1235,10 @@ function lockForGenerateCache ($cacheKey)
  * @param string $cacheKey            
  * @return boolean
  */
-function unlockForGenerateCache ($cacheKey)
+function unlockForGenerateCache($cacheKey)
 {
     try {
-        $lockFile = sys_get_temp_dir() . '/cache_lock_' .
-                 md5($_SERVER['HTTP_HOST'] . $cacheKey);
+        $lockFile = sys_get_temp_dir() . '/cache_lock_' . md5($_SERVER['HTTP_HOST'] . $cacheKey);
         unlink($lockFile);
         return true;
     } catch (Exception $e) {
@@ -1289,7 +1252,7 @@ function unlockForGenerateCache ($cacheKey)
  *
  * @return boolean
  */
-function clearCacheLockTempFile ()
+function clearCacheLockTempFile()
 {
     $pattern = sys_get_temp_dir() . '/cache_lock_*';
     $files = glob($pattern);
@@ -1314,7 +1277,7 @@ function clearCacheLockTempFile ()
  *            查询关键字
  * @return pager array
  */
-function createPager ($url, $record_count, $page = 1, $size = 10, $sch = array())
+function createPager($url, $record_count, $page = 1, $size = 10, $sch = array())
 {
     $url .= "?" . http_build_query($sch);
     $url_format = $url . "&page=";
@@ -1366,8 +1329,7 @@ function createPager ($url, $record_count, $page = 1, $size = 10, $sch = array()
             }
         }
         
-        $pager['page_first'] = ($page - $_offset > 1 && $_pagenum < $page_count) ? $url_format .
-                 1 : '';
+        $pager['page_first'] = ($page - $_offset > 1 && $_pagenum < $page_count) ? $url_format . 1 : '';
         $pager['page_prev'] = ($page > 1) ? $url_format . $page_prev : '';
         $pager['page_next'] = ($page < $page_count) ? $url_format . $page_next : '';
         $pager['page_last'] = ($_to < $page_count) ? $url_format . $page_count : '';
@@ -1385,7 +1347,7 @@ function createPager ($url, $record_count, $page = 1, $size = 10, $sch = array()
  *
  * @return string
  */
-function createRandVCode ($n = 4, $session_start = false)
+function createRandVCode($n = 4, $session_start = false)
 {
     $str = Array(); // 用来存储随机码
     $string = "ABCDEFGHIJKLMNPQRSTUVWXY3456789"; // 随机挑选其中4个字符，也可以选择更多，注意循环的时候加上，宽度适当调整
@@ -1408,7 +1370,7 @@ function createRandVCode ($n = 4, $session_start = false)
  * 进行mongoid和tostring之间的转换
  * 增加函数mongoid用于mongoid和字符串形式之间的自动转换
  *
- * @param mixed $var
+ * @param mixed $var            
  * @return string MongoId
  */
 function myMongoId($var = null)
@@ -1440,4 +1402,44 @@ function myMongoId($var = null)
             }
         }
     }
+}
+
+/**
+ * 查找文档中的链接，并在URL后面追加参数
+ * @param array $extraArray
+ * @return string|unknown|mixed
+ */
+function followUrl($body,$extraArray)
+{
+    $filters = array(
+        'jpg',
+        'jpeg',
+        'png',
+        'js',
+        'css',
+        'gif',
+        'mp3'
+    ); // 过滤指定后缀名URL
+    $regex = "(?:http|https|ftp|ftps)://(?:[a-zA-Z0-9\-]*\.)+[a-zA-Z0-9]{2,4}(?:/[a-zA-Z0-9=.\?&\-\%/_,]*)?";
+    // 为外链增加相应的需要传递的微信变量
+    $body = preg_replace_callback("#$regex#im", function ($matchs) use($extraArray, $filters)
+    {
+        $url = $matchs[0];
+        $parseUrl = parse_url($url);
+        if (isset($parseUrl['path'])) {
+            $tmp = explode('.', $parseUrl['path']);
+            if (! in_array(end($tmp), $filters)) {
+                $replace = strpos($url, '?') === false ? $url . '?' . http_build_query($extraArray) : $url . '&' . http_build_query($extraArray);
+                return $replace;
+            } else {
+                return $url;
+            }
+        } else 
+            if (isset($parseUrl['host'])) {
+                return strpos($url, '?') === false ? $url . '?' . http_build_query($extraArray) : $url . '&' . http_build_query($extraArray);
+            } else {
+                return $url;
+            }
+    }, $body);
+    return $body;
 }

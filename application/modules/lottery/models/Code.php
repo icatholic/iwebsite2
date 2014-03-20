@@ -9,10 +9,13 @@ class Lottery_Model_Code extends iWebsite_Plugin_Mongo
 
     public function getCode($activity_id, $prize_id)
     {
+        $now = new MongoDate();
         $query = array(
-            'activity_id' => $activity_id,
+//             'activity_id' => $activity_id,
             'prize_id' => $prize_id,
-            'is_used' => false,
+            'is_used' => array(
+                '$ne' => true
+            ),
             'start_time' => array(
                 '$lt' => $now
             ),
@@ -21,16 +24,16 @@ class Lottery_Model_Code extends iWebsite_Plugin_Mongo
             )
         );
         $codes = $this->find($query);
-        
         if (! empty($codes['datas'])) {
             foreach ($codes['datas'] as $row) {
-                $now = new MongoDate();
                 $options = array();
                 $options['query'] = array(
                     '_id' => $row['_id'],
-                    'activity_id' => $activity_id,
+//                     'activity_id' => $activity_id,
                     'prize_id' => $prize_id,
-                    'is_used' => false,
+                    'is_used' => array(
+                        '$ne' => true
+                    ),
                     'start_time' => array(
                         '$lt' => $now
                     ),
@@ -44,9 +47,9 @@ class Lottery_Model_Code extends iWebsite_Plugin_Mongo
                     )
                 );
                 $rst = $this->findAndModify($options);
-                if(!empty($rst['result']))
-                    return $rst['result'];
-                else 
+                if (! empty($rst['value']))
+                    return $rst['value'];
+                else
                     continue;
             }
         }
