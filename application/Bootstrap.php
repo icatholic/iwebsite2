@@ -125,11 +125,11 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         
         $db['weixin'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
         $db['weixin']->setCache($cache);
-        $db['default']->setLocal(false);
+        $db['weixin']->setLocal(false);
         
         $db['lottery'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
         $db['lottery']->setCache($cache);
-        $db['default']->setLocal(false);
+        $db['weixin']->setLocal(false);
         
         Zend_Registry::set('db', $db);
     }

@@ -160,6 +160,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             echo $this->result("OK", convertToPureArray($exchangeInfo));
             return true;
         } catch (Exception $e) {
+            var_dump($e);
             exit($this->error(505, $e->getMessage()));
         }
     }
@@ -213,7 +214,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         
         $this->_exchange->updateExchangeInfo($exchange_id, $datas);
         
-        $this->result('OK',"提交成功");
+        $this->result('OK', "提交成功");
     }
 }
 
