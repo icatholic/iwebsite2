@@ -8,8 +8,8 @@ class iDatabase
      *
      * @var string
      */
-    //private $_wsdl = 'http://cloud.umaman.com/service/database/index?wsdl';
-    private $_wsdl = 'http://localhost/service/database/index?wsdl';
+    private $_wsdl = 'http://cloud.umaman.com/service/database/index?wsdl';
+    //private $_wsdl = 'http://localhost/service/database/index?wsdl';
 
     /**
      * 是否每次加载WSDL 默认为false
@@ -23,8 +23,8 @@ class iDatabase
      *
      * @var string
      */
-    //private $_namespace = 'http://cloud.umaman.com/service/database/index';
-    private $_namespace = 'http://localhost/service/database/index';
+    private $_namespace = 'http://cloud.umaman.com/service/database/index';
+    //private $_namespace = 'http://localhost/service/database/index';
 
     /**
      * 传统采用SOAP上传文件，如果文件过大，解析xml会出现问题

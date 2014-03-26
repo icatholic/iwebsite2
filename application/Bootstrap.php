@@ -118,9 +118,9 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         // 支持连接多个idb数据库
         $db = array();
-        $db['default'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
-        $db['weixin'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
-        $db['lottery'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
+        $db['default'] = new iDatabase('52dce281489619e902452b46', '11111111', '53059145489619c06a3dc01f');
+        $db['weixin'] = new iDatabase('52dce281489619e902452b46', '11111111', '53059145489619c06a3dc01f');
+        $db['lottery'] = new iDatabase('52dce281489619e902452b46', '11111111', '53059145489619c06a3dc01f');
         Zend_Registry::set('db', $db);
     }
 
