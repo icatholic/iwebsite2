@@ -14,22 +14,26 @@ abstract class iWebsite_Plugin_Mongo
      */
     public function __construct()
     {
-        if (Zend_Registry::isRegistered('db')) {
-            $db = Zend_Registry::get('db');
-            if (count($db) == 0)
-                exit('Please set db config');
-            
-            if (isset($db[$this->dbName])) {
-                $this->_db = clone $db[$this->dbName];
+        try {
+            if (Zend_Registry::isRegistered('db')) {
+                $db = Zend_Registry::get('db');
+                if (count($db) == 0)
+                    exit('Please set db config');
+                
+                if (isset($db[$this->dbName])) {
+                    $this->_db = clone $db[$this->dbName];
+                } else {
+                    $db = array_values($db);
+                    $this->_db = clone $db[0];
+                }
             } else {
-                $db = array_values($db);
-                $this->_db = clone $db[0];
+                exit('Zend_Registry::isRegistered(\'db\') is undefined');
             }
-        } else {
-            exit('Zend_Registry::isRegistered(\'db\') is undefined');
+            
+            $this->_db->setCollection($this->name);
+        } catch (Exception $e) {
+            var_dump($e);
         }
-        
-        $this->_db->setCollection($this->name);
     }
 
     /**

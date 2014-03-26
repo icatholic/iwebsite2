@@ -157,6 +157,7 @@ class iWebsite_Local_Database
             'key' => true
         ));
         if ($rst === null) {
+            // var_dump(iterator_to_array($this->_key->find(array())), $query);
             throw new \Exception('授权密钥无效');
         }
         return $rst;
@@ -171,31 +172,35 @@ class iWebsite_Local_Database
      */
     public function setCollection($collectionAlias)
     {
-        $this->_collection = new iWebsite_Local_MongoCollection(IDATABASE_COLLECTIONS);
-        $this->_mapping = new iWebsite_Local_MongoCollection(IDATABASE_MAPPING);
-        
-        $collectionInfo = $this->_collection->findOne(array(
-            'project_id' => $this->_project_id,
-            'alias' => $collectionAlias
-        ));
-        if ($collectionInfo === null) {
-            throw new \Exception('访问集合不存在');
+        try {
+            $this->_collection = new iWebsite_Local_MongoCollection(IDATABASE_COLLECTIONS);
+            $this->_mapping = new iWebsite_Local_MongoCollection(IDATABASE_MAPPING);
+            
+            $collectionInfo = $this->_collection->findOne(array(
+                'project_id' => $this->_project_id,
+                'alias' => $collectionAlias
+            ));
+            if ($collectionInfo === null) {
+                throw new \Exception('访问集合不存在');
+            }
+            
+            $this->_collection_id = myMongoId($collectionInfo['_id']);
+            $mapping = $this->_mapping->findOne(array(
+                'project_id' => $this->_project_id,
+                'collection_id' => $this->_collection_id,
+                'active' => true
+            ));
+            if ($mapping === null) {
+                $this->_model = new iWebsite_Local_MongoCollection($this->iCollectionName($this->_collection_id));
+            } else {
+                $this->_model = new iWebsite_Local_MongoCollection($mapping['collection'], $mapping['database'], $mapping['cluster']);
+            }
+            
+            $this->getSchema();
+            return true;
+        } catch (Exception $e) {
+            var_dump($e);
         }
-        
-        $this->_collection_id = myMongoId($collectionInfo['_id']);
-        $mapping = $this->_mapping->findOne(array(
-            'project_id' => $this->_project_id,
-            'collection_id' => $this->_collection_id,
-            'active' => true
-        ));
-        if ($mapping === null) {
-            $this->_model = new iWebsite_Local_MongoCollection(iCollectionName($this->_collection_id));
-        } else {
-            $this->_model = new iWebsite_Local_MongoCollection($mapping['collection'], $mapping['database'], $mapping['cluster']);
-        }
-        
-        $this->getSchema();
-        return true;
     }
 
     /**
@@ -607,18 +612,9 @@ class iWebsite_Local_Database
      * @throws \Exception
      * @return array
      */
-    private function toArray($string)
+    private function toArray($rst)
     {
-        if (is_array($string)) {
-            return $string;
-        } else {
-            $rst = @unserialize(trim($string));
-        }
-        
-        if ($rst !== false) {
-            if (empty($rst)) {
-                return array();
-            }
+        if(is_array($rst)){
             array_walk_recursive($rst, function (&$value, $key)
             {
                 if ($key === '_id' && strlen($value) === 24) {
@@ -626,9 +622,19 @@ class iWebsite_Local_Database
                         $value = new \MongoId($value);
                 }
             });
-            return $rst;
         }
-        throw new \Exception('参数格式错误:无法进行有效的反序列化');
+        return $rst;
+
+    }
+
+    private function iCollectionName($_id)
+    {
+        if ($_id instanceof MongoId)
+            $_id = $_id->__toString();
+        if (empty($_id))
+            throw new \Exception('集合_id不能为空');
+        
+        return 'idatabase_collection_' . $_id;
     }
 
     public function __destruct()
