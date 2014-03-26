@@ -9,6 +9,10 @@ class Default_DbController extends Zend_Controller_Action
         $this->_helper->viewRenderer->setNoRender(true);
         $this->model = new Default_Model_Test();
     }
+    
+    public function indexAction() {
+        
+    }
 
     public function findAction()
     {

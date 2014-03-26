@@ -35,6 +35,8 @@ defined('MONGOS_LOCAL') || define('MONGOS_LOCAL', '127.0.0.1:27017');
 
 class iWebsite_Local_MongoCollection extends \MongoCollection
 {
+    
+    private $_mongoConnect = null;
 
     /**
      * 连接的集合名称
@@ -91,20 +93,6 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
      * @var object
      */
     private $_mapreduce;
-
-    /**
-     * 相关数据库配置参数的数组
-     *
-     * @var array
-     */
-    private $_config;
-
-    /**
-     * 相关数据库配置参数的Config实例
-     *
-     * @var Config
-     */
-    private $_configInstance;
 
     /**
      * GridFS连接实例
@@ -223,31 +211,33 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
         $this->_database = $database;
         $this->_cluster = $cluster;
         $this->_collectionOptions = $collectionOptions;
-        $this->_configInstance = $this->_config = $config;
         
-        $options = array();
-        $options['connectTimeoutMS'] = 60000;
-        $options['socketTimeoutMS'] = 60000;
-        $options['w'] = 1;
-        $options['wTimeout'] = 60000;
-        
-        if (APPLICATION_ENV == 'production') {
-            $mongos = array(
-                MONGOS_DEFAULT_01,
-                MONGOS_DEFAULT_02,
-                MONGOS_DEFAULT_03
-            );
+        if($this->_mongoConnect==null) {
+            $options = array();
+            $options['connectTimeoutMS'] = 60000;
+            $options['socketTimeoutMS'] = 60000;
+            $options['w'] = 1;
+            $options['wTimeout'] = 60000;
             
-            shuffle($mongos);
-            $dnsString = 'mongodb://' . join(',', $mongos);
-        } else {
-            $dnsString = 'mongodb://127.0.0.1:27017';
+            if (APPLICATION_ENV == 'production') {
+                $mongos = array(
+                    MONGOS_DEFAULT_01,
+                    MONGOS_DEFAULT_02,
+                    MONGOS_DEFAULT_03
+                );
+                
+                shuffle($mongos);
+                $dnsString = 'mongodb://' . join(',', $mongos);
+            } else {
+                $dnsString = 'mongodb://127.0.0.1:27017';
+            }
+            $this->_mongoConnect = new \MongoClient($dnsString, $options);
         }
-        $connect = new \MongoClient($dnsString, $options);
-        $this->_db = $connect->selectDB(DEFAULT_DATABASE);
-        $this->_admin = $connect->selectDB(DB_ADMIN);
-        $this->_backup = $connect->selectDB(DB_BACKUP);
-        $this->_mapreduce = $connect->selectDB(DB_MAPREDUCE);
+        
+        $this->_db = $this->_mongoConnect->selectDB(DEFAULT_DATABASE);
+        $this->_admin = $this->_mongoConnect->selectDB(DB_ADMIN);
+        $this->_backup = $this->_mongoConnect->selectDB(DB_BACKUP);
+        $this->_mapreduce = $this->_mongoConnect->selectDB(DB_MAPREDUCE);
         $this->_fs = new \MongoGridFS($this->_db, GRIDFS_PREFIX);
         
         // 默认执行几个操作
@@ -868,7 +858,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
         }
         try {
             // map reduce执行锁管理开始
-            $locks = new self($this->_configInstance, 'locks', DB_MAPREDUCE, $this->_cluster);
+            $locks = new self('locks', DB_MAPREDUCE, $this->_cluster);
             $locks->setReadPreference(\MongoClient::RP_PRIMARY_PREFERRED);
             
             $checkLock = function ($out) use($locks)
@@ -971,7 +961,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
                 
                 if ($rst['ok'] == 1) {
                     if ($rst['counts']['emit'] > 0 && $rst['counts']['output'] > 0) {
-                        $outMongoCollection = new self($this->_configInstance, $out, DB_MAPREDUCE, $this->_cluster);
+                        $outMongoCollection = new self($out, DB_MAPREDUCE, $this->_cluster);
                         $outMongoCollection->setNoAppendQuery(true);
                         return $outMongoCollection;
                     }

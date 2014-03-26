@@ -121,13 +121,13 @@ class iWebsite_Local_Database
     public function authenticate($project_id, $rand, $sign, $key_id = null)
     {
         if (strlen($rand) < 8) {
-            throw new \Exception(411, '随机字符串长度过短，为了安全起见至少8位');
+            throw new \Exception('随机字符串长度过短，为了安全起见至少8位');
         }
         $this->_project_id = $project_id;
         $key_id = ! empty($key_id) ? $key_id : null;
         $keyInfo = $this->getKeysInfo($project_id, $key_id);
         if (md5($project_id . $rand . $keyInfo['key']) !== strtolower($sign)) {
-            throw new \Exception(401, '身份认证校验失败');
+            throw new \Exception('身份认证校验失败');
         }
         return true;
     }
@@ -157,7 +157,7 @@ class iWebsite_Local_Database
             'key' => true
         ));
         if ($rst === null) {
-            throw new \Exception(404, '授权密钥无效');
+            throw new \Exception('授权密钥无效');
         }
         return $rst;
     }
@@ -179,7 +179,7 @@ class iWebsite_Local_Database
             'alias' => $collectionAlias
         ));
         if ($collectionInfo === null) {
-            throw new \Exception(404, '访问集合不存在');
+            throw new \Exception('访问集合不存在');
         }
         
         $this->_collection_id = myMongoId($collectionInfo['_id']);
@@ -207,10 +207,10 @@ class iWebsite_Local_Database
     public function getSchema()
     {
         if ($this->_collection_id == null)
-            throw new \Exception(500, '$_collection_id不存在');
+            throw new \Exception('$_collection_id不存在');
         
         if ($this->_project_id == null)
-            throw new \Exception(500, '$_project_id不存在');
+            throw new \Exception('$_project_id不存在');
         
         $this->_structure = new iWebsite_Local_MongoCollection(IDATABASE_STRUCTURES);
         $cursor = $this->_structure->find(array(
@@ -218,7 +218,7 @@ class iWebsite_Local_Database
         ));
         
         if ($cursor->count() == 0)
-            throw new \Exception(500, '集合未定义文档结构');
+            throw new \Exception('集合未定义文档结构');
         
         while ($cursor->hasNext()) {
             $row = $cursor->getNext();
@@ -628,7 +628,7 @@ class iWebsite_Local_Database
             });
             return $rst;
         }
-        throw new \Exception(500, '参数格式错误:无法进行有效的反序列化');
+        throw new \Exception('参数格式错误:无法进行有效的反序列化');
     }
 
     public function __destruct()
