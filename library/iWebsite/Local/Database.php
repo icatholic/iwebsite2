@@ -627,6 +627,12 @@ class iWebsite_Local_Database
 
     }
 
+    /**
+     * 集合名称
+     * @param mixed $_id
+     * @throws \Exception
+     * @return string
+     */
     private function iCollectionName($_id)
     {
         if ($_id instanceof MongoId)
