@@ -13,15 +13,6 @@ class Default_DbController extends Zend_Controller_Action
         $this->model = new Default_Model_Test();
     }
 
-    public function indexAction()
-    {
-        try {
-//             $this->model = new Default_Model_Test();
-        } catch (Exception $e) {
-            var_dump($e);
-        }
-    }
-
     public function findAction()
     {
         try {
@@ -33,11 +24,23 @@ class Default_DbController extends Zend_Controller_Action
 
     public function findAllAction()
     {
-        echo 'default index index';
+        try {
+            var_dump($this->model->findAll(array()));
+        } catch (Exception $e) {
+            var_dump($e);
+        }
     }
 
     public function insertAction()
-    {}
+    {
+        try {
+            var_dump($this->model->insert(array(
+                'textfield' => time()
+            )));
+        } catch (Exception $e) {
+            var_dump($e);
+        }
+    }
 
     public function __destruct()
     {}

@@ -35,7 +35,7 @@ defined('MONGOS_LOCAL') || define('MONGOS_LOCAL', '127.0.0.1:27017');
 
 class iWebsite_Local_MongoCollection extends \MongoCollection
 {
-    
+
     private $_mongoConnect = null;
 
     /**
@@ -212,7 +212,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
         $this->_cluster = $cluster;
         $this->_collectionOptions = $collectionOptions;
         
-        if($this->_mongoConnect==null) {
+        if ($this->_mongoConnect == null) {
             $options = array();
             $options['connectTimeoutMS'] = 60000;
             $options['socketTimeoutMS'] = 60000;
@@ -1097,5 +1097,29 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
     public function __destruct()
     {
         $this->debug();
+    }
+}
+
+/**
+ * 对于fastcgi模式加快返回速度
+ */
+if (! function_exists("array_unset_recursive")) {
+
+    function array_unset_recursive(&$array, $remove)
+    {
+        if (! is_array($remove)) {
+            $remove = array(
+                $remove
+            );
+        }
+        foreach ($array as $key => &$value) {
+            if (in_array($key, $remove, true)) {
+                unset($array[$key]);
+            } else {
+                if (is_array($value)) {
+                    array_unset_recursive($value, $remove);
+                }
+            }
+        }
     }
 }
