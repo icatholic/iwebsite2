@@ -217,6 +217,7 @@ class iDatabase
             ));
             return $this->_client;
         } else {
+            fb("local","LOG");
             $this->_client = new iWebsite_Local_Database();
             $this->_client->authenticate($this->_project_id, $this->_rand, $this->sign());
             $this->_client->setCollection($this->_collection_alias);
