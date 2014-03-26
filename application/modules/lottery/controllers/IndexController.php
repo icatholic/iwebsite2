@@ -243,6 +243,13 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         if (! empty($id_number))
             $info['id_number'] = $id_number;
         
+<<<<<<< HEAD
+        $this->_identity->updateIdentityInfo($indentity_id, $info);
+        
+        $this->_exchange->updateExchangeInfo($exchange_id, $datas);
+        
+        $this->result('OK', "提交成功");
+=======
         try {
             $identityInfo = array();
             if (! empty($info)) {
@@ -263,6 +270,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         } catch (Exception $e) {
             exit($this->error(505, $e->getFile() . $e->getLine() . $e->getMessage()));
         }
+>>>>>>> 38c886b318d95e04e18acb1321a89f3e24eeef4c
     }
 
 }

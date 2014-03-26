@@ -18,7 +18,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         $this->_front = Zend_Controller_Front::getInstance();
     }
-    
+
     /**
      * 对于Cli调用模式进行处理开始，比如执行计划任务等
      */
@@ -118,7 +118,9 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         // 支持连接多个idb数据库
         $db = array();
-        $db['default'] = new iDatabase('531acaa81fd1bed80e000029', '123123123', '5329b0731fd1be9409000029');   
+        $db['default'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
+        $db['weixin'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
+        $db['lottery'] = new iDatabase('52dce3ab4a9619c12f8b4c7d', '11111111', '52fc9b2c499619b40d8bf47c');
         Zend_Registry::set('db', $db);
     }
 
