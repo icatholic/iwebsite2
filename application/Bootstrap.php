@@ -110,6 +110,36 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         
         Zend_Registry::set('cache', $cache);
     }
+    
+    /**
+     * 建立连接服务器的物理连接
+     */
+    protected function _initMongoDBConnect() {
+        defined('MONGOS_DEFAULT_01') || define('MONGOS_DEFAULT_01', '10.0.0.30:57017');
+        defined('MONGOS_DEFAULT_02') || define('MONGOS_DEFAULT_02', '10.0.0.31:57017');
+        defined('MONGOS_DEFAULT_03') || define('MONGOS_DEFAULT_03', '10.0.0.32:57017');
+        
+        $options = array();
+        $options['connectTimeoutMS'] = 60000;
+        $options['socketTimeoutMS'] = 60000;
+        $options['w'] = 1;
+        $options['wTimeout'] = 60000;
+        
+        if (APPLICATION_ENV == 'production') {
+            $mongos = array(
+                MONGOS_DEFAULT_01,
+                MONGOS_DEFAULT_02,
+                MONGOS_DEFAULT_03
+            );
+        
+            shuffle($mongos);
+            $dnsString = 'mongodb://' . join(',', $mongos);
+        } else {
+            $dnsString = 'mongodb://127.0.0.1:27017';
+        }
+       $connect = new \MongoClient($dnsString, $options);
+       Zend_Registry::set('mongoConnect', $connect);
+    }
 
     /**
      * 允许本地直接连接数据库或者采用soap服务进行连接两种方式

@@ -213,25 +213,29 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
         $this->_collectionOptions = $collectionOptions;
         
         if ($this->_mongoConnect == null) {
-            $options = array();
-            $options['connectTimeoutMS'] = 60000;
-            $options['socketTimeoutMS'] = 60000;
-            $options['w'] = 1;
-            $options['wTimeout'] = 60000;
-            
-            if (APPLICATION_ENV == 'production') {
-                $mongos = array(
-                    MONGOS_DEFAULT_01,
-                    MONGOS_DEFAULT_02,
-                    MONGOS_DEFAULT_03
-                );
-                
-                shuffle($mongos);
-                $dnsString = 'mongodb://' . join(',', $mongos);
+            if (Zend_Registry::isRegistered('mongoConnect')) {
+                $this->_mongoConnect == Zend_Registry::get('mongoConnect');
             } else {
-                $dnsString = 'mongodb://127.0.0.1:27017';
+                $options = array();
+                $options['connectTimeoutMS'] = 60000;
+                $options['socketTimeoutMS'] = 60000;
+                $options['w'] = 1;
+                $options['wTimeout'] = 60000;
+                
+                if (APPLICATION_ENV == 'production') {
+                    $mongos = array(
+                        MONGOS_DEFAULT_01,
+                        MONGOS_DEFAULT_02,
+                        MONGOS_DEFAULT_03
+                    );
+                    
+                    shuffle($mongos);
+                    $dnsString = 'mongodb://' . join(',', $mongos);
+                } else {
+                    $dnsString = 'mongodb://127.0.0.1:27017';
+                }
+                $this->_mongoConnect = new \MongoClient($dnsString, $options);
             }
-            $this->_mongoConnect = new \MongoClient($dnsString, $options);
         }
         
         $this->_db = $this->_mongoConnect->selectDB(DEFAULT_DATABASE);
