@@ -214,7 +214,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
         
         if ($this->_mongoConnect == null) {
             if (Zend_Registry::isRegistered('mongoConnect')) {
-                $this->_mongoConnect == Zend_Registry::get('mongoConnect');
+                $this->_mongoConnect = Zend_Registry::get('mongoConnect');
             } else {
                 $options = array();
                 $options['connectTimeoutMS'] = 60000;
@@ -1100,7 +1100,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
      */
     public function __destruct()
     {
-        $this->debug();
+        //$this->debug();
     }
 }
 
