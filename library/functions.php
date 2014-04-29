@@ -1406,10 +1406,11 @@ function myMongoId($var = null)
 
 /**
  * 查找文档中的链接，并在URL后面追加参数
- * @param array $extraArray
- * @return string|unknown|mixed
+ * 
+ * @param array $extraArray            
+ * @return string unknown mixed
  */
-function followUrl($body,$extraArray)
+function followUrl($body, $extraArray)
 {
     $filters = array(
         'jpg',
@@ -1446,15 +1447,55 @@ function followUrl($body,$extraArray)
 
 /**
  * 效仿数组函数的写法，实现复制数组。目的是为了解除内部变量的引用关系
- * @param array $arr
+ * 
+ * @param array $arr            
  * @return array
  */
-function array_copy($arr) {
+function array_copy($arr)
+{
     $newArray = array();
-    foreach($arr as $key => $value) {
-        if(is_array($value)) $newArray[$key] = array_copy($value);
-        else if(is_object($value)) $newArray[$key] = clone $value;
-        else $newArray[$key] = $value;
+    foreach ($arr as $key => $value) {
+        if (is_array($value))
+            $newArray[$key] = array_copy($value);
+        else 
+            if (is_object($value))
+                $newArray[$key] = clone $value;
+            else
+                $newArray[$key] = $value;
     }
     return $newArray;
+}
+
+/**
+ * 递归方法unset数组里面的元素
+ * @param array $array
+ * @param array|string $fields
+ * @param boolean $remove true表示删除数组$array中的$fields属性 false表示保留数组$array中的$fields属性
+ */
+function array_unset_recursive(&$array, $fields, $remove = true)
+{
+    if (! is_array($fields)) {
+        $fields = array(
+            $fields
+        );
+    }
+    foreach ($array as $key => &$value) {
+        if ($remove) {
+            if (in_array($key, $fields, true)) {
+                unset($array[$key]);
+            } else {
+                if (is_array($value)) {
+                    array_unset_recursive($value, $fields, $remove);
+                }
+            }
+        } else {
+            if (! in_array($key, $fields, true)) {
+                unset($array[$key]);
+            } else {
+                if (is_array($value)) {
+                    array_unset_recursive($value, $fields, $remove);
+                }
+            }
+        }
+    }
 }
