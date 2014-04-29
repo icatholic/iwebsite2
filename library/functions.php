@@ -1406,7 +1406,7 @@ function myMongoId($var = null)
 
 /**
  * 查找文档中的链接，并在URL后面追加参数
- * 
+ *
  * @param array $extraArray            
  * @return string unknown mixed
  */
@@ -1447,7 +1447,7 @@ function followUrl($body, $extraArray)
 
 /**
  * 效仿数组函数的写法，实现复制数组。目的是为了解除内部变量的引用关系
- * 
+ *
  * @param array $arr            
  * @return array
  */
@@ -1468,9 +1468,11 @@ function array_copy($arr)
 
 /**
  * 递归方法unset数组里面的元素
- * @param array $array
- * @param array|string $fields
- * @param boolean $remove true表示删除数组$array中的$fields属性 false表示保留数组$array中的$fields属性
+ * 
+ * @param array $array            
+ * @param array|string $fields            
+ * @param boolean $remove
+ *            true表示删除数组$array中的$fields属性 false表示保留数组$array中的$fields属性
  */
 function array_unset_recursive(&$array, $fields, $remove = true)
 {
@@ -1499,3 +1501,87 @@ function array_unset_recursive(&$array, $fields, $remove = true)
         }
     }
 }
+
+/**
+ * 判断是否为微信的浏览器
+ * 
+ * @return boolean
+ */
+function isWeixinBrowser()
+{
+    if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), strtolower('MicroMessenger')) !== false) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+ * 获取微信版本
+ * 
+ * @return string unknown
+ */
+function getWeixinVersion()
+{
+    $patten = "/MicroMessenger\/(.*)/i";
+    preg_match($patten, $_SERVER['HTTP_USER_AGENT'], $matchs);
+    if (empty($matchs[1])) {
+        return "";
+    } else {
+        return $matchs[1];
+    }
+}
+
+/**
+ * 标准化数据返回结果json或jsonp返回信息
+ * 
+ * @param string $jsonpcallback            
+ * @param boolean $stat            
+ * @param string $msg            
+ * @param string $result            
+ * @return mixed
+ */
+function jsonpcallback($jsonpcallback = "", $stat = true, $msg = "OK", $result = "")
+{
+    if (! empty($jsonpcallback)) {
+        return $jsonpcallback . '(' . json_encode(array(
+            'success' => $stat,
+            'message' => $msg,
+            'result' => $result
+        )) . ')';
+    } else {
+        return json_encode(array(
+            'success' => $stat,
+            'message' => $msg,
+            'result' => $result
+        ));
+    }
+}
+
+// 限制请求的数量
+function isRequestRestricted($cacheKey, $timeSpanLimit = 300, $numLimit = 10)
+{
+    $isRestrict = false;
+    
+    $cache = Zend_Registry::get('cache');
+    if (($cacheInfo = $cache->load($cacheKey)) === false) {
+        $cacheInfo['requestnum'] = 0;
+        $cacheInfo['cachetime'] = time();
+    }
+    $requestnum = $cacheInfo['requestnum'];
+    $cachetime = $cacheInfo['cachetime'];
+    $requestnum ++;
+    $cacheInfo['requestnum'] = $requestnum;
+    $cache->save($cacheInfo, $cacheKey, array(), $timeSpanLimit);
+    $now = time();
+    if (($now - $cachetime) > $timeSpanLimit && $requestnum <= $numLimit)     // 如果超过$timeSpanLimit秒并且没有达到$numLimit那个阀值
+    {
+        // 清除缓存重新计数
+        $cache->remove($cacheKey);
+    }
+    if ($requestnum > $numLimit) {
+        $isRestrict = true;
+    }
+    return $isRestrict;
+}
+
