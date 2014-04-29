@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "429acd555a8b96281f33b7c81a4c4fa3",
+    "hash": "69d6ead3bfb8d6be6ed75fd129663538",
     "packages": [
         {
             "name": "browscap/browscap-php",
@@ -11,12 +11,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/browscap/browscap-php.git",
-                "reference": "9831019fa4e96e3fe77d1ba854911aa3f9378c49"
+                "reference": "d3a7bf961a1eee14adb29105cdcc0740af05cec8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/browscap/browscap-php/zipball/9831019fa4e96e3fe77d1ba854911aa3f9378c49",
-                "reference": "9831019fa4e96e3fe77d1ba854911aa3f9378c49",
+                "url": "https://api.github.com/repos/browscap/browscap-php/zipball/d3a7bf961a1eee14adb29105cdcc0740af05cec8",
+                "reference": "d3a7bf961a1eee14adb29105cdcc0740af05cec8",
                 "shasum": ""
             },
             "require": {
@@ -55,7 +55,7 @@
                 "get_browser",
                 "user agent"
             ],
-            "time": "2014-02-17 10:12:52"
+            "time": "2014-03-26 08:21:28"
         },
         {
             "name": "codeplex/phpexcel",
@@ -113,12 +113,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/firephp/firephp-core.git",
-                "reference": "d7de3f4298f731e3cc4e3d02b54dc0e52157c35b"
+                "reference": "bb0af2a62facaa07c08ed8ff9213f2966f32457b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firephp/firephp-core/zipball/d7de3f4298f731e3cc4e3d02b54dc0e52157c35b",
-                "reference": "d7de3f4298f731e3cc4e3d02b54dc0e52157c35b",
+                "url": "https://api.github.com/repos/firephp/firephp-core/zipball/bb0af2a62facaa07c08ed8ff9213f2966f32457b",
+                "reference": "bb0af2a62facaa07c08ed8ff9213f2966f32457b",
                 "shasum": ""
             },
             "type": "library",
@@ -144,7 +144,205 @@
             ],
             "description": "Traditional FirePHPCore library for sending PHP variables to the browser.",
             "homepage": "https://github.com/firephp/firephp-core",
-            "time": "2014-02-10 16:53:49"
+            "time": "2014-02-26 18:33:14"
+        },
+        {
+            "name": "guzzle/common",
+            "version": "v3.8.1",
+            "target-dir": "Guzzle/Common",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/guzzle/common.git",
+                "reference": "67f6c3fd04bae387d47c2a673fa623ed8f4189bb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/guzzle/common/zipball/67f6c3fd04bae387d47c2a673fa623ed8f4189bb",
+                "reference": "67f6c3fd04bae387d47c2a673fa623ed8f4189bb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2",
+                "symfony/event-dispatcher": ">=2.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.7-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Guzzle\\Common": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Common libraries used by Guzzle",
+            "homepage": "http://guzzlephp.org/",
+            "keywords": [
+                "collection",
+                "common",
+                "event",
+                "exception"
+            ],
+            "time": "2014-01-28 22:29:15"
+        },
+        {
+            "name": "guzzle/http",
+            "version": "v3.8.1",
+            "target-dir": "Guzzle/Http",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/guzzle/http.git",
+                "reference": "565fd64be16d91c840f497c5de76f86d54a822d8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/guzzle/http/zipball/565fd64be16d91c840f497c5de76f86d54a822d8",
+                "reference": "565fd64be16d91c840f497c5de76f86d54a822d8",
+                "shasum": ""
+            },
+            "require": {
+                "guzzle/common": "self.version",
+                "guzzle/parser": "self.version",
+                "guzzle/stream": "self.version",
+                "php": ">=5.3.2"
+            },
+            "suggest": {
+                "ext-curl": "*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.7-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Guzzle\\Http": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Dowling",
+                    "email": "mtdowling@gmail.com",
+                    "homepage": "https://github.com/mtdowling"
+                }
+            ],
+            "description": "HTTP libraries used by Guzzle",
+            "homepage": "http://guzzlephp.org/",
+            "keywords": [
+                "Guzzle",
+                "client",
+                "curl",
+                "http",
+                "http client"
+            ],
+            "time": "2014-01-23 18:23:29"
+        },
+        {
+            "name": "guzzle/parser",
+            "version": "v3.8.1",
+            "target-dir": "Guzzle/Parser",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/guzzle/parser.git",
+                "reference": "3f52387052f2e4ef083145a0f73c3654aa14e086"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/guzzle/parser/zipball/3f52387052f2e4ef083145a0f73c3654aa14e086",
+                "reference": "3f52387052f2e4ef083145a0f73c3654aa14e086",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.7-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Guzzle\\Parser": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Interchangeable parsers used by Guzzle",
+            "homepage": "http://guzzlephp.org/",
+            "keywords": [
+                "URI Template",
+                "cookie",
+                "http",
+                "message",
+                "url"
+            ],
+            "time": "2013-10-24 00:04:09"
+        },
+        {
+            "name": "guzzle/stream",
+            "version": "v3.8.1",
+            "target-dir": "Guzzle/Stream",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/guzzle/stream.git",
+                "reference": "fa8af730ca714861c0001cfba64aaecc5f21bb96"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/guzzle/stream/zipball/fa8af730ca714861c0001cfba64aaecc5f21bb96",
+                "reference": "fa8af730ca714861c0001cfba64aaecc5f21bb96",
+                "shasum": ""
+            },
+            "require": {
+                "guzzle/common": "self.version",
+                "php": ">=5.3.2"
+            },
+            "suggest": {
+                "guzzle/http": "To convert Guzzle request objects to PHP streams"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.7-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Guzzle\\Stream": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Dowling",
+                    "email": "mtdowling@gmail.com",
+                    "homepage": "https://github.com/mtdowling"
+                }
+            ],
+            "description": "Guzzle stream wrapper component",
+            "homepage": "http://guzzlephp.org/",
+            "keywords": [
+                "Guzzle",
+                "component",
+                "stream"
+            ],
+            "time": "2014-01-28 22:14:17"
         },
         {
             "name": "icatholic/weixin",
@@ -152,15 +350,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/icatholic/weixin.git",
-                "reference": "cbed8b4ded013b3d135dc9776215313623fa0c78"
+                "reference": "26800d84110e668f9f8124a4877d0ce1402b27c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/icatholic/weixin/zipball/cbed8b4ded013b3d135dc9776215313623fa0c78",
-                "reference": "cbed8b4ded013b3d135dc9776215313623fa0c78",
+                "url": "https://api.github.com/repos/icatholic/weixin/zipball/26800d84110e668f9f8124a4877d0ce1402b27c1",
+                "reference": "26800d84110e668f9f8124a4877d0ce1402b27c1",
                 "shasum": ""
             },
             "require": {
+                "guzzle/http": "~3.8.1",
                 "php": ">=5.2.11"
             },
             "type": "library",
@@ -178,6 +377,11 @@
                     "name": "icatholic",
                     "email": "youngyang@icatholic.net.cn",
                     "homepage": "http://github.com/icatholic/"
+                },
+                {
+                    "name": "icatholic",
+                    "email": "handsomegyr@gmail.com",
+                    "homepage": "http://github.com/icatholic/"
                 }
             ],
             "description": "A simple PHP client library for weixin",
@@ -186,7 +390,7 @@
                 "icatholic",
                 "weixin"
             ],
-            "time": "2014-02-24 09:17:19"
+            "time": "2014-03-11 11:37:25"
         },
         {
             "name": "lukaszr/matrixcode",
@@ -224,16 +428,16 @@
         },
         {
             "name": "mobiledetect/mobiledetectlib",
-            "version": "2.7.8",
+            "version": "2.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/serbanghita/Mobile-Detect.git",
-                "reference": "aad192c0e0152ccd6a4ce4b4c2c901d4994063f0"
+                "reference": "cf8f99c1575e6fdb2df4bb65248d351395312479"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/serbanghita/Mobile-Detect/zipball/aad192c0e0152ccd6a4ce4b4c2c901d4994063f0",
-                "reference": "aad192c0e0152ccd6a4ce4b4c2c901d4994063f0",
+                "url": "https://api.github.com/repos/serbanghita/Mobile-Detect/zipball/cf8f99c1575e6fdb2df4bb65248d351395312479",
+                "reference": "cf8f99c1575e6fdb2df4bb65248d351395312479",
                 "shasum": ""
             },
             "require": {
@@ -272,7 +476,7 @@
                 "mobile detector",
                 "php mobile detect"
             ],
-            "time": "2014-02-05 18:07:26"
+            "time": "2014-04-21 18:09:41"
         },
         {
             "name": "phpmailer/phpmailer",
@@ -326,6 +530,111 @@
             ],
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "time": "2013-09-12 07:52:38"
+        },
+        {
+            "name": "react/promise",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/reactphp/promise.git",
+                "reference": "95fcf8b62ec1b11bfa346c60c74fe6408a8ea922"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/95fcf8b62ec1b11bfa346c60c74fe6408a8ea922",
+                "reference": "95fcf8b62ec1b11bfa346c60c74fe6408a8ea922",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "React\\Promise\\": "src/"
+                },
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jan Sorgalla",
+                    "email": "jsorgalla@googlemail.com",
+                    "homepage": "http://sorgalla.com",
+                    "role": "maintainer"
+                }
+            ],
+            "description": "A lightweight implementation of CommonJS Promises/A for PHP",
+            "time": "2014-02-03 21:10:58"
+        },
+        {
+            "name": "symfony/event-dispatcher",
+            "version": "v2.4.4",
+            "target-dir": "Symfony/Component/EventDispatcher",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/EventDispatcher.git",
+                "reference": "e539602e5455aa086c0e81e604745af7789e4d8a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/EventDispatcher/zipball/e539602e5455aa086c0e81e604745af7789e4d8a",
+                "reference": "e539602e5455aa086c0e81e604745af7789e4d8a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "symfony/dependency-injection": "~2.0"
+            },
+            "suggest": {
+                "symfony/dependency-injection": "",
+                "symfony/http-kernel": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\EventDispatcher\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony EventDispatcher Component",
+            "homepage": "http://symfony.com",
+            "time": "2014-04-16 10:34:31"
         }
     ],
     "packages-dev": [
@@ -339,7 +648,8 @@
         "lukaszr/matrixcode": 20,
         "firephp/firephp-core": 20,
         "browscap/browscap-php": 20,
-        "icatholic/weixin": 20
+        "icatholic/weixin": 20,
+        "react/promise": 20
     },
     "platform": {
         "php": ">=5.2.11"

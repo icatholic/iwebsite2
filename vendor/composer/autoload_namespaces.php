@@ -9,7 +9,12 @@ return array(
     'phpbrowscapTest' => array($vendorDir . '/browscap/browscap-php/tests'),
     'phpbrowscap' => array($vendorDir . '/browscap/browscap-php/src'),
     'Weixin' => array($vendorDir . '/icatholic/weixin/lib'),
+    'Symfony\\Component\\EventDispatcher\\' => array($vendorDir . '/symfony/event-dispatcher'),
     'PHPExcel' => array($vendorDir . '/codeplex/phpexcel'),
     'Matrixcode' => array($vendorDir . '/lukaszr/matrixcode/src'),
+    'Guzzle\\Stream' => array($vendorDir . '/guzzle/stream'),
+    'Guzzle\\Parser' => array($vendorDir . '/guzzle/parser'),
+    'Guzzle\\Http' => array($vendorDir . '/guzzle/http'),
+    'Guzzle\\Common' => array($vendorDir . '/guzzle/common'),
     'Detection' => array($vendorDir . '/mobiledetect/mobiledetectlib/namespaced'),
 );
