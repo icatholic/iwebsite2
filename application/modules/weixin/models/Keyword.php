@@ -36,12 +36,13 @@ class Weixin_Model_Keyword extends iWebsite_Plugin_Mongo
         if (! $fuzzy) {
             $msg = strtolower($msg);
             if (isset($keywordList[$msg])) {
+                $this->incHitNumber($keywordList[$msg]);
                 return $keywordList[$msg];
             } else {
                 return $this->matchKeyWord($msg, true);
             }
         } else {
-            $split = $this->split($msg);
+            $split = $this->split($msg, 1, 10);
             $keys = array();
             if (count($split) > 0) {
                 $keys = array_keys($keywordList);
@@ -50,13 +51,15 @@ class Weixin_Model_Keyword extends iWebsite_Plugin_Mongo
             if (count($keys) == 0) {
                 return array();
             }
-            
             $queue = new iWebsite_Stdlib_SplPriorityQueue();
             foreach ($keys as $key) {
                 $queue->insert($keywordList[$key], $keywordList[$key]['priority']);
             }
             $queue->top();
-            return $queue->current();
+            
+            $result = $queue->current();
+            $this->incHitNumber($result);
+            return $result;
         }
     }
 
@@ -96,7 +99,7 @@ class Weixin_Model_Keyword extends iWebsite_Plugin_Mongo
             return array();
         
         $elementMin = $elementMin <= 0 ? 1 : $elementMin;
-        $elementMax = $elementMax == 0 ? $elementMin : $elementMax;
+        $elementMax = $elementMax == 0 ? $elementsNumber : $elementMax;
         $elementMax = $elementMax > $elementsNumber ? $elementsNumber : $elementMax;
         $elementMax = $elementMin > $elementMax ? $elementMin : $elementMax;
         
@@ -109,5 +112,19 @@ class Weixin_Model_Keyword extends iWebsite_Plugin_Mongo
             $elementMin += 1;
         } while ($elementMin <= $elementMax);
         return $arrSplit;
+    }
+
+    /**
+     * 记录关键词的命中次数
+     */
+    public function incHitNumber($keywordInfo)
+    {
+        return $this->update(array(
+            '_id' => $keywordInfo['_id']
+        ), array(
+            '$inc' => array(
+                'times' => 1
+            )
+        ));
     }
 }

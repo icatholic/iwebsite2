@@ -10,7 +10,8 @@
     "firephp/firephp-core" : "dev-master",
     "phpmailer/phpmailer" : "v5.2.7",
     "browscap/browscap-php": "1.0.*@dev",
-    "icatholic/weixin": "dev-master"
+    "icatholic/weixin": "dev-master",
+    "react/promise": "2.0.*@dev"
   },
   "keywords" : [ "iwebsite2", "zf1.12" ],
   "config" : {

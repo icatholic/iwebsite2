@@ -46,7 +46,7 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
 
     /**
      * 根据用户的互动行为，通过服务器端token获取该用户的个人信息
-     * openid不存在或者随机10次执行一次更新用户信息
+     * openid不存在或者随机100次执行一次更新用户信息
      */
     public function updateUserInfoByAction($openid)
     {

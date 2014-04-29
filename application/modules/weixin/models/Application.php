@@ -116,9 +116,9 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
                 $datas['EventKey'] = 'qrscene_1';
                 break;
             case 'text':
-                $datas['Content'] = '默认回复';
-                $datas['FromUserName'] = 'FromUserName';
-                $datas['ToUserName'] = 'ToUserName';
+                $datas['Content'] = '联系';
+                $datas['FromUserName'] = 'o8NOajuFB07kWd4eHbKhY24OXPFE';
+                $datas['ToUserName'] = 'gh_127af9cfa796';
                 $datas['MsgType'] = 'text';
                 break;
             case 'reply':

@@ -11,12 +11,15 @@ class Weixin_SnsController extends Zend_Controller_Action
 
     private $_config;
 
+    private $_tracking;
+
     public function init()
     {
         $this->getHelper('viewRenderer')->setNoRender(true);
         $this->_config = Zend_Registry::get('config');
         $this->_user = new Weixin_Model_User();
         $this->_app = new Weixin_Model_Application();
+        $this->_tracking = new Weixin_Model_ScriptTracking();
         $this->_appConfig = $this->_app->getToken();
         $this->_weixin = new Weixin\Client();
         if (! empty($this->_appConfig['access_token'])) {
@@ -30,6 +33,7 @@ class Weixin_SnsController extends Zend_Controller_Action
      */
     public function indexAction()
     {
+        $_SESSION['oauth_start_time'] = microtime(true);
         try {
             $redirect = isset($_GET['redirect']) ? urlencode(trim($_GET['redirect'])) : ''; // 附加参数存储跳转地址
             $scope = isset($_GET['scope']) ? trim($_GET['scope']) : 'snsapi_userinfo';
@@ -59,9 +63,10 @@ class Weixin_SnsController extends Zend_Controller_Action
                             $redirect .= '&FromUserName=' . $arrAccessToken['openid'];
                     }
                 }
+                $this->_tracking->record("授权session存在", $_SESSION['oauth_start_time'], microtime(true), $arrAccessToken['openid']);
                 header("location:{$redirect}");
                 exit();
-            } elseif (! empty($_COOKIE['openid']) && $scope=='snsapi_base') {
+            } elseif (! empty($_COOKIE['openid']) && $scope == 'snsapi_base') {
                 $redirect = isset($_GET['redirect']) ? urldecode($_GET['redirect']) : '';
                 $openid = $_COOKIE['openid'];
                 if (strpos($redirect, 'FromUserName') === false) {
@@ -70,6 +75,7 @@ class Weixin_SnsController extends Zend_Controller_Action
                     else
                         $redirect .= '&FromUserName=' . $openid;
                 }
+                $this->_tracking->record("授权cookie存在", $_SESSION['oauth_start_time'], microtime(true), $openid);
                 header("location:{$redirect}");
                 exit();
             } else {
@@ -111,7 +117,6 @@ class Weixin_SnsController extends Zend_Controller_Action
                     $userInfo = $this->_weixin->getSnsManager()->getSnsUserInfo($arrAccessToken['openid']);
                     if (! isset($userInfo['errcode'])) {
                         $userInfo['access_token'] = $arrAccessToken;
-                        setcookie('openid', $arrAccessToken['openid'], time() + 365 * 24 * 3600, '/');
                         $this->_user->updateUserInfoBySns($arrAccessToken['openid'], $userInfo);
                     } else {
                         throw new Exception("获取用户信息失败，原因:" . json_encode($userInfo, JSON_UNESCAPED_UNICODE));
@@ -119,6 +124,7 @@ class Weixin_SnsController extends Zend_Controller_Action
                 }
                 
                 if (isset($arrAccessToken['openid'])) {
+                    setcookie('openid', $arrAccessToken['openid'], time() + 365 * 24 * 3600, '/');
                     if (strpos($redirect, 'FromUserName') === false) {
                         if (strpos($redirect, '?') === false)
                             $redirect .= '?FromUserName=' . $arrAccessToken['openid'];
@@ -126,6 +132,8 @@ class Weixin_SnsController extends Zend_Controller_Action
                             $redirect .= '&FromUserName=' . $arrAccessToken['openid'];
                     }
                 }
+                
+                $this->_tracking->record("SNS授权", $_SESSION['oauth_start_time'], microtime(true), $arrAccessToken['openid']);
                 header("location:{$redirect}");
                 exit();
             } else {

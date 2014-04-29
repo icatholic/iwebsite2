@@ -122,6 +122,12 @@ class Lottery_Model_Identity extends iWebsite_Plugin_Mongo
         $info = $this->formatInfo($info);
         $query = $this->queryUnique($uniqueId);
         $info = array_merge($info, $query);
+        
+        $identityInfo = $this->findOne($query);
+        if($identityInfo!=null) {
+            $query['_id'] = $identityInfo['_id'];
+        }
+        
         $options = array();
         $options['query'] = $query;
         $options['update'] = array(

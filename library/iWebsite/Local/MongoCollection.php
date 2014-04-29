@@ -216,25 +216,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
             if (Zend_Registry::isRegistered('mongoConnect')) {
                 $this->_mongoConnect = Zend_Registry::get('mongoConnect');
             } else {
-                $options = array();
-                $options['connectTimeoutMS'] = 60000;
-                $options['socketTimeoutMS'] = 60000;
-                $options['w'] = 1;
-                $options['wTimeout'] = 60000;
-                
-                if (APPLICATION_ENV == 'production') {
-                    $mongos = array(
-                        MONGOS_DEFAULT_01,
-                        MONGOS_DEFAULT_02,
-                        MONGOS_DEFAULT_03
-                    );
-                    
-                    shuffle($mongos);
-                    $dnsString = 'mongodb://' . join(',', $mongos);
-                } else {
-                    $dnsString = 'mongodb://127.0.0.1:27017';
-                }
-                $this->_mongoConnect = new \MongoClient($dnsString, $options);
+                throw new Exception("请设定mongodb连接信息");
             }
         }
         
@@ -250,15 +232,15 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
             $this->shardingCollection();
         }
         parent::__construct($this->_db, $this->_collection);
-        
-        /**
-         * 设定读取优先级
-         * MongoClient::RP_PRIMARY 只读取主db
-         * MongoClient::RP_PRIMARY_PREFERRED 读取主db优先
-         * MongoClient::RP_SECONDARY 只读从db优先
-         * MongoClient::RP_SECONDARY_PREFERRED 读取从db优先
-         */
-        $this->db->setReadPreference(\MongoClient::RP_PRIMARY_PREFERRED);
+    
+    /**
+     * 设定读取优先级
+     * MongoClient::RP_PRIMARY 只读取主db
+     * MongoClient::RP_PRIMARY_PREFERRED 读取主db优先
+     * MongoClient::RP_SECONDARY 只读从db优先
+     * MongoClient::RP_SECONDARY_PREFERRED 读取从db优先
+     */
+        // $this->db->setReadPreference(\MongoClient::RP_SECONDARY_PREFERRED);
     }
 
     /**
@@ -299,6 +281,101 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
             );
         } else {
             $query['__REMOVED__'] = false;
+        }
+        return $query;
+    }
+
+    /**
+     * 检查某个数组中，是否包含某个键
+     *
+     * @param array $array            
+     * @param array $keys            
+     * @return boolean
+     */
+    private function checkKeyExistInArray($array, $keys)
+    {
+        if (! is_array($keys)) {
+            $keys = array(
+                $keys
+            );
+        }
+        $result = false;
+        array_walk_recursive($array, function ($items, $key) use($keys, &$result)
+        {
+            if (in_array($key, $keys, true))
+                $result = true;
+        });
+        return $result;
+    }
+
+    /**
+     * ICC采用_id自动分片机制，故需要判断是否增加片键字段，用于分片集合update数据时使用upsert=>true的情况
+     *
+     * @param array $query            
+     * @return multitype: Ambigous multitype:\MongoId >
+     */
+    private function addSharedKeyToQuery(array $query = null)
+    {
+        if (! is_array($query)) {
+            throw new \Exception('$query必须为数组');
+        }
+        
+        if ($this->checkKeyExistInArray($query, '_id')) {
+            return $query;
+        }
+        
+        $keys = array_keys($query);
+        $intersect = array_intersect($keys, $this->_queryHaystack);
+        if (! empty($intersect)) {
+            $query = array(
+                '$and' => array(
+                    array(
+                        '_id' => new \MongoId()
+                    ),
+                    $query
+                )
+            );
+        } else {
+            $query['_id'] = new \MongoId();
+        }
+        return $query;
+    }
+
+    /**
+     * 获取所有符合条件的数据，做findAndModify
+     * 
+     * @param array $query            
+     */
+    private function getSharedKeyToQuery(array $query = null)
+    {
+        if (! is_array($query)) {
+            throw new \Exception('$query必须为数组');
+        }
+        
+        if ($this->checkKeyExistInArray($query, '_id')) {
+            return $query;
+        }
+        
+        $_ids = $this->distinct('_id', $query);
+        $keys = array_keys($query);
+        $intersect = array_intersect($keys, $this->_queryHaystack);
+        if (! empty($intersect)) {
+            $query = array(
+                '$and' => array(
+                    array(
+                        '_id' => array(
+                            '$in' => $_ids
+                        )
+                    ),
+                    $query
+                )
+            );
+        } else {
+            $query['_id'] = array(
+                '_id' => array(
+                    '$in' => $_ids
+                )
+            );
         }
         return $query;
     }
@@ -512,6 +589,11 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
     public function findAndModify(array $query, array $update = NULL, array $fields = NULL, array $options = NULL)
     {
         $query = $this->appendQuery($query);
+        if (parent::count($query) == 0 && $options['upsert'] == true) {
+            $query = $this->addSharedKeyToQuery($query);
+        } else {
+            unset($options['upsert']);
+        }
         return parent::findAndModify($query, $update, $fields, $options);
     }
 
@@ -543,6 +625,11 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
         if (isset($option['upsert']))
             $cmd['upsert'] = is_bool($option['upsert']) ? $option['upsert'] : false;
         
+        if (parent::count($cmd['query']) == 0 && $option['upsert'] == true) {
+            $cmd['query'] = $this->addSharedKeyToQuery($cmd['query']);
+        } else {
+            unset($cmd['upsert']);
+        }
         return $this->_db->command($cmd);
     }
 
@@ -771,6 +858,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
         
         if (parent::count($criteria) == 0) {
             if (isset($options['upsert']) && $options['upsert']) {
+                $criteria = $this->addSharedKeyToQuery($criteria);
                 parent::update($criteria, array(
                     '$set' => array(
                         '__CREATE_TIME__' => new \MongoDate(),
@@ -780,6 +868,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
                 ), $options);
             }
         } else {
+            unset($options['upsert']);
             parent::update($criteria, array(
                 '$set' => array(
                     '__MODIFY_TIME__' => new \MongoDate()
@@ -1100,7 +1189,8 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
      */
     public function __destruct()
     {
-        //$this->debug();
+        if (self::debug)
+            var_dump($this->_db->lastError(), $this->_admin->lastError(), $this->_backup->lastError(), $this->_mapreduce->lastError());
     }
 }
 

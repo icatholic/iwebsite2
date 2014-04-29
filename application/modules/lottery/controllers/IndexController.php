@@ -24,6 +24,8 @@ class Lottery_IndexController extends iWebsite_Controller_Action
     private $_source;
 
     private $_user;
+    
+    private $_lock;
 
     public function init()
     {
@@ -38,6 +40,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         $this->_result_msg = new Lottery_Model_ResultMsg();
         $this->_rule = new Lottery_Model_Rule();
         $this->_source = new Lottery_Model_Source();
+        $this->_lock = new Lottery_Model_Lock();
         
         // 额外增加的业务处理逻辑
         $this->_user = new Weixin_Model_User();
@@ -80,6 +83,16 @@ class Lottery_IndexController extends iWebsite_Controller_Action
                         $source = Lottery_Model_Identity::SOURCE_OTHERS;
                     }
         
+        if (empty($uniqueId)) {
+            echo $this->error(499, "唯一识别ID为空");
+            return false;
+        }
+        
+        if(empty($activity_id)) {
+            echo $this->error(498, "活动编号为空");
+            return false;
+        }
+        
         // 通过ajax请求时，不校验签名
         // if(empty($sign) || $this->checkSign($uniqueId, $key)!==$sign) {
         // return $this->error(505, "签名错误");
@@ -98,6 +111,9 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             
             // 产生用户身份信息
             $this->_identity->setSource($source);
+            
+            //检索是否该用户上一次抽奖是否完成
+            
             
             // 增加微信昵称等信息
             $info = array();
@@ -243,13 +259,6 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         if (! empty($id_number))
             $info['id_number'] = $id_number;
         
-<<<<<<< HEAD
-        $this->_identity->updateIdentityInfo($indentity_id, $info);
-        
-        $this->_exchange->updateExchangeInfo($exchange_id, $datas);
-        
-        $this->result('OK', "提交成功");
-=======
         try {
             $identityInfo = array();
             if (! empty($info)) {
@@ -265,13 +274,38 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             
             $this->_exchange->updateExchangeInfo($exchange_id, $datas);
             
+            if (isset($exchangeInfo['activity_id']) && $exchangeInfo['activity_id'] == "532058de489619f50d7eb1b7") {
+                // 写入优惠券信息
+                $exchange_id = $exchangeInfo['_id']->__toString();
+                $openid = $exchangeInfo['identity_info']['weixin_openid'];
+                $activityInfo = $this->_activity->getActivityInfo($exchangeInfo['activity_id']);
+                $activity_name = $activityInfo['name'];
+                $coupon_name = $exchangeInfo['prize_info']['prize_name'];
+                $code = $exchangeInfo['prize_code']['code'];
+                $pwd = $exchangeInfo['prize_code']['pwd'];
+                $start_time = $exchangeInfo['prize_code']['start_time'];
+                $end_time = $exchangeInfo['prize_code']['end_time'];
+                $couponModel = new Campaign_Model_User_Coupon();
+                $couponModel->record($openid, $activity_name, $coupon_name, $code, $pwd, $start_time, $end_time, $exchange_id);
+                
+                // 主动推送消息给到给用户
+                $app = new Weixin_Model_Application();
+                $coupon = new Campaign_Model_User_Coupon();
+                $appConfig = $app->getToken();
+                $weixin = new Weixin\Client();
+                if (! empty($appConfig['access_token'])) {
+                    $weixin->setAccessToken($appConfig['access_token']);
+                    $weixin->getMsgManager()
+                        ->getCustomSender()
+                        ->sendText($openid, $coupon->getCouponsMsg($openid));
+                }
+            }
+            
             echo $this->result('OK', "提交成功");
             return true;
         } catch (Exception $e) {
             exit($this->error(505, $e->getFile() . $e->getLine() . $e->getMessage()));
         }
->>>>>>> 38c886b318d95e04e18acb1321a89f3e24eeef4c
     }
-
 }
 

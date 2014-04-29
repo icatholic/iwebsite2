@@ -5,23 +5,15 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
     private $_front;
 
-    /**
-     * 初始化常量
-     */
     protected function _initConst()
     {}
 
-    /**
-     * 初始化前端控制器
-     */
     protected function _initFront()
     {
         $this->_front = Zend_Controller_Front::getInstance();
     }
-
-    /**
-     * 对于Cli调用模式进行处理开始，比如执行计划任务等
-     */
+    
+    // 对于Cli调用模式进行处理开始，比如执行计划任务等
     protected function _initCronjobRouter()
     {
         if (PHP_SAPI === 'cli') {
@@ -31,33 +23,24 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             $front->registerPlugin(new iWebsite_Plugin_Cli());
         }
     }
-
-    /**
-     * 启动session
-     */
+    // 对于Cli调用模式进行处理结束
     protected function _initSession()
     {
         Zend_Session::setOptions(array(
             'strict' => 'on'
         ));
-        if (isset($_GET['iWebSiteSessionId']) && strlen($_GET['iWebSiteSessionId']) === 32) {
+        if (isset($_GET['iWebSiteSessionId']) && strlen($_GET['iWebSiteSessionId']) >= 24) {
             Zend_Session::setId($_GET['iWebSiteSessionId']);
         }
         Zend_Session::start();
     }
 
-    /**
-     * 初始化全局配置文件
-     */
     protected function _initConfig()
     {
         $this->_config = $this->getOptions();
         Zend_Registry::set('config', $this->_config);
     }
 
-    /**
-     * 初始化自动加载文件
-     */
     protected function _initLoader()
     {
         require 'functions.php';
@@ -76,18 +59,18 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             'automatic_serialization' => true
         );
         
-        if (APPLICATION_ENV == 'production') {
+        if (APPLICATION_ENV === 'production') {
             $backendOptions = array(
                 'servers' => array(
                     array(
-                        'host' => '10.0.0.1',
-                        'port' => 11211,
+                        'host' => MEMCACHED_SERVER_01,
+                        'port' => MEMCACHED_SERVER_PORT_01,
                         'persistent' => false,
                         'weight' => 1
                     ),
                     array(
-                        'host' => '10.0.0.2',
-                        'port' => 11211,
+                        'host' => MEMCACHED_SERVER_02,
+                        'port' => MEMCACHED_SERVER_PORT_02,
                         'persistent' => false,
                         'weight' => 1
                     )
@@ -110,19 +93,16 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         
         Zend_Registry::set('cache', $cache);
     }
-    
+
     /**
      * 建立连接服务器的物理连接
      */
-    protected function _initMongoDBConnect() {
-        defined('MONGOS_DEFAULT_01') || define('MONGOS_DEFAULT_01', '10.0.0.30:57017');
-        defined('MONGOS_DEFAULT_02') || define('MONGOS_DEFAULT_02', '10.0.0.31:57017');
-        defined('MONGOS_DEFAULT_03') || define('MONGOS_DEFAULT_03', '10.0.0.32:57017');
-        
+    protected function _initMongoDBConnect()
+    {
         $options = array();
         $options['connectTimeoutMS'] = 60000;
         $options['socketTimeoutMS'] = 60000;
-        $options['w'] = 1;
+        $options['w'] = WRITE_CONCERN;
         $options['wTimeout'] = 60000;
         
         if (APPLICATION_ENV == 'production') {
@@ -131,19 +111,17 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
                 MONGOS_DEFAULT_02,
                 MONGOS_DEFAULT_03
             );
-        
+            
             shuffle($mongos);
             $dnsString = 'mongodb://' . join(',', $mongos);
         } else {
             $dnsString = 'mongodb://127.0.0.1:27017';
         }
-       $connect = new \MongoClient($dnsString, $options);
-       Zend_Registry::set('mongoConnect', $connect);
+        $connect = new \MongoClient($dnsString, $options);
+        $connect->setReadPreference(DEFAULT_READ_PERFORMANCE);
+        Zend_Registry::set('mongoConnect', $connect);
     }
 
-    /**
-     * 允许本地直接连接数据库或者采用soap服务进行连接两种方式
-     */
     protected function _initMongoDB()
     {
         // 支持连接多个idb数据库
@@ -172,14 +150,14 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             $backendOptions = array(
                 'servers' => array(
                     array(
-                        'host' => '10.0.0.1',
-                        'port' => 11211,
+                        'host' => MEMCACHED_SERVER_01,
+                        'port' => MEMCACHED_SERVER_PORT_01,
                         'persistent' => false,
                         'weight' => 1
                     ),
                     array(
-                        'host' => '10.0.0.2',
-                        'port' => 11211,
+                        'host' => MEMCACHED_SERVER_02,
+                        'port' => MEMCACHED_SERVER_PORT_02,
                         'persistent' => false,
                         'weight' => 1
                     )
@@ -238,7 +216,6 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         } else {
             $outputCache = Zend_Cache::factory('Output', 'File', $frontendOptions, $backendOptions);
         }
-        
         Zend_Registry::set('outputCache', $outputCache);
         
         // 手动清空缓存

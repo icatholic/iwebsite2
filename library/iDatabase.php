@@ -160,6 +160,13 @@ class iDatabase
     {
         $this->_local = is_bool($local) ? $local : false;
     }
+    
+    /**
+     * 设定驱动WriteConcern值
+     */
+    public function setWriteConcern() {
+        
+    }
 
     /**
      * 建立soap链接
@@ -219,7 +226,7 @@ class iDatabase
         } else {
             fb("local","LOG");
             $this->_client = new iWebsite_Local_Database();
-            $this->_client->authenticate($this->_project_id, $this->_rand, $this->sign());
+            $this->_client->authenticate($this->_project_id, $this->_rand, $this->sign(),$this->_key_id);
             $this->_client->setCollection($this->_collection_alias);
             return $this->_client;
         }

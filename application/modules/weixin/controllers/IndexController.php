@@ -140,6 +140,8 @@ class Weixin_IndexController extends Zend_Controller_Action
                         // 不同项目特定的业务逻辑开始
                         // 不同项目特定的业务逻辑结束
                     }
+                    
+                    //扫描二维码送优惠券
                     $content = '首访回复';
                 } elseif ($Event == 'SCAN') { // 扫描带参数二维码事件 用户已关注时的事件推送
                     $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
@@ -165,6 +167,11 @@ class Weixin_IndexController extends Zend_Controller_Action
                                                // 相对点击事件做特别处理，请在这里，并删除$content = $EventKey;
                     $content = $EventKey;
                 }
+            }
+            
+            if($content=='首访回复1'||$content=='首访回复') {
+                $rst = doGet("http://kotexcrm.umaman.com/campaign/coupon/index?FromUserName={$FromUserName}");
+                //$rst = json_decode($rst,true);
             }
             
             // 语音逻辑开始
@@ -255,7 +262,7 @@ class Weixin_IndexController extends Zend_Controller_Action
             
             // 我的优惠券查询
             $couponModel = new Campaign_Model_User_Coupon();
-            if ($content == '我的优惠') {
+            if ($content == '我的优惠'||$content == '我的优惠券') {
                 // 获取用户的优惠券
                 $msg = $couponModel->getCouponsMsg($FromUserName);
                 if ($msg !== false) {
@@ -271,8 +278,12 @@ class Weixin_IndexController extends Zend_Controller_Action
             }             // 获取优惠券的优惠码
             elseif (preg_match("/^[a-y]{1}$/", $content)) {
                 // 查询优惠券信息
-                $msg = $couponModel->getCouponByAlpha($FromUserName, $content);
+                $coupon = $couponModel->getCouponByAlpha($FromUserName, $content);
+                $msg = $coupon['code'];
                 if ($msg !== false) {
+                    if($coupon['coupon_name']=='一号店10元抵用券') {
+                        $msg = "亲，你的一号店抵用券代码是：{$msg}\n可通过电脑登陆1号店官网，激活抵用券代码进行兑换。";
+                    }
                     $response = $this->_weixin->getMsgManager()
                         ->getReplySender()
                         ->replyText($msg);

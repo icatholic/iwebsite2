@@ -157,7 +157,7 @@ class iWebsite_Local_Database
             'key' => true
         ));
         if ($rst === null) {
-            // var_dump(iterator_to_array($this->_key->find(array())), $query);
+            var_dump(iterator_to_array($this->_key->find(array())), $query,$key_id);
             throw new \Exception('授权密钥无效');
         }
         return $rst;
@@ -305,7 +305,7 @@ class iWebsite_Local_Database
      * @param string $fields            
      * @return string
      */
-    public function findOne($query, $fields)
+    public function findOne($query, $fields = null)
     {
         $query = $this->toArray($query);
         if (! empty($fields)) {

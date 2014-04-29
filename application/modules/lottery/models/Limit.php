@@ -65,12 +65,24 @@ class Lottery_Model_Limit extends iWebsite_Plugin_Mongo
                                 return false;
                             }
                         } else {
-                            if (isset($exchanges[$limit['prize_id']]) && ! empty($limit['prize_id']) && $prize_id == $limit['prize_id']) {
-                                if ($exchanges[$limit['prize_id']] >= $limit['limit']) {
-                                    fb($exchanges, 'LOG');
-                                    fb($exchanges[$limit['prize_id']], 'LOG');
-                                    fb($limit['limit'], 'LOG');
+                            if (! empty($limit['prize_id']) && is_array($limit['prize_id']) && in_array($prize_id, $limit['prize_id'], true)) {
+                                $exchangedTotalNumber = 0;
+                                foreach ($exchanges as $k => $v) {
+                                    if (in_array($k, $limit['prize_id'], true)) {
+                                        $exchangedTotalNumber += $v;
+                                    }
+                                }
+                                
+                                if ($exchangedTotalNumber >= $limit['limit']) {
                                     return false;
+                                }
+                            } else {
+                                if (is_string($limit['prize_id'])) {
+                                    if (isset($exchanges[$limit['prize_id']]) && ! empty($limit['prize_id']) && $prize_id == $limit['prize_id']) {
+                                        if ($exchanges[$limit['prize_id']] >= $limit['limit']) {
+                                            return false;
+                                        }
+                                    }
                                 }
                             }
                         }
