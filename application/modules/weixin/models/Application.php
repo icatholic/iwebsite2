@@ -97,6 +97,25 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
         // }
         return $token;
     }
+    
+    /**
+     * 发送通知消息给某人
+     * 
+     * @param string $to openid
+     * @param string $content 内容
+     */
+    public function notify($to,$content) {
+        $appConfig = $this->getToken();
+        $weixin = new Weixin\Client();
+        if (! empty($appConfig['access_token'])) {
+            $weixin->setAccessToken($appConfig['access_token']);
+            $weixin->getMsgManager()
+            ->getCustomSender()
+            ->sendText($to, $content);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * 调试数据
