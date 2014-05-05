@@ -579,9 +579,8 @@ class Weixinshop_PayController extends iWebsite_Controller_Action {
 			// <SignMethod><![CDATA[sha1]]></SignMethod>
 			// </xml>";
 			$postStr = file_get_contents ( 'php://input' );		
-			function object2array($object) { return @json_decode(@json_encode($object),1); }
 			$postData = simplexml_load_string ( $postStr, 'SimpleXMLElement', LIBXML_NOCDATA );
-			$postData=object2array($postData);
+			$postData=object2Array($postData);
 			$picInfoList = array();
 			foreach ($postData['PicInfo']['item'] as $picInfo) {
 				if(!empty($picInfo['PicUrl'])){
