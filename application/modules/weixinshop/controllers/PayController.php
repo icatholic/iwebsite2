@@ -167,7 +167,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action {
 			$orderInfo = $modelOrder->createOrder ( $postData ['OpenId'], $postData ['ProductId'], $goodsInfo ['body'], $goodsInfo ['gprize'], 1, $this->notify_url, $goodsInfo ['attach'], $goodsInfo ['goods_tag'], $goodsInfo ['transport_fee'], $goodsInfo ['composite_sku_no'] );
 			
 			// 获取Package
-			$package = $goodsInfo ['package'];
+			$package = $orderInfo ['package'];
 			$out_trade_no = $orderInfo ['out_trade_no'];
 		} catch ( Exception $e ) {
 			$this->errorLog->log ( $e );
