@@ -29,7 +29,7 @@ class Weixinshop_Model_GoodsCategory extends iWebsite_Plugin_Mongo {
 	 */
 	public function getInfoById($id) {
 		$query = array (
-				'_id' => myMongoId($id)
+				'_id' => myMongoId ( $id ) 
 		);
 		$info = $this->findOne ( $query );
 		return $info;
