@@ -1589,3 +1589,20 @@ function isRequestRestricted($cacheKey, $timeSpanLimit = 300, $numLimit = 10)
 function object2Array($object) { 
 	return @json_decode(@json_encode($object),1); 
 }
+
+/**
+ * 生成n位的随机码
+ *
+ * @return string
+ */
+function createRandCode ($n = 32)
+{
+	$str = Array(); // 用来存储随机码
+	$string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	$code = "";
+	for ($i = 0; $i < $n; $i ++) {
+		$str[$i] = $string[rand(0, $n-1)];
+		$code .= $str[$i];
+	}
+	return $code;
+}

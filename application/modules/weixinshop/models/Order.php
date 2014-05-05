@@ -23,6 +23,8 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 根据ID获取信息
+	 * @param string $id        	
+	 * @return array
 	 */
 	public function getInfoById($id) {
 		$query = array (
@@ -34,6 +36,8 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 根据商户订单号获取信息
+	 * @param string $out_trade_no        	
+	 * @return array
 	 */
 	public function getInfoByOutTradeNo($out_trade_no) {
 		$query = array (
@@ -42,9 +46,32 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$info = $this->findOne ( $query );
 		return $info;
 	}
-	
+
 	/**
 	 * 生成订单
+	 * @param string $OpenId
+	 * @param string $ProductId
+	 * @param string $body
+	 * @param int $gprize
+	 * @param int $gnum
+	 * @param string $notify_url
+	 * @param string $attach
+	 * @param string $goods_tag
+	 * @param int $transport_fee
+	 * @param string $composite_sku_no
+	 * @param string $consignee_province
+	 * @param string $consignee_city
+	 * @param string $consignee_area
+	 * @param string $consignee_name
+	 * @param string $consignee_address
+	 * @param string $consignee_tel
+	 * @param string $consignee_zipcode
+	 * @param int $fee_type
+	 * @param string $input_charset
+	 * @param string $bank_type
+	 * @param string $signType
+	 * @throws Exception
+	 * @return array
 	 */
 	public function createOrder($OpenId, $ProductId, $body, $gprize, $gnum, $notify_url, $attach = "", $goods_tag = "", $transport_fee = 0, $composite_sku_no = "", $consignee_province = "", $consignee_city = "", $consignee_area = "", $consignee_name = "", $consignee_address = "", $consignee_tel = "", $consignee_zipcode = "", $fee_type = 1, $input_charset = "GBK", $bank_type = "WX", $signType = 'sha1') {
 		$data = array ();
@@ -81,7 +108,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$data ['uma_time_start'] = new MongoDate();
 		// 订单失效时间， 格式为yyyyMMddHHmmss
 		$data ['time_expire'] = "";
-		$data ['uma_time_expire'] = "1970-01-01 00:00:00";
+		$data ['uma_time_expire'] = new MongoDate(0);
 		// 通知URL
 		$data ['notify_url'] = $notify_url;
 		
@@ -109,7 +136,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$data ['is_refund'] = 'false';
 		// time_end 是支付完成时间；
 		$data ['time_end'] = '';
-		$data ['uma_time_end'] = "1970-01-01 00:00:00";
+		$data ['uma_time_end'] = new MongoDate(0);
 		// discount 是折扣价格，单位为分；
 		$data ['discount'] = 0;
 		// rmb_total_fee 是换算成人民币之后的总金额，单位为分，一般看total_fee 即可。
@@ -467,19 +494,8 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	// 生成商户系统内部的订单号
 	public function createOutTradeNo() {
-		// return md5(uniqid("",true));
-		// $var = new MongoId();
-		// return $var->__toString();
-		$modelPayOrderNum = new Weixinshop_Model_PayOrderNum ();
-		$currentNum = $modelPayOrderNum->getRecordNum ();
-		$currentNum = $currentNum % 10000;
-		$currentNum = str_pad ( $currentNum, 4, "0", STR_PAD_LEFT );
-		// 8开头+年月日时间+四位随机
-		// return "8".date("YmdHis").$currentNum;
-		
-		// 8+年月日小时分钟+四位随机数
-		// 但年不要前面两位，如：2014-04-08 13:50分下了一单，单号为：814040813501234
-		return "8" . date ( "ymdHi" ) . $currentNum;
+		$var = new MongoId();
+		return $var->__toString();
 	}
 	
 	// 获取订单状态
