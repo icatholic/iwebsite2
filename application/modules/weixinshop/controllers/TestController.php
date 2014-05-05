@@ -60,7 +60,7 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 			die ( 'isExisted result:' . $isExisted );
 			$stock_num = 1;
 			// $info = $modelGoodsStockDetail->handle($out_trade_no, $gid,
-		// $stock_num);
+			// $stock_num);
 			// print_r($info);
 			// die('ok');
 		} catch ( Exception $e ) {
@@ -93,6 +93,17 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 			$openid = uniqid ();
 			$orderid = uniqid ();
 			$info = $modelConsignee->log ( $province, $city, $area, $name, $address, $tel, $zipcode, $openid, $orderid );
+			
+			print_r ( $info );
+			die ( 'ok' );
+		} catch ( Exception $e ) {
+		}
+	}
+	public function payErrorLogAction() {
+		try {
+			$modelPayErrorLog = new Weixinshop_Model_PayErrorLog ();
+			$e = new ErrorException ( "错误1", 99 );
+			$info = $modelPayErrorLog->log ( $e );
 			
 			print_r ( $info );
 			die ( 'ok' );
