@@ -176,9 +176,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action {
 		}
 		
 		// 调用Native（原生）支付回调商户后台获取package
-		$ret = $this->weixinPay->getPackageForNativeUrl ( $package, $orderInfo ['nonceStr'], 		// createRandCode(32),//
-		$orderInfo ['timeStamp'], 		// time(),//
-		$postData ['SignMethod'], $RetCode, $RetErrMsg );
+		$ret = $this->weixinPay->getPackageForNativeUrl ( $package, $orderInfo ['nonceStr'], $orderInfo ['timeStamp'], $postData ['SignMethod'], $RetCode, $RetErrMsg );
 		
 		// 记录
 		$modelPayNativePackageResult = new Weixinshop_Model_PayNativePackageResult ();
