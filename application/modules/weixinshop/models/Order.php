@@ -205,7 +205,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 修改订单的状态
-	 * 
+	 *
 	 * @param array $info        	
 	 * @param array $updateData        	
 	 * @param string $status_change_by        	
@@ -271,7 +271,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		}
 		if (isset ( $updateData ['time_end'] )) {
 			$data ["time_end"] = $updateData ['time_end'];
-			$data ["uma_time_end"] = date ( 'Y-m-d H:i:s', strtotime ( $updateData ['time_end'] ) );
+			$data ["uma_time_end"] = new MongoDate ( strtotime ( $updateData ['time_end'] ) );
 		}
 		if (isset ( $updateData ['input_charset'] )) {
 			$data ["transport_fee"] = $updateData ['transport_fee'];
@@ -334,7 +334,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 获取已支付订单列表
-	 * 
+	 *
 	 * @param string $OpenId        	
 	 * @param int $page        	
 	 * @param int $limit        	
@@ -353,10 +353,12 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 			if (! empty ( $list ['datas'] )) {
 				$modelGoods = new Weixinshop_Model_Goods ();
 				foreach ( $list ['datas'] as &$order ) {
-					// 获取财富通的订单结果
-					$updateData = $this->queryTenpayInfo ( $order ['out_trade_no'] );
-					// 更新订单状态
-					$order = $this->changeStatus ( $order, $updateData, "orderquery4tenpay" );
+					// // 获取财富通的订单结果
+					// $updateData = $this->queryTenpayInfo ( $order
+					// ['out_trade_no'] );
+					// // 更新订单状态
+					// $order = $this->changeStatus ( $order, $updateData,
+					// "orderquery4tenpay" );
 					// 获取商品信息
 					$order ['goodsInfo'] = $modelGoods->getInfoByGid ( $order ['ProductId'] );
 				}
@@ -375,7 +377,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$token = $config ['iWeixin'] ['token'];
 		$project_id = $config ['iWeixin'] ['project_id'];
 		
-		$tokenServer = new Weixin\Token\Server ($config ['iWeixin'] ['pay'] ['appId'],$config ['iWeixin'] ['pay'] ['appSecret']);
+		$tokenServer = new Weixin\Token\Server ( $config ['iWeixin'] ['pay'] ['appId'], $config ['iWeixin'] ['pay'] ['appSecret'] );
 		$token = $tokenServer->getAccessToken ();
 		
 		$iWeixinPay = new Weixin\Pay ();
@@ -479,7 +481,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 获取订单列表
-	 * 
+	 *
 	 * @param string $OpenId        	
 	 * @param int $page        	
 	 * @param int $limit        	
@@ -495,10 +497,12 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 			if (! empty ( $list ['datas'] )) {
 				$modelGoods = new Weixinshop_Model_Goods ();
 				foreach ( $list ['datas'] as &$order ) {
-					// 获取财富通的订单结果
-					$updateData = $this->queryTenpayInfo ( $order ['out_trade_no'] );
-					// 更新订单状态
-					$order = $this->changeStatus ( $order, $updateData, "orderquery4tenpay" );
+					// // 获取财富通的订单结果
+					// $updateData = $this->queryTenpayInfo ( $order
+					// ['out_trade_no'] );
+					// // 更新订单状态
+					// $order = $this->changeStatus ( $order, $updateData,
+					// "orderquery4tenpay" );
 					// 获取商品信息
 					$order ['goodsInfo'] = $modelGoods->getInfoByGid ( $order ['ProductId'] );
 				}
@@ -509,7 +513,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 生成商户系统内部的订单号
-	 * 
+	 *
 	 * @return string
 	 */
 	public function createOutTradeNo() {
@@ -519,7 +523,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 获取订单状态
-	 * 
+	 *
 	 * @param array $data        	
 	 * @return number
 	 */
