@@ -1,7 +1,7 @@
 <?php
 class Weixinshop_Model_PayFeedback extends iWebsite_Plugin_Mongo
 {
-	protected $name = 'iWeixinpay_PayFeedback';
+	protected $name = 'iWeixinPay_PayFeedback';
 	protected $dbName = 'weixinshop';
 	
 	/*

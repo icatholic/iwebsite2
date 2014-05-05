@@ -1,6 +1,6 @@
 <?php
 class Weixinshop_Model_Consignee extends iWebsite_Plugin_Mongo {
-	protected $name = 'iWeixinpay_Consignee';
+	protected $name = 'iWeixinPay_Consignee';
 	protected $dbName = 'weixinshop';
 	
 	/**

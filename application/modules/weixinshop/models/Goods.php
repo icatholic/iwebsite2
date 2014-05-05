@@ -1,6 +1,6 @@
 <?php
 class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
-	protected $name = 'iWeixinpay_Goods';
+	protected $name = 'iWeixinPay_Goods';
 	protected $dbName = 'weixinshop';
 	
 	/**
@@ -25,10 +25,12 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 根据ID获取信息
+	 * @param string $id        	
+	 * @return array
 	 */
 	public function getInfoById($id) {
 		$query = array (
-				'_id' => myMongoId($id) 
+				'_id' => myMongoId ( $id ) 
 		);
 		$info = $this->findOne ( $query );
 		return $info;
@@ -36,6 +38,8 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 根据商品号获取信息
+	 * @param string $gid        	
+	 * @return array
 	 */
 	public function getInfoByGid($gid) {
 		$query = array (
@@ -47,9 +51,11 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 获取商品列表信息
-	 * 
-	 * @param int $is_purchase_inner 是否内购
-	 * 	@param array $gids 商品ID列表
+	 *
+	 * @param int $is_purchase_inner
+	 *        	是否内购
+	 * @param array $gids
+	 *        	商品ID列表
 	 * @return array
 	 */
 	public function getList($is_purchase_inner = 0, array $gids = array()) {
@@ -69,7 +75,7 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 减少库存数量
-	 * 
+	 *
 	 * @param string $out_trade_no        	
 	 * @param string $gid        	
 	 * @param int $gnum        	
@@ -85,7 +91,7 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 				$data ['stock_num'] = 0 - $gnum;
 				$options = array (
 						"query" => array (
-								"_id" => myMongoId($info ['_id']),
+								"_id" => $info ['_id'],
 								'stock_num' => array (
 										'$gt' => 0 
 								) 
@@ -95,8 +101,13 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 						),
 						"new" => true 
 				);
-				$this->findAndModify ( $options );
-				
+				$rst = $this->findAndModify ( $options );
+				if ($rst ['ok'] == 0) {
+					throw new Exception ( "findAndModify执行错误，返回结果为:" . json_encode ( $rst ) );
+				}
+				if (empty ( $rst ['value'] )) {
+					return false;
+				}
 				// 记录明细追踪表
 				$modelGoodsStockDetail->handle ( $out_trade_no, $gid, 0 - $gnum );
 			}
@@ -105,7 +116,7 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 是否有库存
-	 * 
+	 *
 	 * @param string $gid        	
 	 * @return boolean
 	 */

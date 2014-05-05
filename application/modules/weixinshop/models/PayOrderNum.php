@@ -1,7 +1,7 @@
 <?php
 class Weixinshop_Model_PayOrderNum extends iWebsite_Plugin_Mongo
 {
-	protected $name = 'iWeixinpay_PayOrderNum';
+	protected $name = 'iWeixinPay_PayOrderNum';
 	protected $dbName = 'weixinshop';
 	
 	public function getRecordNum()

@@ -1,6 +1,6 @@
 <?php
 class Weixinshop_Model_GoodsCategory extends iWebsite_Plugin_Mongo {
-	protected $name = 'iWeixinpay_GoodsCategory';
+	protected $name = 'iWeixinPay_GoodsCategory';
 	protected $dbName = 'weixinshop';
 	
 	/**

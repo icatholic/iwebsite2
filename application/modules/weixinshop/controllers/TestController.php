@@ -30,23 +30,48 @@ class Weixinshop_TestController extends Zend_Controller_Action
     	try {
     		$modelGoods = new Weixinshop_Model_Goods();
     		$id="5367056f4a961948378b4584";
-    		$info = $modelGoods->getInfoById($id);
-    		print_r($info);
+    		//$info = $modelGoods->getInfoById($id);
+    		//print_r($info);
     		
     		$gid="goo1";
-    		$info = $modelGoods->getInfoByGid($gid);
-    		print_r($info);
+    		//$info = $modelGoods->getInfoByGid($gid);
+    		//print_r($info);    		
     		
-    		die('aaaaaaaaaaa');
     		$gnum=1;
-    		$modelGoods->getList();
-    		$modelGoods->hasStock($gid, $gnum);
+    		$is_purchase_inner = 1;
+    		$gids = array($gid);
+    		//$list = $modelGoods->getList($is_purchase_inner,$gids);
+    		//print_r($list);
+    		//die('aaaaaaaaaaa');
+    		
+    		//$hasStock= $modelGoods->hasStock($gid, $gnum);
+    		//die('hasStock result:'.$hasStock);
     		
     		$out_trade_no= uniqid();
     		$modelGoods->subStock($out_trade_no, $gid, $gnum);
     		
+    		die('aaaaaaaaaaa');
+    		
     	} catch (Exception $e) {
     	}
     }
+    
+    public function goodsStockDetailAction() {
+    	try {
+    		$modelGoodsStockDetail = new Weixinshop_Model_GoodsStockDetail();
+    		$out_trade_no = "536719fb20316";//uniqid();
+    		$gid= "goo1";
+    		$is_today = false;
+    		$isExisted = $modelGoodsStockDetail->isExisted($out_trade_no,$gid,$is_today);
+    		die('isExisted result:'.$isExisted);
+    		$stock_num = 1;
+    		//$info = $modelGoodsStockDetail->handle($out_trade_no, $gid, $stock_num);
+    		//print_r($info);
+    		//die('ok');
+    
+    	} catch (Exception $e) {
+    	}
+    }
+    
 }
 

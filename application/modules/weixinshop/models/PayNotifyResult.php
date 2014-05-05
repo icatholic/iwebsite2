@@ -1,7 +1,7 @@
 <?php
 class Weixinshop_Model_PayNotifyResult extends iWebsite_Plugin_Mongo
 {
-	protected $name = 'iWeixinpay_PayNotifyResult';
+	protected $name = 'iWeixinPay_PayNotifyResult';
 	protected $dbName = 'weixinshop';
 	/*
 	 * 默认排序

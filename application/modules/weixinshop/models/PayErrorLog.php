@@ -1,7 +1,7 @@
 <?php
 class Weixinshop_Model_PayErrorLog extends iWebsite_Plugin_Mongo
 {
-	protected $name = 'iWeixinpay_PayErrorLog';
+	protected $name = 'iWeixinPay_PayErrorLog';
 	protected $dbName = 'weixinshop';
 	
 	/*

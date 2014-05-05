@@ -1,6 +1,6 @@
 <?php
 class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
-	protected $name = 'iWeixinpay_Order';
+	protected $name = 'iWeixinPay_Order';
 	protected $dbName = 'weixinshop';
 	
 	/**
