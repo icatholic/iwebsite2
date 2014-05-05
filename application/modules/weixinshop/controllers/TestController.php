@@ -31,7 +31,7 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 			// $info = $modelGoods->getInfoById($id);
 			// print_r($info);
 			
-			$gid = "goo1";
+			$gid = "777111666";
 			// $info = $modelGoods->getInfoByGid($gid);
 			// print_r($info);
 			
@@ -58,7 +58,7 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 		try {
 			$modelGoodsStockDetail = new Weixinshop_Model_GoodsStockDetail ();
 			$out_trade_no = "536719fb20316"; // uniqid();
-			$gid = "goo1";
+			$gid = "777111666";
 			$is_today = false;
 			$isExisted = $modelGoodsStockDetail->isExisted ( $out_trade_no, $gid, $is_today );
 			die ( 'isExisted result:' . $isExisted );
@@ -121,7 +121,7 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 			// $info = $modelPaySalePlan->getInfoById($id);
 			// print_r ( $info );
 			
-			$ProductId = "goo1";
+			$ProductId = "777111666";
 			// $info = $modelPaySalePlan->getInfoByProductId($ProductId);
 			// print_r ( $info );
 			
@@ -135,7 +135,7 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 		try {
 			$modelOrder = new Weixinshop_Model_Order ();
 			$OpenId = "guoyongrong1234567890";
-			$ProductId = "goo1";
+			$ProductId = "777111666";
 			$body = "说明";
 			$gprize = 1;
 			$gnum = 1;
