@@ -10,7 +10,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
 }
 
 defined('APPLICATION_PATH') || define('APPLICATION_PATH', realpath(dirname(__FILE__) . '/../application'));
-defined('APPLICATION_ENV') || define('APPLICATION_ENV', 'production'); // [production|development]
+defined('APPLICATION_ENV') || define('APPLICATION_ENV', 'development'); // [production|development]
 
 set_include_path(implode(PATH_SEPARATOR, array(
     realpath(APPLICATION_PATH . '/../library'),

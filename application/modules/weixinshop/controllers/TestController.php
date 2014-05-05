@@ -24,5 +24,29 @@ class Weixinshop_TestController extends Zend_Controller_Action
         }  
         echo 'finish';
     }
+    
+    
+    public function goodsAction() {
+    	try {
+    		$modelGoods = new Weixinshop_Model_Goods();
+    		$id="5367056f4a961948378b4584";
+    		$info = $modelGoods->getInfoById($id);
+    		print_r($info);
+    		
+    		$gid="goo1";
+    		$info = $modelGoods->getInfoByGid($gid);
+    		print_r($info);
+    		
+    		die('aaaaaaaaaaa');
+    		$gnum=1;
+    		$modelGoods->getList();
+    		$modelGoods->hasStock($gid, $gnum);
+    		
+    		$out_trade_no= uniqid();
+    		$modelGoods->subStock($out_trade_no, $gid, $gnum);
+    		
+    	} catch (Exception $e) {
+    	}
+    }
 }
 

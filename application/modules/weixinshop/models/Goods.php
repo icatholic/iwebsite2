@@ -2,7 +2,8 @@
 class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 	protected $name = 'iWeixinpay_Goods';
 	protected $dbName = 'weixinshop';
-	/*
+	
+	/**
 	 * 默认排序
 	 */
 	public function getDefaultSort() {
@@ -11,7 +12,8 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 		);
 		return $sort;
 	}
-	/*
+	
+	/**
 	 * 默认查询条件
 	 */
 	public function getQuery() {

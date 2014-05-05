@@ -37,8 +37,8 @@ class Weixinshop_PayController extends iWebsite_Controller_Action {
 	/**
 	 * 生成订单
 	 */
-	public function createAction() {
-		// http://iwebsite2/weixinshop/pay/create?jsonpcallback=?&OpenId=xxx&ProductId=xxxx&gnum=xxxx
+	public function createOrderAction() {
+		// http://iwebsite2/weixinshop/pay/create-order?jsonpcallback=?&OpenId=xxx&ProductId=xxxx&gnum=xxxx
 		try {
 			$OpenId = $this->getRequest ()->getCookie ( "FromUserName", '' );
 			// $OpenId = trim ( $this->get ( 'OpenId', '' ) ); // 微信号

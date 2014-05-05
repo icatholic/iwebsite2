@@ -1,148 +1,5 @@
 [
     {
-        "name": "codeplex/phpexcel",
-        "version": "1.7.8",
-        "version_normalized": "1.7.8.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/markushausammann/PHPExcel.git",
-            "reference": "6236b1e1513dda38a68a5ac22bbab5fc2b7942fd"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/markushausammann/PHPExcel/zipball/6236b1e1513dda38a68a5ac22bbab5fc2b7942fd",
-            "reference": "6236b1e1513dda38a68a5ac22bbab5fc2b7942fd",
-            "shasum": ""
-        },
-        "require": {
-            "ext-xml": "*",
-            "php": ">=5.2.0"
-        },
-        "time": "2012-11-21 10:55:52",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-0": {
-                "PHPExcel": ""
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "LGPL"
-        ],
-        "authors": [
-            {
-                "name": "Maarten Balliauw",
-                "homepage": "http://blog.maartenballiauw.be"
-            },
-            {
-                "name": "Mark Baker"
-            },
-            {
-                "name": "Erit Tilt"
-            }
-        ],
-        "description": "PHPExcel - OpenXML - Create Excel2007 documents in PHP - Spreadsheet engine",
-        "homepage": "http://phpexcel.codeplex.com",
-        "keywords": [
-            "OpenXML",
-            "excel",
-            "php",
-            "spreadsheet"
-        ]
-    },
-    {
-        "name": "lukaszr/matrixcode",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/lukaszr/Matrixcode.git",
-            "reference": "392ee0931c87132615c37306d8a443ffd0972e58"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/lukaszr/Matrixcode/zipball/392ee0931c87132615c37306d8a443ffd0972e58",
-            "reference": "392ee0931c87132615c37306d8a443ffd0972e58",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.2.0"
-        },
-        "time": "2012-06-07 12:52:52",
-        "type": "library",
-        "installation-source": "source",
-        "autoload": {
-            "psr-0": {
-                "Matrixcode": "src"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "New-BSD"
-        ],
-        "description": "Matrixcode generator.",
-        "keywords": [
-            "matrixcode",
-            "qrcode"
-        ]
-    },
-    {
-        "name": "phpmailer/phpmailer",
-        "version": "v5.2.7",
-        "version_normalized": "5.2.7.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/PHPMailer/PHPMailer.git",
-            "reference": "8717a79565b2c0ed67f851d70e1949febdf3b226"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/8717a79565b2c0ed67f851d70e1949febdf3b226",
-            "reference": "8717a79565b2c0ed67f851d70e1949febdf3b226",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.0.0"
-        },
-        "require-dev": {
-            "phpdocumentor/phpdocumentor": "*",
-            "phpunit/phpunit": "*"
-        },
-        "time": "2013-09-12 07:52:38",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "classmap": [
-                "class.phpmailer.php",
-                "class.pop3.php",
-                "class.smtp.php"
-            ]
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "LGPL-2.1"
-        ],
-        "authors": [
-            {
-                "name": "Jim Jagielski",
-                "email": "jimjag@gmail.com"
-            },
-            {
-                "name": "Marcus Bointon",
-                "email": "phpmailer@synchromedia.co.uk"
-            },
-            {
-                "name": "Andy Prevost",
-                "email": "codeworxtech@users.sourceforge.net"
-            },
-            {
-                "name": "Brent R. Matzelle"
-            }
-        ],
-        "description": "PHPMailer is a full-featured email creation and transfer class for PHP"
-    },
-    {
         "name": "browscap/browscap-php",
         "version": "dev-master",
         "version_normalized": "9999999-dev",
@@ -197,36 +54,83 @@
         ]
     },
     {
-        "name": "mobiledetect/mobiledetectlib",
-        "version": "2.8.0",
-        "version_normalized": "2.8.0.0",
+        "name": "codeplex/phpexcel",
+        "version": "1.7.8",
+        "version_normalized": "1.7.8.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/serbanghita/Mobile-Detect.git",
-            "reference": "cf8f99c1575e6fdb2df4bb65248d351395312479"
+            "url": "https://github.com/markushausammann/PHPExcel.git",
+            "reference": "6236b1e1513dda38a68a5ac22bbab5fc2b7942fd"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/serbanghita/Mobile-Detect/zipball/cf8f99c1575e6fdb2df4bb65248d351395312479",
-            "reference": "cf8f99c1575e6fdb2df4bb65248d351395312479",
+            "url": "https://api.github.com/repos/markushausammann/PHPExcel/zipball/6236b1e1513dda38a68a5ac22bbab5fc2b7942fd",
+            "reference": "6236b1e1513dda38a68a5ac22bbab5fc2b7942fd",
             "shasum": ""
         },
         "require": {
-            "php": ">=5.0.0"
+            "ext-xml": "*",
+            "php": ">=5.2.0"
         },
-        "require-dev": {
-            "phpunit/phpunit": "*"
-        },
-        "time": "2014-04-21 18:09:41",
+        "time": "2012-11-21 10:55:52",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
-            "classmap": [
-                "Mobile_Detect.php"
-            ],
             "psr-0": {
-                "Detection": "namespaced/"
+                "PHPExcel": ""
             }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "LGPL"
+        ],
+        "authors": [
+            {
+                "name": "Maarten Balliauw",
+                "homepage": "http://blog.maartenballiauw.be"
+            },
+            {
+                "name": "Mark Baker"
+            },
+            {
+                "name": "Erit Tilt"
+            }
+        ],
+        "description": "PHPExcel - OpenXML - Create Excel2007 documents in PHP - Spreadsheet engine",
+        "homepage": "http://phpexcel.codeplex.com",
+        "keywords": [
+            "OpenXML",
+            "excel",
+            "php",
+            "spreadsheet"
+        ]
+    },
+    {
+        "name": "firephp/firephp-core",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/firephp/firephp-core.git",
+            "reference": "bb0af2a62facaa07c08ed8ff9213f2966f32457b"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/firephp/firephp-core/zipball/bb0af2a62facaa07c08ed8ff9213f2966f32457b",
+            "reference": "bb0af2a62facaa07c08ed8ff9213f2966f32457b",
+            "shasum": ""
+        },
+        "time": "2014-02-26 18:33:14",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "classmap": [
+                "lib/FirePHPCore/FirePHP.class.php",
+                "lib/FirePHPCore/fb.php"
+            ],
+            "files": [
+                "lib/FirePHPCore/fb.php"
+            ]
         },
         "notification-url": "https://packagist.org/downloads/",
         "license": [
@@ -234,20 +138,58 @@
         ],
         "authors": [
             {
-                "name": "Serban Ghita",
-                "email": "serbanghita@gmail.com",
-                "homepage": "http://mobiledetect.net",
-                "role": "Developer"
+                "name": "Christoph Dorn",
+                "email": "christoph@christophdorn.com",
+                "homepage": "http://christophdorn.com"
             }
         ],
-        "description": "Mobile_Detect is a lightweight PHP class for detecting mobile devices. It uses the User-Agent string combined with specific HTTP headers to detect the mobile environment.",
-        "homepage": "https://github.com/serbanghita/Mobile-Detect",
+        "description": "Traditional FirePHPCore library for sending PHP variables to the browser.",
+        "homepage": "https://github.com/firephp/firephp-core"
+    },
+    {
+        "name": "guzzle/parser",
+        "version": "v3.8.1",
+        "version_normalized": "3.8.1.0",
+        "target-dir": "Guzzle/Parser",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/guzzle/parser.git",
+            "reference": "3f52387052f2e4ef083145a0f73c3654aa14e086"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/guzzle/parser/zipball/3f52387052f2e4ef083145a0f73c3654aa14e086",
+            "reference": "3f52387052f2e4ef083145a0f73c3654aa14e086",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.2"
+        },
+        "time": "2013-10-24 00:04:09",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "3.7-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Guzzle\\Parser": ""
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "description": "Interchangeable parsers used by Guzzle",
+        "homepage": "http://guzzlephp.org/",
         "keywords": [
-            "detect mobile devices",
-            "mobile",
-            "mobile detect",
-            "mobile detector",
-            "php mobile detect"
+            "URI Template",
+            "cookie",
+            "http",
+            "message",
+            "url"
         ]
     },
     {
@@ -410,52 +352,6 @@
         ]
     },
     {
-        "name": "guzzle/parser",
-        "version": "v3.8.1",
-        "version_normalized": "3.8.1.0",
-        "target-dir": "Guzzle/Parser",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/guzzle/parser.git",
-            "reference": "3f52387052f2e4ef083145a0f73c3654aa14e086"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/parser/zipball/3f52387052f2e4ef083145a0f73c3654aa14e086",
-            "reference": "3f52387052f2e4ef083145a0f73c3654aa14e086",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.3.2"
-        },
-        "time": "2013-10-24 00:04:09",
-        "type": "library",
-        "extra": {
-            "branch-alias": {
-                "dev-master": "3.7-dev"
-            }
-        },
-        "installation-source": "dist",
-        "autoload": {
-            "psr-0": {
-                "Guzzle\\Parser": ""
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "description": "Interchangeable parsers used by Guzzle",
-        "homepage": "http://guzzlephp.org/",
-        "keywords": [
-            "URI Template",
-            "cookie",
-            "http",
-            "message",
-            "url"
-        ]
-    },
-    {
         "name": "guzzle/http",
         "version": "v3.8.1",
         "version_normalized": "3.8.1.0",
@@ -515,6 +411,201 @@
         ]
     },
     {
+        "name": "icatholic/weixin",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/icatholic/weixin.git",
+            "reference": "26800d84110e668f9f8124a4877d0ce1402b27c1"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/icatholic/weixin/zipball/26800d84110e668f9f8124a4877d0ce1402b27c1",
+            "reference": "26800d84110e668f9f8124a4877d0ce1402b27c1",
+            "shasum": ""
+        },
+        "require": {
+            "guzzle/http": "~3.8.1",
+            "php": ">=5.2.11"
+        },
+        "time": "2014-03-11 11:37:25",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-0": {
+                "Weixin": "lib/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "icatholic",
+                "email": "youngyang@icatholic.net.cn",
+                "homepage": "http://github.com/icatholic/"
+            },
+            {
+                "name": "icatholic",
+                "email": "handsomegyr@gmail.com",
+                "homepage": "http://github.com/icatholic/"
+            }
+        ],
+        "description": "A simple PHP client library for weixin",
+        "homepage": "http://github.com/icatholic/weixin",
+        "keywords": [
+            "icatholic",
+            "weixin"
+        ]
+    },
+    {
+        "name": "lukaszr/matrixcode",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/lukaszr/Matrixcode.git",
+            "reference": "392ee0931c87132615c37306d8a443ffd0972e58"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/lukaszr/Matrixcode/zipball/392ee0931c87132615c37306d8a443ffd0972e58",
+            "reference": "392ee0931c87132615c37306d8a443ffd0972e58",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.2.0"
+        },
+        "time": "2012-06-07 12:52:52",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-0": {
+                "Matrixcode": "src"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "New-BSD"
+        ],
+        "description": "Matrixcode generator.",
+        "keywords": [
+            "matrixcode",
+            "qrcode"
+        ]
+    },
+    {
+        "name": "mobiledetect/mobiledetectlib",
+        "version": "2.8.0",
+        "version_normalized": "2.8.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/serbanghita/Mobile-Detect.git",
+            "reference": "cf8f99c1575e6fdb2df4bb65248d351395312479"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/serbanghita/Mobile-Detect/zipball/cf8f99c1575e6fdb2df4bb65248d351395312479",
+            "reference": "cf8f99c1575e6fdb2df4bb65248d351395312479",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.0.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "*"
+        },
+        "time": "2014-04-21 18:09:41",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "Mobile_Detect.php"
+            ],
+            "psr-0": {
+                "Detection": "namespaced/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Serban Ghita",
+                "email": "serbanghita@gmail.com",
+                "homepage": "http://mobiledetect.net",
+                "role": "Developer"
+            }
+        ],
+        "description": "Mobile_Detect is a lightweight PHP class for detecting mobile devices. It uses the User-Agent string combined with specific HTTP headers to detect the mobile environment.",
+        "homepage": "https://github.com/serbanghita/Mobile-Detect",
+        "keywords": [
+            "detect mobile devices",
+            "mobile",
+            "mobile detect",
+            "mobile detector",
+            "php mobile detect"
+        ]
+    },
+    {
+        "name": "phpmailer/phpmailer",
+        "version": "v5.2.7",
+        "version_normalized": "5.2.7.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/PHPMailer/PHPMailer.git",
+            "reference": "8717a79565b2c0ed67f851d70e1949febdf3b226"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/8717a79565b2c0ed67f851d70e1949febdf3b226",
+            "reference": "8717a79565b2c0ed67f851d70e1949febdf3b226",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.0.0"
+        },
+        "require-dev": {
+            "phpdocumentor/phpdocumentor": "*",
+            "phpunit/phpunit": "*"
+        },
+        "time": "2013-09-12 07:52:38",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "class.phpmailer.php",
+                "class.pop3.php",
+                "class.smtp.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "LGPL-2.1"
+        ],
+        "authors": [
+            {
+                "name": "Jim Jagielski",
+                "email": "jimjag@gmail.com"
+            },
+            {
+                "name": "Marcus Bointon",
+                "email": "phpmailer@synchromedia.co.uk"
+            },
+            {
+                "name": "Andy Prevost",
+                "email": "codeworxtech@users.sourceforge.net"
+            },
+            {
+                "name": "Brent R. Matzelle"
+            }
+        ],
+        "description": "PHPMailer is a full-featured email creation and transfer class for PHP"
+    },
+    {
         "name": "react/promise",
         "version": "dev-master",
         "version_normalized": "9999999-dev",
@@ -564,96 +655,5 @@
             }
         ],
         "description": "A lightweight implementation of CommonJS Promises/A for PHP"
-    },
-    {
-        "name": "firephp/firephp-core",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/firephp/firephp-core.git",
-            "reference": "bb0af2a62facaa07c08ed8ff9213f2966f32457b"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/firephp/firephp-core/zipball/bb0af2a62facaa07c08ed8ff9213f2966f32457b",
-            "reference": "bb0af2a62facaa07c08ed8ff9213f2966f32457b",
-            "shasum": ""
-        },
-        "time": "2014-02-26 18:33:14",
-        "type": "library",
-        "installation-source": "source",
-        "autoload": {
-            "classmap": [
-                "lib/FirePHPCore/FirePHP.class.php",
-                "lib/FirePHPCore/fb.php"
-            ],
-            "files": [
-                "lib/FirePHPCore/fb.php"
-            ]
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Christoph Dorn",
-                "email": "christoph@christophdorn.com",
-                "homepage": "http://christophdorn.com"
-            }
-        ],
-        "description": "Traditional FirePHPCore library for sending PHP variables to the browser.",
-        "homepage": "https://github.com/firephp/firephp-core"
-    },
-    {
-        "name": "icatholic/weixin",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/icatholic/weixin.git",
-            "reference": "26800d84110e668f9f8124a4877d0ce1402b27c1"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/icatholic/weixin/zipball/26800d84110e668f9f8124a4877d0ce1402b27c1",
-            "reference": "26800d84110e668f9f8124a4877d0ce1402b27c1",
-            "shasum": ""
-        },
-        "require": {
-            "guzzle/http": "~3.8.1",
-            "php": ">=5.2.11"
-        },
-        "time": "2014-03-11 11:37:25",
-        "type": "library",
-        "installation-source": "source",
-        "autoload": {
-            "psr-0": {
-                "Weixin": "lib/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "icatholic",
-                "email": "youngyang@icatholic.net.cn",
-                "homepage": "http://github.com/icatholic/"
-            },
-            {
-                "name": "icatholic",
-                "email": "handsomegyr@gmail.com",
-                "homepage": "http://github.com/icatholic/"
-            }
-        ],
-        "description": "A simple PHP client library for weixin",
-        "homepage": "http://github.com/icatholic/weixin",
-        "keywords": [
-            "icatholic",
-            "weixin"
-        ]
     }
 ]
