@@ -105,8 +105,8 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		// 订单生成的机器IP
 		$ip = getIp ();
 		$data ['client_ip'] = $ip;
-		$data ['spbill_create_ip'] = ($ip); // ip2long
-		                                    // 订单生成时间， 格式为yyyyMMddHHmmss
+		$data ['spbill_create_ip'] = ($ip);
+		// 订单生成时间， 格式为yyyyMMddHHmmss
 		$data ['time_start'] = date ( "YmdHis" );
 		$data ['uma_time_start'] = new MongoDate ();
 		// 订单失效时间， 格式为yyyyMMddHHmmss
@@ -375,7 +375,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$token = $config ['iWeixin'] ['token'];
 		$project_id = $config ['iWeixin'] ['project_id'];
 		
-		$tokenServer = new Weixin\Token\Server ();
+		$tokenServer = new Weixin\Token\Server ($config ['iWeixin'] ['pay'] ['appId'],$config ['iWeixin'] ['pay'] ['appSecret']);
 		$token = $tokenServer->getAccessToken ();
 		
 		$iWeixinPay = new Weixin\Pay ();

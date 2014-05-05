@@ -129,5 +129,45 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 		} catch ( Exception $e ) {
 		}
 	}
+	
+	public function orderAction() {
+		try {
+			$modelOrder = new Weixinshop_Model_Order ();
+			$OpenId="guoyongrong1234567890";
+			$ProductId = "goo1";
+			$body  = "说明";
+			$gprize = 1;
+			$gnum  = 1;
+			$notify_url = "http://wx.laiyifen.com/service/order/notify";
+			$attach = ""; 
+			$goods_tag = "";
+			$transport_fee = 0; 
+			$composite_sku_no = ""; 
+			$consignee_province = ""; 
+			$consignee_city = ""; 
+			$consignee_area = "";
+			$consignee_name = ""; 
+			$consignee_address = ""; 
+			$consignee_tel = ""; 
+			$consignee_zipcode = ""; 
+			$fee_type = 1;
+			$input_charset = "GBK"; 
+			$bank_type = "WX";
+			$signType = 'sha1';
+			$info = $modelOrder->createOrder($OpenId, $ProductId, $body, $gprize, $gnum, $notify_url, $attach, $goods_tag, $transport_fee, $composite_sku_no, $consignee_province, $consignee_city, $consignee_area, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode, $fee_type, $input_charset, $bank_type, $signType);
+			print_r ( $info );
+			die ( 'ok' );
+			
+			$ProductId = "goo1";
+			//$info = $modelPaySalePlan->getInfoByProductId($ProductId);
+			//print_r ( $info );
+				
+			$list = $modelPaySalePlan->getList("");
+			print_r ( $list );
+			die ( 'ok' );
+				
+		} catch ( Exception $e ) {
+		}
+	}
 }
 
