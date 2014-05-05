@@ -1585,3 +1585,7 @@ function isRequestRestricted($cacheKey, $timeSpanLimit = 300, $numLimit = 10)
     return $isRestrict;
 }
 
+// 将对象转化成数组
+function object2Array($object) { 
+	return @json_decode(@json_encode($object),1); 
+}
