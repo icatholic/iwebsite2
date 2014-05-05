@@ -124,7 +124,7 @@ class iDatabase
      *
      * @var string
      */
-    private $_local = true;
+    private $_local = false;
 
     /**
      *
@@ -139,6 +139,8 @@ class iDatabase
         $this->_password = $password;
         $this->_rand = sha1(time());
         $this->_key_id = $key_id;
+        
+        $this->setLocal(APPLICATION_ENV==='production' ? true : false);
     }
 
     /**
