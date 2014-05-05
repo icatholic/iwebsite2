@@ -5,6 +5,9 @@ class Weixinshop_Model_Consignee extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 根据ID获取信息
+	 *
+	 * @param string $id        	
+	 * @return array
 	 */
 	public function getInfoById($id) {
 		$query = array (
@@ -16,6 +19,9 @@ class Weixinshop_Model_Consignee extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 根据微信ID获取最后一条信息
+	 *
+	 * @param string $openid        	
+	 * @return array
 	 */
 	public function getLastInfoByOpenid($openid) {
 		$query = array (
@@ -43,7 +49,8 @@ class Weixinshop_Model_Consignee extends iWebsite_Plugin_Mongo {
 	 * @param string $tel        	
 	 * @param string $zipcode        	
 	 * @param string $openid        	
-	 * @param string $orderid        	
+	 * @param string $orderid  
+	 * @return array      	
 	 */
 	public function log($province, $city, $area, $name, $address, $tel, $zipcode, $openid, $orderid) {
 		$data = array ();
@@ -56,6 +63,6 @@ class Weixinshop_Model_Consignee extends iWebsite_Plugin_Mongo {
 		$data ['zipcode'] = $zipcode;
 		$data ['openid'] = $openid;
 		$data ['orderid'] = $orderid;
-		$this->insert ( $data );
+		return $this->insert ( $data );
 	}
 }
