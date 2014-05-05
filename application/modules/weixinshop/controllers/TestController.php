@@ -110,5 +110,24 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 		} catch ( Exception $e ) {
 		}
 	}
+	
+	public function paySalePlanAction() {
+		try {
+			$modelPaySalePlan = new Weixinshop_Model_PaySalePlan ();
+			$id = "536720c8499619eb108b45a4";
+			//$info = $modelPaySalePlan->getInfoById($id);
+			//print_r ( $info );
+			
+			$ProductId = "goo1";
+			//$info = $modelPaySalePlan->getInfoByProductId($ProductId);
+			//print_r ( $info );
+			
+			$list = $modelPaySalePlan->getList("");
+			print_r ( $list );
+			die ( 'ok' );
+			
+		} catch ( Exception $e ) {
+		}
+	}
 }
 

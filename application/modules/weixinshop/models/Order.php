@@ -78,7 +78,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$data ['spbill_create_ip'] = ($ip); // ip2long
 		// 订单生成时间， 格式为yyyyMMddHHmmss
 		$data ['time_start'] = date ( "YmdHis" );
-		$data ['uma_time_start'] = date ( 'Y-m-d H:i:s' );
+		$data ['uma_time_start'] = new MongoDate();
 		// 订单失效时间， 格式为yyyyMMddHHmmss
 		$data ['time_expire'] = "";
 		$data ['uma_time_expire'] = "1970-01-01 00:00:00";
@@ -120,7 +120,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		// nonceStr 随机串。
 		$data ['nonceStr'] = createRandCode ( 32 );
 		// 订单状态修改时间
-		$data ['status_time'] = date ( 'Y-m-d H:i:s' );
+		$data ['status_time'] = new MongoDate();
 		// 订单状态修改方式
 		$data ['status_change_by'] = 'create';
 		
@@ -253,7 +253,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		}
 		
 		// 订单状态修改时间
-		$data ['status_time'] = date ( 'Y-m-d H:i:s' );
+		$data ['status_time'] = new MongoDate();
 		// 订单状态修改方式
 		$data ['status_change_by'] = $status_change_by;
 		

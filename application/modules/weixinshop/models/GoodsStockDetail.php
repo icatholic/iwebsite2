@@ -15,7 +15,7 @@ class Weixinshop_Model_GoodsStockDetail extends iWebsite_Plugin_Mongo {
 		$data = array ();
 		$data ['out_trade_no'] = $out_trade_no;
 		$data ['gid'] = $gid;
-		$data ['stock_time'] = date ( 'Y-m-d H:i:s' );
+		$data ['stock_time'] = new MongoDate();
 		$data ['stock_num'] = $stock_num;
 		$info = $this->insert ( $data );
 		return $info;

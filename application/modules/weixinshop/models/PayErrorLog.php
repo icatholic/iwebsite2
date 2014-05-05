@@ -45,7 +45,7 @@ class Weixinshop_Model_PayErrorLog extends iWebsite_Plugin_Mongo {
 		$data = array ();
 		$data ['error_code'] = $e->getCode ();
 		$data ['error_message'] = $e->getMessage ();
-		$data ['log_time'] = date ( 'Y-m-d H:i:s' );
+		$data ['log_time'] = new MongoDate();
 		$result = $this->insert ( $data );
 		
 		return $result;
