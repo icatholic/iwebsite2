@@ -202,5 +202,48 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 		} catch ( Exception $e ) {
 		}
 	}
+	public function payFeedbackAction() {
+		try {
+			$modelPayFeedback = new Weixinshop_Model_PayFeedback ();
+			
+			$postStr = "<xml>
+				<OpenId><![CDATA[111222]]></OpenId>
+				<AppId><![CDATA[wwwwb4f85f3a797777]]></AppId>
+				<TimeStamp> 1369743511</TimeStamp>
+				<MsgType><![CDATA[request]]></MsgType>
+				<FeedBackId><![CDATA[5883726847655944563]]></FeedBackId>
+				<TransId><![CDATA[10123312412321435345]]></TransId>
+				<Reason><![CDATA[商品质量有问题]]></Reason>
+				<Solution><![CDATA[补发货给我]]></Solution>
+				<ExtInfo><![CDATA[明天六点前联系我18610847266]]></ExtInfo>
+	    		<PicInfo>
+				 <item><PicUrl><![CDATA[http://mmbiz.qpic.cn/mmbiz/49ogibiahRNtOk37iaztwmdgFbyFS9FUrqfodiaUAmxr4hOP34C6R4nGgebMalKuY3H35riaZ5vtzJh25tp7vBUwWxw/0]]></PicUrl></item>
+				 <item><PicUrl><![CDATA[http://mmbiz.qpic.cn/mmbiz/49ogibiahRNtOk37iaztwmdgFbyFS9FUrqfn3y72eHKRSAwVz1PyIcUSjBrDzXAibTiaAdrTGb4eBFbib9ibFaSeic3OIg/0]]></PicUrl></item>
+				 <item><PicUrl><![CDATA[]]></PicUrl></item>
+				 <item><PicUrl><![CDATA[]]></PicUrl></item>
+				 <item><PicUrl><![CDATA[]]></PicUrl></item>
+				 </PicInfo>
+				<AppSignature><![CDATA[bc6f341a223be36d2e97fafd5dcc2ad3635a855d]]> </AppSignature>
+				<SignMethod><![CDATA[sha1]]></SignMethod>
+				</xml>";
+			$postData = simplexml_load_string ( $postStr, 'SimpleXMLElement', LIBXML_NOCDATA );
+			$postData=object2Array($postData);
+			$picInfoList = array();
+			foreach ($postData['PicInfo']['item'] as $picInfo) {
+				if(!empty($picInfo['PicUrl'])){
+					$picInfoList[] =$picInfo['PicUrl'];
+				}
+			}
+			$postData['PicInfo'] = implode("\n", $picInfoList);
+			$calc_appSignature ="calc_appSignature";
+			
+			$info = $modelPayFeedback ->handle($postData ['AppId'], $postData ['TimeStamp'], $postData ['OpenId'], $postData ['MsgType'], $postData ['FeedBackId'], $postData ['TransId'], $postData ['Reason'], $postData ['Solution'], $postData ['ExtInfo'], $postData ['PicInfo'], $postData ['AppSignature'], $postData ['SignMethod'], $postStr, $calc_appSignature);
+			
+			print_r ( $info );
+			die ( 'ok' );
+		} catch ( Exception $e ) {
+		}
+	}
+	
 }
 

@@ -141,7 +141,7 @@ class Weixinshop_Model_PayNotifyResult extends iWebsite_Plugin_Mongo
 		//通知结果错误说明
 		$data['error'] = $notify_result['error'];
 		//通知时间		
-		$data['notify_time'] = date('Y-m-d H:i:s');
+		$data['notify_time'] = new MongoDate ();
 		
 		//计算所得签名
 		$data['calc_sign'] = $calc_sign;
