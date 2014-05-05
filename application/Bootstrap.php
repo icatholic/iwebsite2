@@ -324,12 +324,5 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         Zend_Search_Lucene::setResultSetLimit(0); // 0表示无限制，全部返回
     }
 
-    /**
-     * 数据库异步提交数据处理
-     */
-    protected function _initDbAsyncPlugin()
-    {
-        $this->_front->registerPlugin(new iWebsite_Plugin_Async());
-    }
 }
 
