@@ -178,7 +178,7 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 			// print_r ( $list );
 			// die ( 'ok' );
 			
-			$out_trade_no = "53672fba7f50eaf80a000001";
+			$out_trade_no = "644a7f2ddaf34bd51fd65c0584c48c75";
 			$info = $modelOrder->getInfoByOutTradeNo ( $out_trade_no );
 			$updateData = array (
 					"input_charset" => "GBK",
@@ -190,7 +190,7 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 					"total_fee" => "1",
 					"fee_type" => "1",
 					"transaction_id" => "1900000109201307020305773741",
-					"out_trade_no" => "2986872580246457300",
+					"out_trade_no" => "644a7f2ddaf34bd51fd65c0584c48c75",
 					"is_split" => "false",
 					"is_refund" => "false",
 					"attach" => "",
@@ -319,7 +319,7 @@ class Weixinshop_TestController extends Zend_Controller_Action {
 					'sign_type' => "MD5",
 					'service_version' => "1.0",
 					'input_charset' => "GBK",
-					'sign' => "182888B39A55A1D6DA9D6CA57CB11D5A",
+					'sign' => "83BAC17A398BB7C278234E558525A13C",
 					'sign_key_index' => 1,
 					'trade_mode' => 1,
 					'trade_state' => 0,

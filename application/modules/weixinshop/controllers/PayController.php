@@ -365,6 +365,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action {
 			$calc_sign = $checkSignRet ['sign'];
 			// $checkSignRet = array('isvalid'=>true);
 			if (empty ( $checkSignRet ['isvalid'] )) {
+				$strDatas = "";
 				foreach ( $data as $key => $value ) {
 					$strDatas .= "{$key}={$value} || ";
 				}
