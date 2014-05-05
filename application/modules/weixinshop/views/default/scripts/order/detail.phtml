@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no; address=no; email=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="<?php echo $this->getResourceUrl()?>css/main.css">
+</head>
+<body id="detail">
+	<header class="header">
+		<h1>订单详情<a href="<?php echo $this->config['global']['path']?>mobile/order/list"><img src="<?php echo $this->getResourceUrl()?>img/arrow-left.png" alt=""></a></h1>
+	</header>
+	<div class="wrapper">
+		<div class="cont">
+			<h3 class="row">
+				<p>订单号：<span><?php echo $this->orderInfo['out_trade_no']?></span></p>
+				<i class="payed">已支付</i>
+			</h3>
+			<table class="table">
+				<tr>
+					<td>总额：</td>
+					<td class="price">￥<em><?php echo showMoney($this->orderInfo['total_fee']/100)?></em></td>
+				</tr>
+				<tr>
+					<td>时间：</td>
+					<td><?php echo date("Y-m-d",strtotime($this->orderInfo['time_end']))?></td>
+				</tr>
+				<tr>
+					<td>收货地址：</td>
+					<td><?php echo $this->orderInfo['consignee_address']?></td>
+				</tr>
+				<tr>
+					<td>收货人：</td>
+					<td><?php echo $this->orderInfo['consignee_name']?></td>
+				</tr>
+			</table>
+			<div class="num"><span>共<em><?php echo $this->orderInfo['gnum']?></em>件</span>商品信息：</div>
+			<div class="pro">
+				<div class="pic">
+					<img src="<?php echo $this->goods['gpic1']?>" alt="">
+				</div>
+				<div class="det">
+					<h4>【<span><?php echo $this->goods['gname']?></span>】</h4>
+					<p><?php echo nl2br($this->goods['headline'])?></p>
+					<p class="pri"><span>￥<em><?php echo showMoney($this->goods['gprize']/100)?></em></span></p>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	 <script type="text/javascript">
+
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+             WeixinJSBridge.call('hideToolbar');
+        });
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+            // 发送给好友
+            WeixinJSBridge.on('menu:share:appmessage', function(argv){
+                shareFriendOrTimeline("sendAppMessage","send_msg");
+            });
+            // 分享到朋友圈
+            WeixinJSBridge.on('menu:share:timeline', function(argv){
+                shareFriendOrTimeline("shareTimeline","timeline");
+            });
+         }, false);
+
+        var shareFriendOrTimeline = function(invokeType,reportType) {
+            WeixinJSBridge.invoke(invokeType,{
+                //"appid":window.shareData.appid,
+                "img_url":'http://wx.laiyifen.com/html/m/img/share.jpg',
+                "img_width":"100",
+                "img_height":"100",
+                "link":"http://wx.laiyifen.com/mobile/goods/index",
+                "desc":"",
+                "title":"来伊份微商城19.9元限时包邮"
+                }, function(res) {
+                     _report(reportType, res.err_msg);
+            });
+        };
+    </script>
+</body>
+</html>

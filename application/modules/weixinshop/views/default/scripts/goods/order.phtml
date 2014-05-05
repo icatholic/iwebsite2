@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no; address=no; email=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" href="<?php echo $this->getResourceUrl()?>css/main.css?<?php echo time();?>">
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/jquery.query.js"></script>
+    <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
+    <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha1.js"></script>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/address.js"></script>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/tool.js?<?php echo time();?>"></script>
+    <script type="text/javascript">
+    var web_path = "<?php echo $this->config['global']['path']?>";
+    var source = 2;//weixin
+    </script>
+
+</head>
+<body id="confirm">
+	<header class="header">
+			<h1>确认订单<a href="<?php echo $this->config['global']['path']?>mobile/goods/index"><img src="<?php echo $this->getResourceUrl()?>img/arrow-left.png" alt=""></a></h1>
+	</header>
+	<div class="wrapper">
+		<div class="cont">
+			<section class="detail">
+				<div class="row">
+					<div class="col pic">
+						<img src="<?php echo $this->goods['gpic1']?>" alt="">
+					</div>
+					<div class="col det">
+					<h2>【<span><?php echo $this->goods['gname']?></span>】</h2>
+					<p><?php echo nl2br($this->goods['headline'])?></p>
+					<p class="pri">微信专享价<br><span>￥<em><?php echo showMoney($this->goods['gprize']/100)?></em></span></p>
+					<div class="form-number">
+						<a class="form-number-l">-</a>
+						<input type="number" value="1" maxlength="2" class="pro_num">
+						<a class="form-number-r">+</a>
+					</div>
+				</div>
+			</section>
+			<section class="addr" id="user_info">  
+				<div class="row"> 
+					<strong class="col">请选择收货地址：</strong><br/>
+          收货人　：<input type="text" value="<?php echo empty($this->consigneeInfo['name'])?"":$this->consigneeInfo['name']?>" class="name"><br/>
+          收货地址：<select id="province"></select><select id="city"></select><select id="district"></select><br/>
+          详细地址：<input type="text" value="<?php echo empty($this->consigneeInfo['address'])?"":$this->consigneeInfo['address']?>" class="address"><br/>
+          联系电话：<input type="text" value="<?php echo empty($this->consigneeInfo['tel'])?"":$this->consigneeInfo['tel']?>" class="mobile"><br/>
+          邮政编码：<input type="text" value="<?php echo empty($this->consigneeInfo['zipcode'])?"":$this->consigneeInfo['zipcode']?>" class="zipcode"><br/>
+					<!-- <a href="javascript:;"  class="col address_choose"><span></span></a> -->
+				</div>
+			</section>
+			<section class="total">
+				<div class="row">
+					<strong class="col">总计：</strong>
+					<div>
+						<p class="pri">￥<em><?php echo showMoney($this->goods['gprize']/100)?></em><span class="deliver_desc">(快递费<span>0</span>元)</span></p>
+					</div>
+				</div>
+			</section>
+			<a class="btn btn-pay" href="javascript:;" id="getBrandWCPayRequest">
+				<img src="<?php echo $this->getResourceUrl()?>img/confirm-order.png" alt="">
+			</a>
+		</div>
+	</div>
+	<script>
+
+    $(function(){
+    	  var price = $('.detail .pri em').html();
+        var total_price = $('.total .pri em');  
+        total_price.html(Number(price).toFixed(2));
+
+        //初始化省市区三级联动
+        var province = "<?php echo empty($this->consigneeInfo['province'])?"":$this->consigneeInfo['province']?>";
+        var city = "<?php echo empty($this->consigneeInfo['city'])?"":$this->consigneeInfo['city']?>";
+        var district = "<?php echo empty($this->consigneeInfo['area'])?"":$this->consigneeInfo['area']?>";
+        if(province==""){
+          $.address("province","city","district");
+        }else{
+          $.address("province","city","district",province,city,district);
+        }
+
+        $('.form-number-l').click(function(event) {
+          var input = $(this).siblings('input');
+          var value = parseInt(input.val());
+          value--;
+          if(value < 1) {
+          	value = 1;
+          }
+          input.val(value);
+          total_price.html((Number(price) * value).toFixed(2));
+        });
+
+        $('.form-number-r').click(function(event) {
+          var input = $(this).siblings('input');
+          var value = parseInt(input.val());
+          value++;
+          if(value > 10) {
+          	value = 10;
+          }
+          input.val(value);
+          total_price.html((Number(price) * value).toFixed(2));
+        });
+
+
+        $('.form-number input').on('input', function() {
+              var value = $(this).val().replace(/[^\d]+/,'');
+              if(parseInt($(this).val())-1<0){
+                $(this).val(1)
+                return false;
+              }
+              if(value == '' || value < 0) value = 1;
+              if(value > 10) value = 10;
+              $(this).val(value);
+              total_price.html((Number(price) * value).toFixed(2));
+          });
+                
+                    
+            function WCPayRequest(orderInfo){
+                var appid = orderInfo['appid'];
+                //alert('公众号名称:'+appid);
+
+                var timeStamp = orderInfo['timeStamp'];                                  
+                //alert('时间戳'+timeStamp);
+
+                var nonceStr = orderInfo['nonceStr'];                                  
+                //alert('随机串'+nonceStr);
+
+                var package2 = orderInfo['package'];
+                //alert('扩展包'+package2);
+
+                var signType = orderInfo['signType'];                                  
+                //alert('签名方式'+signType);
+
+                var paySign = orderInfo['AppSignature'];
+                //alert('微信签名'+paySign);
+                
+                //return;
+                WeixinJSBridge.invoke('getBrandWCPayRequest',{
+                      "appId" : appid, //公众号名称，由商户传入
+                      "timeStamp" : timeStamp, //时间戳
+                      "nonceStr" : nonceStr, //随机串
+                      "package" : package2,//扩展包
+                      "signType" : signType, //微信签名方式:1.sha1
+                      "paySign" : paySign //微信签名
+                   },
+                   function(res){                                             
+                       if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+                      	 //alert(res.err_msg);
+                           	// 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
+                               //因此微信团队建议，当收到ok返回时，向商户后台询问是否收到交易成功的通知，若收到通知，前端展示交易成功的界面；
+                              //若此时未收到通知，商户后台主动调用查询订单接口，查询订单的当前状态，并反馈给前端展示相应的界面。
+                             //orderQuery();
+                             window.location.href = web_path+'lyfwx_pay/result.php?showwxpaytitle=1';
+                           }else{
+                        	   if(res.err_msg == "get_brand_wcpay_request:fail" ) {
+                            	   //....
+                            	   alert('支付失败，请重新支付!');
+                        	   }
+                           }
+                                 
+                   }); 
+            }
+
+        	var SignType = "sha1";
+            var appId = "<?php echo $this->appId?>";
+            
+            function createOrder(){
+                    var params = {}; 
+                    params['ProductId'] = '<?php echo $this->goods['gid']?>';//商品号
+                    params['gnum'] = parseInt($(".pro_num").val());//购买数量  
+                    params['consignee_name'] = $("#user_info .name").val();//收货人
+                    params['consignee_address'] = $("#user_info .address").val();//收货地址   
+                    params['consignee_tel'] = $("#user_info .mobile").val();//收货人电话
+                    params['consignee_zipcode'] = $("#user_info .zipcode").val();//收货人邮编 
+
+                    params['consignee_province'] = $("#province").val(); 
+                    params['consignee_city']     = $("#city").val();   
+                    params['consignee_area'] = $("#district").val();
+
+                    console.log(params);
+                    try{
+                      $.ajax(
+                                {
+                                    url:web_path+'service/order/create',
+                                    type:'POST',
+                                    data:params,
+                                    dataType: "json",
+                                    timeout:20000,
+                                    success:function(data) {
+                                        $('a#getBrandWCPayRequest').attr("lock",0);
+                                        if(data.success) {
+                                            WCPayRequest(data.result);
+                                        }
+                                        else {
+                                            alert(data.message);
+                                        }  
+                                    },
+                                    error:function(){
+                                        alert("亲~~您的网络不给力！请过会再试！");
+                                        $('a#getBrandWCPayRequest').attr("lock",0);
+                                    }
+                                });
+                    }catch(err){
+                      alert(err)
+                    }
+            }
+            function checkMobile(mobile){
+              var pattern = /^(13|14|15|18)\d{9}$/;
+              return pattern.test(mobile);
+            }
+            function checkInfo(){
+              var ok = true;
+              $("#user_info input,#user_info select").each(function(i){
+                 if($(this).val()==""){
+                    alert("亲^_^ 支付前请完整填写好您的收货信息！请继续完善您的信息哦~~");
+                    ok = false;
+                    return false;
+                 }
+              });
+              return ok;
+            }
+            
+            $("#user_info .mobile").blur(function(){
+                if(!checkMobile($(this).val())){
+                   alert("手机格式填写错误！请重新填写哦^_^");
+                   $(this).focus();
+                }
+            });
+                
+            // 当微信内置浏览器完成内部初始化后会触发WeixinJSBridgeReady事件。
+            document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+                //公众号支付
+               $('a#getBrandWCPayRequest').click(function(e){
+                    //生成订单
+
+                    if(checkInfo() && !parseInt($(this).attr("lock"))){
+                       $(this).attr("lock",1);
+                        createOrder(); 
+                    }
+               });
+            }, false);
+
+            document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+                 WeixinJSBridge.call('hideToolbar');
+            });
+            document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+                // 发送给好友
+                WeixinJSBridge.on('menu:share:appmessage', function(argv){
+                    shareFriendOrTimeline("sendAppMessage","send_msg");
+                });
+                // 分享到朋友圈
+                WeixinJSBridge.on('menu:share:timeline', function(argv){
+                    shareFriendOrTimeline("shareTimeline","timeline");
+                });
+             }, false);
+
+            var shareFriendOrTimeline = function(invokeType,reportType) {
+               WeixinJSBridge.invoke(invokeType,{
+                //"appid":window.shareData.appid,
+                "img_url":'http://wx.laiyifen.com/html/m/img/share.jpg',
+                "img_width":"100",
+                "img_height":"100",
+                "link":"http://wx.laiyifen.com/mobile/goods/index",
+                "desc":"",
+                "title":"来伊份微商城19.9元限时包邮"
+                }, function(res) {
+                     _report(reportType, res.err_msg);
+            });
+        };
+   });
+    </script>
+
+</body>
+</html>

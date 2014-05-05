@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta content="width=device-width" name="viewport" />
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>微信商城-商品详细页面</title>
+<link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/main.css?<?php echo time();?>"/>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/jquery-2.0.3.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/jquery.query.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/swipe.js"></script>
+<script type="text/javascript">
+		var web_path = "<?php echo $this->config['global']['path']?>";
+</script>
+</head>
+<body id="index">
+    <header class="header_index">
+        <div class="header_wrapper_index">
+            <h2 class="logo"><img src="<?php echo $this->getResourceUrl()?>img/logo.jpg" alt="logo"></h2>
+            微信专享价
+            <nav>
+               <a href="<?php echo $this->config['global']['path']?>mobile/order/list">我的<br/>订单</a>
+               <a href="<?php echo $this->config['global']['path']?>mobile/index/help">帮助</a>
+            </nav>
+        </div>
+    </header>
+	<div class="wrapper">
+		<section class="main_box" id="box_pro">
+                <div id='slider' class='swipe'>
+                  <div class='swipe-wrap'>
+                       <div>
+                        <div class="pd58">
+                            <div class="pd04">
+                                <p class="pro_show">
+                                    <img src="<?php echo $this->goods['gpic1']?>">
+                                    <span class="img_promotion">
+                                        <img src="<?php echo $this->goods['prize_pic'] ?>">
+                                    </span>
+                                    <span class="timer_mask"></span>
+                                    <span class="timer">
+                                       <img src="<?php echo $this->getResourceUrl()?>img/clock.png">仅剩<em>00:00:00</em>
+                                    </span>
+                                    <span class="saleoff">
+                                    </span>
+                                </p>
+                                <div class="pro_info">
+                                    <h3>【<?php echo $this->goods['gname']?>】</h3>
+                                    <span class="pro_group pro_group2">
+                                    	<?php echo nl2br($this->goods['headline'])?>
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="btn w100p btn_buy_now btn_disable" gid="<?php echo $this->goods['gid']?>"><a href="javascript:;"><img src="<?php echo $this->getResourceUrl()?>img/icon_cart.png"><em>放入购物车</em></a></p>
+                            <p class="btn w100p btn_buy_now btn_disable" gid="<?php echo $this->goods['gid']?>"><a href="javascript:;"><img src="<?php echo $this->getResourceUrl()?>img/icon_cart.png"><em>立即购买</em></a></p>
+                            
+                            <div class="pro_detail pd04">
+                             <h4>商品描述 </h4>
+                               <p class="brief"><?php echo $this->goods['brief']?></p>
+                               <div class="desc">
+                                  <?php echo $this->goods['desc']?>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               
+        </section>
+	</div>
+    <input type="hidden" id="time_now" value="<?php echo $this->currentTime?>"/>
+    <input type="hidden" id="time_over" value="<?php echo $this->offsaleTime?>"/>
+    <div id="loading"></div>
+    <script type="text/javascript">
+
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+             WeixinJSBridge.call('hideToolbar');
+        });
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+            // 发送给好友
+            WeixinJSBridge.on('menu:share:appmessage', function(argv){
+                shareFriendOrTimeline("sendAppMessage","send_msg");
+            });
+            // 分享到朋友圈
+            WeixinJSBridge.on('menu:share:timeline', function(argv){
+                shareFriendOrTimeline("shareTimeline","timeline");
+            });
+         }, false);
+
+        var shareFriendOrTimeline = function(invokeType,reportType) {
+            WeixinJSBridge.invoke(invokeType,{
+                //"appid":window.shareData.appid,
+                "img_url":'http://wx.laiyifen.com/html/m/img/share.jpg',
+                "img_width":"100",
+                "img_height":"100",
+                "link":"http://wx.laiyifen.com/mobile/goods/index",
+                "desc":"",
+                "title":"来伊份微商城19.9元限时包邮"
+                }, function(res) {
+                     _report(reportType, res.err_msg);
+            });
+        };
+        $(function(){
+          $("#loading").height($("body").height());
+          // alert("<?php echo time();?>"+","+$("#time_now").val()+","+$("#time_over").val()+","+($("#time_over").val() - $("#time_now").val()));
+        })
+        window.onload = function(){
+
+            $("#loading").addClass('none');
+        }
+    </script>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/lyfen.js?t=<?php echo time()?>"></script>
+	<script language="javascript">
+		//购买
+		$(".btn_buy_now").on("click",
+	     function(){
+         if(!$(this).hasClass("btn_disable")){
+            window.location.href = web_path+'lyfwx_pay/order.php?showwxpaytitle=1&ProductId='+$(this).attr("gid");
+            return;
+         }
+  	   }
+	  );
+	</script>
+</body>
+</html>

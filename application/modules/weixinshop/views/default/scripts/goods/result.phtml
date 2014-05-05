@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no; address=no; email=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="<?php echo $this->getResourceUrl()?>css/main.css?<?php echo time();?>">
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/jquery-2.0.3.min.js"></script>
+</head>
+<body id="result">
+	<header class="header">
+		<h1>订单结果<a href="<?php echo $this->config['global']['path']?>mobile/goods/index"><img src="<?php echo $this->getResourceUrl()?>img/arrow-left.png" alt=""></a></h1>
+	</header>
+
+	<div class="wrapper">
+		<div class="cont">
+			<?php if(!empty($this->isOK)){?>
+			<div class="success">
+				<img src="<?php echo $this->getResourceUrl()?>img/order-success.png" alt="">
+			</div>
+			<?php }else{?>
+			<img src="<?php echo $this->getResourceUrl()?>img/order-failure.png" alt="">
+			<?php }?>
+			<a class="btn btn-return" href="#">
+				<img src="<?php echo $this->getResourceUrl()?>img/btn-return.png" alt="">
+			</a>
+			<a class="btn btn-share" href="#">
+				<img src="<?php echo $this->getResourceUrl()?>img/btn-share.png" alt="">
+			</a>
+		</div>
+	</div>
+    <div class="mask"></div>
+    <div class="tan_share">
+        <img src="<?php echo $this->getResourceUrl()?>img/bg_share.png">
+        <a href="javascript:;" class="btn_ok"></a>
+    </div>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/lyfen.js?t=<?php echo time()?>"></script>
+	 <script type="text/javascript">
+
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+             WeixinJSBridge.call('hideToolbar');
+        });
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+            // 发送给好友
+            WeixinJSBridge.on('menu:share:appmessage', function(argv){
+                shareFriendOrTimeline("sendAppMessage","send_msg");
+            });
+            // 分享到朋友圈
+            WeixinJSBridge.on('menu:share:timeline', function(argv){
+                shareFriendOrTimeline("shareTimeline","timeline");
+            });
+         }, false);
+
+        var shareFriendOrTimeline = function(invokeType,reportType) {
+            WeixinJSBridge.invoke(invokeType,{
+                //"appid":window.shareData.appid,
+                "img_url":'http://wx.laiyifen.com/html/m/img/share.jpg',
+                "img_width":"100",
+                "img_height":"100",
+                "link":"http://wx.laiyifen.com/mobile/goods/index",
+                "desc":"",
+                "title":"来伊份微商城19.9元限时包邮"
+                }, function(res) {
+                     _report(reportType, res.err_msg);
+            });
+        };
+    </script>
+</body>
+</html>
