@@ -1,8 +1,8 @@
 <?php
 class Weixinshop_Model_GoodsStockDetail extends iWebsite_Plugin_Mongo
 {
-	protected $name = 'iWeixinshop_GoodsStockDetail';
-	protected $dbName = 'fg0034';
+	protected $name = 'iWeixinpay_GoodsStockDetail';
+	protected $dbName = 'weixinshop';
 	
 	//处理
 	public function handle($out_trade_no,$gid,$stock_num)

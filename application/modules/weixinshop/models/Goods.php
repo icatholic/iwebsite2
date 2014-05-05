@@ -1,7 +1,7 @@
 <?php
 class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
-	protected $name = 'iWeixinshop_Goods';
-	protected $dbName = 'fg0034';
+	protected $name = 'iWeixinpay_Goods';
+	protected $dbName = 'weixinshop';
 	/*
 	 * 默认排序
 	 */
@@ -26,7 +26,7 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 	 */
 	public function getInfoById($id) {
 		$query = array (
-				'_id' => $id 
+				'_id' => myMongoId($id) 
 		);
 		$info = $this->findOne ( $query );
 		return $info;
@@ -83,7 +83,7 @@ class Weixinshop_Model_Goods extends iWebsite_Plugin_Mongo {
 				$data ['stock_num'] = 0 - $gnum;
 				$options = array (
 						"query" => array (
-								"_id" => $info ['_id'],
+								"_id" => myMongoId($info ['_id']),
 								'stock_num' => array (
 										'$gt' => 0 
 								) 

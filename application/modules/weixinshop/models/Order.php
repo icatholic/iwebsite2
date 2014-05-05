@@ -1,8 +1,8 @@
 <?php
 class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
 {
-	protected $name = 'iWeixinshop_Order';
-	protected $dbName = 'fg0034';
+	protected $name = 'iWeixinpay_Order';
+	protected $dbName = 'weixinshop';
 	/*
 	 * 默认排序
 	*/
@@ -25,7 +25,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
 	 */
 	public function getInfoById($id)
 	{
-		$query = array('_id'=>$id);
+		$query = array('_id'=>myMongoId($id));
 		$info = $this->findOne($query);
 		return $info;
 	}
