@@ -55,6 +55,15 @@ class Weixinshop_OrderController extends iWebsite_Controller_Action {
 		}
 	}
 	
+	
+	/**
+	 * 下单页面
+	 */	
+	public function createAction()
+	{
+		
+	}
+	
 	public function __destruct() {
 	}
 }

@@ -11,7 +11,7 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 	}
 	
 	/**
-	 * 显示购物车首页
+	 * 显示购物车结算
 	 */
 	public function indexAction() {
 		try {
@@ -24,23 +24,59 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 				$goodsIds = key ( $cart );
 				$goodsList = $modelGoods->getList ( 0, $goodsIds );
 				
-				foreach ( $goodsList as $info ) {
-					// 获取
-					$goodsId = $info['gid'];
-					if(array_key_exists($goodsId, $cart))//存在
+				foreach ($cart as $goodsId => &$value) {
+					if(array_key_exists($goodsId, $goodsList))//存在
 					{
-						$cart [$goodsId] ['name'] = $info ['gname']; // 商品名
-						$cart [$goodsId] ['prize'] = $info ['gprize']; // 商品单价
-						$cart [$goodsId] ['gpic'] = $info ['gpic1']; // 商品图片
-						$cart [$goodsId] ['amount'] = $info ['gprize']*$cart [$goodsId] ['num']; // 商品图片
-						$cart [$goodsId] ['stock_num'] = $info ['stock_num']; // 商品库存;
+						$info = $goodsList[$goodsId];
+						$value ['name'] = $info ['gname']; // 商品名
+						$value ['prize'] = $info ['gprize']; // 商品单价
+						$value ['gpic'] = $info ['gpic1']; // 商品图片
+						$value ['amount'] = $info ['gprize']*$value ['num']; // 商品图片
+						$value ['stock_num'] = $info ['stock_num']; // 商品库存;
 					}else{
-						
+						unset($value);//删除
 					}
 				}
 			}
 			$this->assign ( 'cart', $cart );
 		} catch ( Exception $e ) {
+			exit ( $this->response ( false, $e->getMessage () ) );
+		}
+	}
+	
+	/**
+	 * 显示结算页面
+	 */
+	public function settleAction() {
+		try {				
+			$OpenId = $this->getRequest ()->getCookie ( "FromUserName", '' );
+			if (empty ( $OpenId ) ) {
+				throw new Exception ( "微信号为空" );
+			}
+				
+			$ProductIds = trim ( $this->get ( 'ProductIds', '' ) ); // 商品号
+			if (empty ( $ProductIds )) {
+				throw new Exception ( "商品号为空" );
+			}
+			
+			$nums = trim ( $this->get ( 'nums', '' ) ); // 商品数量
+			if (empty ( $nums )) {
+				throw new Exception ( "商品数量为空" );
+			}
+			
+			$modelGoods = new Weixinshop_Model_Goods ();
+			$goodsInfo = $modelGoods->getInfoByGid ( $ProductId );
+			if (empty ( $goodsInfo )) {
+				throw new Exception ( "商品号无效" );
+			}
+			$this->assign ( "goods", $goodsInfo );
+				
+			// 获取发货人信息
+			$modelConsignee = new Weixinshop_Model_Consignee ();
+			$consigneeInfo = $modelConsignee->getLastInfoByOpenid ( $OpenId );
+			$this->assign ( "consigneeInfo", $consigneeInfo );
+		} catch ( Exception $e ) {
+			$this->errorLog->log ( $e );
 			exit ( $this->response ( false, $e->getMessage () ) );
 		}
 	}
