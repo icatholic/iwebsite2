@@ -149,13 +149,7 @@ class Weixinshop_TestController extends Zend_Controller_Action
             $modelOrder = new Weixinshop_Model_Order();
             $out_trade_no = "5368e9c47f50ea000a000000";
             $info = $modelOrder->getInfoByOutTradeNo($out_trade_no);
-            //print_r ( $info['details'] );
-            
-            $modelGoods = new Weixinshop_Model_Goods();
-            foreach ($info['details'] as $goods) {
-                // 减少库存数量
-                $modelGoods->subStock($info['out_trade_no'], $goods['_id']->__toString(), $goods['num']);
-            }
+            print_r ( $info['details'] );
             die ( 'ok' );
             
             $OpenId = "guoyongrong1234567890";
@@ -425,7 +419,7 @@ class Weixinshop_TestController extends Zend_Controller_Action
     }
     
     
-    public function checkoutAction()
+    public function createOrderAction()
     {
         try {
             $ProductIds=array('777111666');
@@ -451,6 +445,34 @@ class Weixinshop_TestController extends Zend_Controller_Action
             // 生成订单
             $modelOrder = new Weixinshop_Model_Order();
             $orderInfo = $modelOrder->createOrder($OpenId, $goodsList);
+            die("OK");
+        } catch (Exception $e) {
+            die( $e->getMessage());
+        }
+    }
+    
+    public function updateOrderAction()
+    {
+        try {
+            $client = new Client("http://iwebsite2/");
+            $client->setDefaultOption('query', array(
+                'orderId' => "5368eb82489619ed508b45a7",
+                'consignee_province' => "上海",
+                'consignee_city' => "上海",
+                'consignee_area' => "杨浦区",
+                'consignee_address' => "延吉中路",
+                'consignee_name' => "郭永荣",
+                'consignee_tel' => "13564100096",
+                'consignee_zipcode' => "200093"
+            ));
+            $request = $client->post('weixinshop/pay/update-order');
+            $response = $client->send($request);
+            if ($response->isSuccessful()) {
+                echo $response->getBody();
+            } else {
+                throw new Exception("微信服务器未有效的响应请求");
+            }
+            
             die("OK");
         } catch (Exception $e) {
             die( $e->getMessage());

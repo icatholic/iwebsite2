@@ -121,10 +121,6 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             if (empty($consignee_name)) {
                 throw new Exception("收货人为空");
             }
-            $consignee_address = trim($this->get('consignee_address', '')); // 收货地址
-            if (empty($consignee_address)) {
-                throw new Exception("收货地址为空");
-            }
             $consignee_tel = trim($this->get('consignee_tel', '')); // 收货人手机
             if (empty($consignee_tel)) {
                 throw new Exception("收货人手机为空");
@@ -155,7 +151,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             
             // 记录收货人信息
             $modelConsignee = new Weixinshop_Model_Consignee();
-            $modelConsignee->log($orderInfo['consignee_province'], $orderInfo['consignee_city'], $orderInfo['consignee_area'], $orderInfo['consignee_name'], $orderInfo['consignee_address'], $orderInfo['consignee_tel'], $orderInfo['consignee_zipcode'], $orderInfo['OpenId'], $orderInfo['_id']);
+            $modelConsignee->log($orderInfo['consignee_province'], $orderInfo['consignee_city'], $orderInfo['consignee_area'], $orderInfo['consignee_name'], $orderInfo['consignee_address'], $orderInfo['consignee_tel'], $orderInfo['consignee_zipcode'], $orderInfo['OpenId'], $orderInfo['_id']->__toString());
             
             $_SESSION['orderInfo'] = $orderInfo;
             exit($this->result("处理结束", $orderInfo));
