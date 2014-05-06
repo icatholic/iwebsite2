@@ -40,14 +40,14 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 			}
 			$this->assign ( 'cart', $cart );
 		} catch ( Exception $e ) {
-			exit ( $this->response ( false, $e->getMessage () ) );
+			exit($this->error($e->getCode(), $e->getMessage()));
 		}
 	}
 	
 	/**
-	 * 显示结算页面
+	 * 结算处理
 	 */
-	public function settleAction() {
+	public function checkoutAction() {
 		try {				
 			$OpenId = $this->getRequest ()->getCookie ( "FromUserName", '' );
 			if (empty ( $OpenId ) ) {
@@ -64,20 +64,34 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 				throw new Exception ( "商品数量为空" );
 			}
 			
+			//检查商品的信息
 			$modelGoods = new Weixinshop_Model_Goods ();
-			$goodsInfo = $modelGoods->getInfoByGid ( $ProductId );
-			if (empty ( $goodsInfo )) {
-				throw new Exception ( "商品号无效" );
+			$goodsList = $modelGoods->getList(0,$ProductIds);
+			foreach ($ProductIds as $index => $ProductId) {
+				if(!key_exists($ProductId, $goodsList))
+				{
+					throw new Exception ( "商品号{$ProductId}的商品不存在" );
+				}else{
+					//商品购买在库数检查
+					if (! $modelGoods->hasStock ( $ProductId, $nums[$index] )) {
+						throw new Exception ( "该商品已卖完" );
+					}
+					//通过的话
+					$goodsList[$ProductId]['num'] = $nums[$index];
+				}
 			}
-			$this->assign ( "goods", $goodsInfo );
-				
-			// 获取发货人信息
-			$modelConsignee = new Weixinshop_Model_Consignee ();
-			$consigneeInfo = $modelConsignee->getLastInfoByOpenid ( $OpenId );
-			$this->assign ( "consigneeInfo", $consigneeInfo );
+			
+			// 生成订单
+			$modelOrder = new Weixinshop_Model_Order();
+			$orderInfo = $modelOrder->createOrder($OpenId, $goodsList);
+			
+			//画面跳转至订单支付页面
+			$orderId = $orderInfo['_id']->__toString();
+			$url = $this->_helper->url ( "pay","order");
+    		$url=$url."?orderId={$orderId}";
+    		$this->_redirect ( $url );
 		} catch ( Exception $e ) {
-			$this->errorLog->log ( $e );
-			exit ( $this->response ( false, $e->getMessage () ) );
+			exit($this->error($e->getCode(), $e->getMessage()));
 		}
 	}
 	
@@ -90,11 +104,11 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 			$cart = self::getCookie ( 'cart' );
 			$cart = $cart ? $cart : array ();
 			if (empty ( $cart )) {
-				exit ( $this->response ( true, "购物车没有内容" ) );
+				exit ( $this->result ( true, "购物车没有内容" ) );
 			}
 			exit ( $this->response ( true, "OK", $cart ) );
 		} catch ( Exception $e ) {
-			exit ( $this->response ( false, $e->getMessage () ) );
+			exit($this->error($e->getCode(), $e->getMessage()));
 		}
 	}
 	
@@ -134,7 +148,7 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 			self::setCookie ( 'cart', $cart );
 			exit ( $this->response ( true, "OK", $cart ) );
 		} catch ( Exception $e ) {
-			exit ( $this->response ( false, $e->getMessage () ) );
+			exit($this->error($e->getCode(), $e->getMessage()));
 		}
 	}
 	
@@ -166,7 +180,7 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 			self::setCookie ( 'cart', $cart );
 			exit ( $this->response ( true, "OK", $cart ) );
 		} catch ( Exception $e ) {
-			exit ( $this->response ( false, $e->getMessage () ) );
+			exit($this->error($e->getCode(), $e->getMessage()));
 		}
 	}
 	
@@ -192,7 +206,7 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 			
 			exit ( $this->response ( true, "OK", $cart ) );
 		} catch ( Exception $e ) {
-			exit ( $this->response ( false, $e->getMessage () ) );
+			exit($this->error($e->getCode(), $e->getMessage()));
 		}
 	}
 	
@@ -206,7 +220,7 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 			self::setCookie ( 'cart', $cart );
 			exit ( $this->response ( true, "OK", $cart ) );
 		} catch ( Exception $e ) {
-			exit ( $this->response ( false, $e->getMessage () ) );
+			exit($this->error($e->getCode(), $e->getMessage()));
 		}
 	}
 	
@@ -233,7 +247,7 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 			}
 			exit ( $this->response ( true, "OK", $info ) );
 		} catch ( Exception $e ) {
-			exit ( $this->response ( false, $e->getMessage () ) );
+			exit($this->error($e->getCode(), $e->getMessage()));
 		}
 	}
 

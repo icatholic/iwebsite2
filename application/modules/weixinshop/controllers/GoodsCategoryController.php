@@ -21,18 +21,19 @@ class Weixinshop_GoodsCategoryController extends iWebsite_Controller_Action
     {
         try {
             $categoryId = trim($this->get('categoryId', '')); // 商品分类ID
-                                                              // 获取商品分类信息
+            
+            // 获取商品分类信息
             $modelGoodsCategory = new Weixinshop_Model_GoodsCategory();
             $categoryInfo = $modelGoodsCategory->getInfoById($categoryId);
             $this->assign("categoryInfo", $categoryInfo);
             
-            // 根据分类ID获取商品列表
-            $modelGoods = new Weixinshop_Model_Goods();
-            $goodsList = $modelGoods->getList($categoryid);
-            $this->assign("goodsList", $goodsList);
+//             // 根据分类ID获取商品列表
+//             $modelGoods = new Weixinshop_Model_Goods();
+//             $goodsList = $modelGoods->getList($categoryId);
+//             $this->assign("goodsList", $goodsList);
             $this->assign('currentTime', date("Y/m/d H:i:s"));
         } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
+            exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
 

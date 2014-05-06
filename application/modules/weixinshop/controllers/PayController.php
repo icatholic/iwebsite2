@@ -51,76 +51,121 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
         try {
             $OpenId = $this->getRequest()->getCookie("FromUserName", '');
             // $OpenId = trim ( $this->get ( 'OpenId', '' ) ); // 微信号
-            // if (empty ( $OpenId )) {
-            // throw new Exception ( "微信号为空" );
-            // }
-            $ProductId = trim($this->get('ProductId', '')); // 商品号
-            if (empty($ProductId)) {
-                throw new Exception("商品号为空");
+            if (empty ( $OpenId )) {
+            	throw new Exception ( "微信号为空" );
             }
-            $gnum = trim($this->get('gnum', '0')); // 购买数量
-            if (empty($gnum)) {
-                throw new Exception("购买数量为空");
-            }
-            
-            $consignee_province = trim($this->get('consignee_province', '')); // 收货人省份
-            if (empty($consignee_province)) {
-                throw new Exception("收货人省份为空");
-            }
-            $consignee_city = trim($this->get('consignee_city', '')); // 收货人城市
-            if (empty($consignee_city)) {
-                throw new Exception("收货人城市为空");
-            }
-            $consignee_area = trim($this->get('consignee_area', '')); // 收货人区或县
-            if (empty($consignee_area)) {
-                throw new Exception("收货人区或县为空");
-            }
-            $consignee_address = trim($this->get('consignee_address', '')); // 收货地址
-            if (empty($consignee_address)) {
-                throw new Exception("收货地址为空");
-            }
-            $consignee_name = trim($this->get('consignee_name', '')); // 收货人
-            if (empty($consignee_name)) {
-                throw new Exception("收货人为空");
-            }
-            $consignee_address = trim($this->get('consignee_address', '')); // 收货地址
-            if (empty($consignee_address)) {
-                throw new Exception("收货地址为空");
-            }
-            $consignee_tel = trim($this->get('consignee_tel', '')); // 收货人手机
-            if (empty($consignee_tel)) {
-                throw new Exception("收货人手机为空");
-            }
-            if (! isValidMobile($consignee_tel)) {
-                throw new Exception("收货人手机格式不正确");
+            $ProductIds = trim ( $this->get ( 'ProductIds', '' ) ); // 商品号
+            if (empty ( $ProductIds )) {
+            	throw new Exception ( "商品号为空" );
+            }            	
+            $nums = trim ( $this->get ( 'nums', '' ) ); // 商品数量
+            if (empty ( $nums )) {
+            	throw new Exception ( "商品数量为空" );
             }
             
-            $consignee_zipcode = trim($this->get('consignee_zipcode', '')); // 邮政编码
-            if (empty($consignee_zipcode)) {
-                throw new Exception("邮政编码为空");
-            }
-            $modelGoods = new Weixinshop_Model_Goods();
-            $goodsInfo = $modelGoods->getInfoByGid($ProductId);
-            if (empty($goodsInfo)) {
-                throw new Exception("商品号无效");
+            //检查商品的信息
+            $modelGoods = new Weixinshop_Model_Goods ();
+            $goodsList = $modelGoods->getList(0,$ProductIds);
+            foreach ($ProductIds as $index => $ProductId) {
+            	if(!key_exists($ProductId, $goodsList))
+            	{
+            		throw new Exception ( "商品号{$ProductId}的商品不存在" );
+            	}else{
+            		//商品购买在库数检查
+					if (! $modelGoods->hasStock ( $ProductId, $nums[$index] )) {
+						throw new Exception ( "该商品已卖完" );
+					}
+            		$goodsList[$ProductId]['num'] = $nums[$index];
+            	}
             }
             
             // 生成订单
             $modelOrder = new Weixinshop_Model_Order();
-            $orderInfo = $modelOrder->createOrder($OpenId, $ProductId, $goodsInfo['body'], $goodsInfo['gprize'], $gnum, $this->notify_url, $goodsInfo['attach'], $goodsInfo['goods_tag'], $goodsInfo['transport_fee'], $goodsInfo['composite_sku_no'], $consignee_province, $consignee_city, $consignee_area, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode);
-            
-            // 记录收货人信息
-            $modelConsignee = new Weixinshop_Model_Consignee();
-            $modelConsignee->log($orderInfo['consignee_province'], $orderInfo['consignee_city'], $orderInfo['consignee_area'], $orderInfo['consignee_name'], $orderInfo['consignee_address'], $orderInfo['consignee_tel'], $orderInfo['consignee_zipcode'], $orderInfo['OpenId'], $orderInfo['_id']);
+            $orderInfo = $modelOrder->createOrder($OpenId, $goodsList);
             
             $_SESSION['orderInfo'] = $orderInfo;
             exit($this->result("处理结束", $orderInfo));
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error(false, $e->getMessage()));
+            exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
-
+	
+    /**
+     * 生成订单
+     */
+    public function updateOrderAction()
+    {
+    	// http://iwebsite2/weixinshop/pay/update-order?jsonpcallback=?&orderId=xxx&ProductId=xxxx&gnum=xxxx
+    	try {
+    		$orderId = trim($this->get('orderId', '')); // 订单号
+    		if (empty($orderId)) {
+    			throw new Exception("订单号为空");
+    		}    		    
+    		$consignee_province = trim($this->get('consignee_province', '')); // 收货人省份
+    		if (empty($consignee_province)) {
+    			throw new Exception("收货人省份为空");
+    		}
+    		$consignee_city = trim($this->get('consignee_city', '')); // 收货人城市
+    		if (empty($consignee_city)) {
+    			throw new Exception("收货人城市为空");
+    		}
+    		$consignee_area = trim($this->get('consignee_area', '')); // 收货人区或县
+    		if (empty($consignee_area)) {
+    			throw new Exception("收货人区或县为空");
+    		}
+    		$consignee_address = trim($this->get('consignee_address', '')); // 收货地址
+    		if (empty($consignee_address)) {
+    			throw new Exception("收货地址为空");
+    		}
+    		$consignee_name = trim($this->get('consignee_name', '')); // 收货人
+    		if (empty($consignee_name)) {
+    			throw new Exception("收货人为空");
+    		}
+    		$consignee_address = trim($this->get('consignee_address', '')); // 收货地址
+    		if (empty($consignee_address)) {
+    			throw new Exception("收货地址为空");
+    		}
+    		$consignee_tel = trim($this->get('consignee_tel', '')); // 收货人手机
+    		if (empty($consignee_tel)) {
+    			throw new Exception("收货人手机为空");
+    		}
+    		if (! isValidMobile($consignee_tel)) {
+    			throw new Exception("收货人手机格式不正确");
+    		}
+    
+    		$consignee_zipcode = trim($this->get('consignee_zipcode', '')); // 邮政编码
+    		if (empty($consignee_zipcode)) {
+    			throw new Exception("邮政编码为空");
+    		}
+    		
+    		$modelOrder = new Weixinshop_Model_Order();
+    		$orderInfo = $modelOrder->getInfoById($orderId);
+    		if (empty($orderInfo)) {
+    			throw new Exception("订单不存在");
+    		}
+    		$isOK = $modelOrder->isOK($orderInfo['trade_state'], $orderInfo['trade_mode']);
+    		if ($isOK) {
+    			throw new Exception("订单已支付");
+    		}
+    		//或者是其他一些判断条件
+    		$transport_fee = 0;
+    		
+    		// 更新订单
+    		$orderInfo = $modelOrder->updateOrder($orderInfo, $transport_fee, $consignee_province, $consignee_city, $consignee_area, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode);
+    
+    		// 记录收货人信息
+    		$modelConsignee = new Weixinshop_Model_Consignee();
+    		$modelConsignee->log($orderInfo['consignee_province'], $orderInfo['consignee_city'], $orderInfo['consignee_area'], $orderInfo['consignee_name'], $orderInfo['consignee_address'], $orderInfo['consignee_tel'], $orderInfo['consignee_zipcode'], $orderInfo['OpenId'], $orderInfo['_id']);
+    
+    		$_SESSION['orderInfo'] = $orderInfo;
+    		exit($this->result("处理结束", $orderInfo));
+    	} catch (Exception $e) {
+    		$this->errorLog->log($e);
+    		exit($this->error($e->getCode(), $e->getMessage()));
+    	}
+    }
+    
     /**
      * Native（原生）支付回调商户后台获取package
      */
@@ -500,7 +545,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             exit($this->result("处理结束", $result));
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error(false, $e->getMessage()));
+            exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
 
@@ -621,7 +666,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             exit($this->result("处理结束"));
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error(false, $e->getMessage()));
+            exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
 
@@ -637,7 +682,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             exit($this->result("处理结束", $consigneeInfo));
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error(false, $e->getMessage()));
+            exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
 

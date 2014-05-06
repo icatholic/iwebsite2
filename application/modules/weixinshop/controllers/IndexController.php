@@ -25,7 +25,7 @@ class Weixinshop_IndexController extends iWebsite_Controller_Action
             $categorys = $modelGoodsCategory->getList("");
             $this->assign("categorys", $categorys);
         } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
+            exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
 
@@ -35,21 +35,7 @@ class Weixinshop_IndexController extends iWebsite_Controller_Action
     public function myAction()
     {
         try {} catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
-        }
-    }
-
-    /**
-     * 显示购物车画面
-     */
-    public function shoppingCartAction()
-    {
-        try {
-            // 获取购物车的内容
-            $shoppingCarts = array();
-            $this->assign("shoppingCarts", $shoppingCarts);
-        } catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
+            exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
 
@@ -59,7 +45,7 @@ class Weixinshop_IndexController extends iWebsite_Controller_Action
     public function helpAction()
     {
         try {} catch (Exception $e) {
-            exit($this->response(false, $e->getMessage()));
+            exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
 

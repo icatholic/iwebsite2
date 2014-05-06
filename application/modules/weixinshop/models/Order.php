@@ -51,54 +51,69 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 	
 	/**
 	 * 生成订单
-	 *
-	 * @param string $OpenId        	
-	 * @param string $ProductId        	
-	 * @param string $body        	
-	 * @param int $gprize        	
-	 * @param int $gnum        	
-	 * @param string $notify_url        	
-	 * @param string $attach        	
-	 * @param string $goods_tag        	
-	 * @param int $transport_fee        	
-	 * @param string $composite_sku_no        	
-	 * @param string $consignee_province        	
-	 * @param string $consignee_city        	
-	 * @param string $consignee_area        	
-	 * @param string $consignee_name        	
-	 * @param string $consignee_address        	
-	 * @param string $consignee_tel        	
-	 * @param string $consignee_zipcode        	
-	 * @param int $fee_type        	
-	 * @param string $input_charset        	
-	 * @param string $bank_type        	
-	 * @param string $signType        	
+	 * @param string $OpenId
+	 * @param array $goodsList
+	 * @param string $body
+	 * @param string $attach
+	 * @param string $goods_tag
+	 * @param int $transport_fee
+	 * @param string $consignee_province
+	 * @param string $consignee_city
+	 * @param string $consignee_area
+	 * @param string $consignee_name
+	 * @param string $consignee_address
+	 * @param string $consignee_tel
+	 * @param string $consignee_zipcode
+	 * @param int $fee_type
+	 * @param string $input_charset
+	 * @param string $bank_type
+	 * @param string $signType
 	 * @throws Exception
 	 * @return array
 	 */
-	public function createOrder($OpenId, $ProductId, $body, $gprize, $gnum, $notify_url, $attach = "", $goods_tag = "", $transport_fee = 0, $composite_sku_no = "", $consignee_province = "", $consignee_city = "", $consignee_area = "", $consignee_name = "", $consignee_address = "", $consignee_tel = "", $consignee_zipcode = "", $fee_type = 1, $input_charset = "GBK", $bank_type = "WX", $signType = 'sha1') {
+	public function createOrder($OpenId, array $goodsList,  $body = "", $attach = "", $goods_tag = "", $transport_fee = 0,  $consignee_province= "", 
+			$consignee_city = "", $consignee_area = "", $consignee_name = "", $consignee_address = "", $consignee_tel = "", $consignee_zipcode = "", $fee_type = 1, $input_charset = "GBK", $bank_type = "WX", $signType = 'sha1') {
+		
 		$data = array ();
 		// 商户系统内部的订单号
 		$data ['out_trade_no'] = $this->createOutTradeNo ();
 		
 		// 微信号
 		$data ['OpenId'] = $OpenId;
+		
 		// 商品号
-		$data ['ProductId'] = $ProductId;
+		$data ['ProductId'] = "";
+		
 		// 商品详细
+		if(empty($body)){
+			foreach ($goodsList as $key => $goods) {
+				$body .= $goods['gname'];//商品详细
+			}
+		}
 		$data ['body'] = $body;
+		
 		// 附加数据
 		$data ['attach'] = $attach;
 		// 商品标记，优惠券时可能用到
 		$data ['goods_tag'] = $goods_tag;
 		// 购买数量
+		$gnum=0;
+		foreach ($goodsList as &$goods) {
+			$gnum += $goods['num'];
+		}
 		$data ['gnum'] = $gnum;
+		
 		// 商品单价
-		$data ['gprize'] = $gprize;
+		$data ['gprize'] = 0;
+		
 		// 物流费用，单位为分
 		$data ['transport_fee'] = $transport_fee;
 		// 商品费用，单位为分
-		$data ['product_fee'] = $gprize * $gnum;
+		$product_fee=0;
+		foreach ($goodsList as $goods) {
+			$product_fee += $goods['num']*$goods['gprize'];
+		}
+		$data ['product_fee'] = $product_fee;//$gprize * $gnum;
 		// 订单总金额
 		$data ['total_fee'] = $data ['transport_fee'] + $data ['product_fee'];
 		
@@ -113,6 +128,8 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$data ['time_expire'] = "";
 		$data ['uma_time_expire'] = new MongoDate ( 0 );
 		// 通知URL
+		$config = Zend_Registry::get('config');
+		$notify_url = $config['iWeixin']['pay']['notify_url'];
 		$data ['notify_url'] = $notify_url;
 		
 		// 现金支付币种,取值：1（人民币）
@@ -173,7 +190,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$data ['uma_order_status'] = 0; // 未支付
 		                                
 		// 组合SKU编号
-		$data ['composite_sku_no'] = $composite_sku_no;
+		$data ['composite_sku_no'] = "";
 		
 		// 获取Package
 		$weixinPay = $this->getWeixinPayInstance ();
@@ -191,15 +208,91 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		$data ['AppSignature'] = $weixinPay->getPaySign ( $para );
 		$data ['signType'] = 'sha1';
 		
-		$modelGoods = new Weixinshop_Model_Goods ();
-		if (! $modelGoods->hasStock ( $data ['ProductId'], $data ['gnum'] )) {
-			throw new Exception ( "该商品已卖完" );
-		}
+		$data ['details'] = $goodsList;
 		$newOrderInfo = $this->insert ( $data );
 		
-		// 减少库存数量
-		$modelGoods->subStock ( $newOrderInfo ['out_trade_no'], $newOrderInfo ['ProductId'], $newOrderInfo ['gnum'] );
+		foreach ($newOrderInfo ['details'] as $goods) {
+			// 减少库存数量
+			$modelGoods->subStock ( $newOrderInfo ['out_trade_no'], $goods ['_id']->__toString(), $goods ['num'] );
+		}
 		
+		return $newOrderInfo;
+	}
+	
+	/**
+	 * 修改订单的信息
+	 * @param array $orderInfo
+	 * @param int $transport_fee
+	 * @param string $consignee_province
+	 * @param string $consignee_city
+	 * @param string $consignee_area
+	 * @param string $consignee_name
+	 * @param string $consignee_address
+	 * @param string $consignee_tel
+	 * @param string $consignee_zipcode
+	 */
+	public function updateOrder($orderInfo,  $transport_fee,  $consignee_province, 
+			$consignee_city, $consignee_area, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode )
+	{
+		$data = array();
+		// 收货人省份
+		$data ['consignee_province'] = $consignee_province;
+		// 收货人城市
+		$data ['consignee_city'] = $consignee_city;
+		// 收货人区或县
+		$data ['consignee_area'] = $consignee_area;
+		// 收货人地址
+		$data ['consignee_address'] = $consignee_address;
+		// 收货人
+		$data ['consignee_name'] = $consignee_name;
+		// 收货人地址
+		$data ['consignee_tel'] = $consignee_tel;
+		// 收货人
+		$data ['consignee_zipcode'] = $consignee_zipcode;
+		// 物流费用，单位为分
+		$data ['transport_fee'] = $transport_fee;
+		// 商品费用，单位为分
+		$data ['product_fee'] = $orderInfo['product_fee'];
+		// 订单总金额
+		$data ['total_fee'] = $data ['product_fee'] + $data ['transport_fee'];
+		
+		// 通知URL
+		$config = Zend_Registry::get('config');
+		$notify_url = $config['iWeixin']['pay']['notify_url'];
+		$data ['notify_url'] = $notify_url;		
+		
+		// timeStamp 时间戳；
+		$data ['timeStamp'] = time ();
+		// nonceStr 随机串。
+		$data ['nonceStr'] = createRandCode ( 32 );
+		
+		// 获取Package
+		$weixinPay = $this->getWeixinPayInstance ();
+		$data ['package'] = $weixinPay->getPackage4JsPay ( $orderInfo ['body'], $orderInfo ['attach'], $orderInfo ['out_trade_no'], $data ['total_fee'], $data ['notify_url'], $orderInfo ['spbill_create_ip'], $orderInfo ['time_start'], $orderInfo ['time_expire'], $data ['transport_fee'], $data ['product_fee'], $orderInfo ['goods_tag'], $orderInfo ['bank_type'], $orderInfo ['fee_type'], $orderInfo ['input_charset'] );
+		
+		$data ['appid'] = $weixinPay->getAppId ();
+		// 获取app_signature
+		$para = array (
+				"appid" => $data ['appid'],
+				"appkey" => $weixinPay->getPaySignKey (),
+				"package" => $data ['package'],
+				"timestamp" => $data ['timeStamp'],
+				"noncestr" => $data ['nonceStr']
+		);
+		$data ['AppSignature'] = $weixinPay->getPaySign ( $para );
+		
+		$options = array (
+				"query" => array (
+						"_id" => $orderInfo ['_id'] 
+				),
+				"update" => array (
+						'$set' => $data 
+				),
+				"new" => true 
+		);
+		$return_result = $this->findAndModify ( $options );
+		
+		$newOrderInfo = $return_result ["value"];
 		return $newOrderInfo;
 	}
 	
@@ -307,13 +400,6 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo {
 		
 		$newOrderInfo = $return_result ["value"];
 		
-		// 判断支付完成
-		$isOK = $this->isOK ( $newOrderInfo ['trade_state'], $newOrderInfo ['trade_mode'] );
-		if ($isOK) {
-			// //减少库存数量
-			// $modelGoods = new Weixinshop_Model_Goods();
-			// $modelGoods->subStock($newOrderInfo['out_trade_no'],$newOrderInfo['ProductId'],$newOrderInfo['gnum']);
-		}
 		return $newOrderInfo;
 	}
 	
