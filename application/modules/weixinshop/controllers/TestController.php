@@ -147,6 +147,17 @@ class Weixinshop_TestController extends Zend_Controller_Action
     {
         try {
             $modelOrder = new Weixinshop_Model_Order();
+            $out_trade_no = "5368e9c47f50ea000a000000";
+            $info = $modelOrder->getInfoByOutTradeNo($out_trade_no);
+            //print_r ( $info['details'] );
+            
+            $modelGoods = new Weixinshop_Model_Goods();
+            foreach ($info['details'] as $goods) {
+                // 减少库存数量
+                $modelGoods->subStock($info['out_trade_no'], $goods['_id']->__toString(), $goods['num']);
+            }
+            die ( 'ok' );
+            
             $OpenId = "guoyongrong1234567890";
             $ProductId = "777111666";
             $body = "说明";
@@ -410,6 +421,39 @@ class Weixinshop_TestController extends Zend_Controller_Action
             }
         } catch (Exception $e) {
             echo $e->getMessage();
+        }
+    }
+    
+    
+    public function checkoutAction()
+    {
+        try {
+            $ProductIds=array('777111666');
+            $nums = array(1);
+            $OpenId = "test1";
+            
+            // 检查商品的信息
+            $modelGoods = new Weixinshop_Model_Goods();
+            $goodsList = $modelGoods->getList(0, $ProductIds);
+            foreach ($ProductIds as $index => $ProductId) {
+                if (! key_exists($ProductId, $goodsList)) {
+                    throw new Exception("商品号{$ProductId}的商品不存在");
+                } else {
+                    // 商品购买在库数检查
+                    if (! $modelGoods->hasStock($ProductId, $nums[$index])) {
+                        throw new Exception("该商品已卖完");
+                    }
+                    // 通过的话
+                    $goodsList[$ProductId]['num'] = $nums[$index];
+                }
+            }
+            
+            // 生成订单
+            $modelOrder = new Weixinshop_Model_Order();
+            $orderInfo = $modelOrder->createOrder($OpenId, $goodsList);
+            die("OK");
+        } catch (Exception $e) {
+            die( $e->getMessage());
         }
     }
 }
