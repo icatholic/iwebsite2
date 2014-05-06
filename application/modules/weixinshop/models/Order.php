@@ -122,7 +122,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
             $product_fee += $goods['num'] * $goods['gprize'];
         }
         $data['product_fee'] = $product_fee; // $gprize * $gnum;
-        
+                                             
         // 订单总金额
         $data['total_fee'] = $data['transport_fee'] + $data['product_fee'];
         
