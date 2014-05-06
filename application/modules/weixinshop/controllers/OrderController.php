@@ -100,13 +100,6 @@ class Weixinshop_OrderController extends iWebsite_Controller_Action {
 				throw new Exception("微信号为空");
 			}
 	
-			$modelGoods = new Weixinshop_Model_Goods();
-			$goodsInfo = $modelGoods->getInfoByGid($orderInfo['ProductId']);
-			if (empty($goodsInfo)) {
-				throw new Exception("商品号无效");
-			}
-			$this->assign("goods", $goodsInfo);
-	
 			// 查询订单的状态
 			$out_trade_no = $orderInfo['out_trade_no'];
 			if (strlen($out_trade_no) < 1) {
