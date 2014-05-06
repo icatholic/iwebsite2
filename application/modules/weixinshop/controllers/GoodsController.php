@@ -21,7 +21,7 @@ class Weixinshop_GoodsController extends iWebsite_Controller_Action
     {
         try {
             $goodsId = trim($this->get('goodsId', '')); // 商品ID
-            
+                                                        
             // 根据分类ID获取商品列表
             $modelGoods = new Weixinshop_Model_Goods();
             $info = $modelGoods->getInfoByGid($goodsId);
@@ -45,7 +45,6 @@ class Weixinshop_GoodsController extends iWebsite_Controller_Action
             exit($this->error($e->getCode(), $e->getMessage()));
         }
     }
-
 
     public function __destruct()
     {}
