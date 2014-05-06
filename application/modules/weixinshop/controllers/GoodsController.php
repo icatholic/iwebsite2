@@ -39,7 +39,7 @@ class Weixinshop_GoodsController extends iWebsite_Controller_Action
             // 根据分类ID获取商品列表
             $modelGoods = new Weixinshop_Model_Goods();
             $goodsList = $modelGoods->getList(1); // 内购
-            $this->assign("goodsList", $info);
+            $this->assign("goodsList", $goodsList);
         } catch (Exception $e) {
             exit($this->response(false, $e->getMessage()));
         }

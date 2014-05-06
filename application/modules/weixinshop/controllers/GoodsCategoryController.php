@@ -28,7 +28,7 @@ class Weixinshop_GoodsCategoryController extends iWebsite_Controller_Action
             
             // 根据分类ID获取商品列表
             $modelGoods = new Weixinshop_Model_Goods();
-            $goodsList = $modelGoods->getList($categoryid);
+            $goodsList = $modelGoods->getList($categoryId);
             $this->assign("goodsList", $goodsList);
             $this->assign('currentTime', date("Y/m/d H:i:s"));
         } catch (Exception $e) {
