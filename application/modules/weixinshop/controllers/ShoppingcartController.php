@@ -65,7 +65,7 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action {
 			}
 			
 			$modelGoods = new Weixinshop_Model_Goods ();
-			$goodsInfo = $modelGoods->getInfoByGid ( $ProductId );
+			$goodsInfo = $modelGoods->getInfoByGid ( $ProductIds );
 			if (empty ( $goodsInfo )) {
 				throw new Exception ( "商品号无效" );
 			}
