@@ -49,7 +49,6 @@ class Weixinshop_OrderController extends iWebsite_Controller_Action
             }
             
             $this->assign("orderInfo", $orderInfo);
-            $this->assign("goods", $orderInfo['detials']);
         } catch (Exception $e) {
             exit($this->error($e->getCode(), $e->getMessage()));
         }
