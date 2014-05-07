@@ -129,6 +129,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $db['weixin'] = new iDatabase('52dce281489619e902452b46', '11111111', '53059145489619c06a3dc01f');
         $db['lottery'] = new iDatabase('52dce281489619e902452b46', '11111111', '53059145489619c06a3dc01f');
         $db['weixinshop'] = new iDatabase('52dce281489619e902452b46', '11111111', '53059145489619c06a3dc01f');
+        $db['iFreight'] = new iDatabase('52dce281489619e902452b46', '11111111', '53059145489619c06a3dc01f');
         Zend_Registry::set('db', $db);
     }
 
