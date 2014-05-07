@@ -1606,3 +1606,14 @@ function createRandCode ($n = 32)
 	}
 	return $code;
 }
+
+/**
+ * 获取某个方法的参数的唯一签名
+ * @param string $class
+ * @param string $method
+ * @return number
+ */
+function getClassMethodArgumentCacheKey($class,$method) {
+    $obj = new ReflectionMethod($class,$method);
+    return crc32(serialize($obj->getParameters()));
+}
