@@ -8,19 +8,22 @@ class Tools_Model_Freight_Price extends iWebsite_Plugin_Mongo
     protected $dbName = 'iFreight';
 
     /**
-     *
-     * @param number $code            
+     * 计算单品的运价
+     * 
+     * @param string $template            
+     * @param string $campany            
+     * @param string $warehouse            
+     * @param int $unit            
+     * @param int $area            
      * @param int $number            
      */
-    /**
-     * 
-     * @param string $campany 物流公司
-     * @param string $warehouse 仓库编号
-     * @param int $area 地理位置信息
-     * @param int $number 购买数量
-     */
-    public function getPrice($campany, $warehouse, $area, $number)
+    public function getPrice($template, $campany, $warehouse, $unit, $area, $number)
     {
-        
+        $info = $this->findAll(array(
+            'template' => $template,
+            'campany' => $campany,
+            'warehouse'=>$warehouse,
+            'unit'=>$unit
+        ));
     }
 }
