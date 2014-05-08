@@ -48,10 +48,6 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
      */
     public function getToken()
     {
-        // $cacheKey = md5($_SERVER['HTTP_HOST'] . __METHOD__);
-        // $cache = Zend_Registry::get('cache');
-        // $token = $cache->load($cacheKey);
-        // if (! $token) {
         $token = $this->findOne(array(
             'is_product' => true
         ));
@@ -62,28 +58,25 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
         
         if (isset($token['access_token_expire']) && ! empty($token['is_advanced'])) {
             if ($token['access_token_expire']->sec <= time()) {
-                if (empty($token['appid']) || empty($token['appid'])) {
-                    throw new Exception('应用编号和密钥未设定');
-                }
-                
-                $objToken = new Weixin\Token\Server($token['appid'], $token['secret']);
-                $arrToken = $objToken->getAccessToken();
-                $cmd = array();
-                $cmd['query'] = array(
-                    '_id' => $token['_id']
-                );
-                $cmd['update'] = array(
-                    '$set' => array(
-                        'access_token' => $arrToken['access_token'],
-                        'access_token_expire' => new MongoDate(time() + 7200)
-                    )
-                );
-                $rst = $this->findAndModify($cmd);
-                if ($rst['ok'] == 1) {
-//                     $cache->save($rst['value'], $cacheKey, array(), $this->_expire);
-                    return $rst['value'];
-                } else {
-                    throw new Exception(json_encode($rst));
+                if (! empty($token['appid']) && ! empty($token['appid'])) {
+                    $objToken = new Weixin\Token\Server($token['appid'], $token['secret']);
+                    $arrToken = $objToken->getAccessToken();
+                    $cmd = array();
+                    $cmd['query'] = array(
+                        '_id' => $token['_id']
+                    );
+                    $cmd['update'] = array(
+                        '$set' => array(
+                            'access_token' => $arrToken['access_token'],
+                            'access_token_expire' => new MongoDate(time() + 7200)
+                        )
+                    );
+                    $rst = $this->findAndModify($cmd);
+                    if ($rst['ok'] == 1) {
+                        return $rst['value'];
+                    } else {
+                        throw new Exception(json_encode($rst));
+                    }
                 }
             }
             
@@ -91,27 +84,28 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
             if ((time() + $this->_expire) > $token['access_token_expire']->sec) {
                 $this->_expire = $token['access_token_expire']->sec - time();
             }
-            
-            // $cache->save($token, $cacheKey, array(), $this->_expire);
+
         }
-        // }
         return $token;
     }
-    
+
     /**
      * 发送通知消息给某人
-     * 
-     * @param string $to openid
-     * @param string $content 内容
+     *
+     * @param string $to
+     *            openid
+     * @param string $content
+     *            内容
      */
-    public function notify($to,$content) {
+    public function notify($to, $content)
+    {
         $appConfig = $this->getToken();
         $weixin = new Weixin\Client();
         if (! empty($appConfig['access_token'])) {
             $weixin->setAccessToken($appConfig['access_token']);
             $weixin->getMsgManager()
-            ->getCustomSender()
-            ->sendText($to, $content);
+                ->getCustomSender()
+                ->sendText($to, $content);
             return true;
         }
         return false;
