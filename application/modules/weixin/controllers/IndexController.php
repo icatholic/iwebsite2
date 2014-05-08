@@ -125,13 +125,7 @@ class Weixin_IndexController extends Zend_Controller_Action
                 if ($Event == 'subscribe') { // 关注事件
                                              // EventKey 事件KEY值，qrscene_为前缀，后面为二维码的参数值
                     
-                    $userPoint = function () use($FromUserName)
-                    {
-                        $modelUserPoint = new Campaign_Model_User_Point();
-                        // $modelUserPoint->subscribe($FromUserName);
-                        $modelUserPoint->setWeixinInstance($this->_weixin);
-                        $modelUserPoint->incInvitePoint($FromUserName);
-                    };
+
                     
                     // Ticket 二维码的ticket，可用来换取二维码图片
                     if (! empty($Ticket) || ! empty($EventKey)) { // 扫描带参数二维码事件 用户未关注时，进行关注后的事件推送
@@ -145,8 +139,8 @@ class Weixin_IndexController extends Zend_Controller_Action
                                 $sence_id = $EventKey;
                             }
                         
-                        if ($sence_id == 2 || $sence_id == 1) {
-                            $content = '扫码2';
+                        if($sence_id>0) {
+                            $content = "扫码{$sence_id}";
                         }
                         // 不同项目特定的业务逻辑结束
                     }
@@ -181,11 +175,6 @@ class Weixin_IndexController extends Zend_Controller_Action
                 }
             }
             
-            if ($content == '首访回复1' || $content == '首访回复') {
-                $rst = doGet("http://kotexcrm.umaman.com/campaign/coupon/index?FromUserName={$FromUserName}");
-                // $rst = json_decode($rst,true);
-            }
-            
             // 语音逻辑开始
             if ($MsgType == 'voice') { // 接收普通消息----语音消息 或者接收语音识别结果
                                        // MediaID 语音消息媒体id，可以调用多媒体文件下载接口拉取该媒体
@@ -205,17 +194,6 @@ class Weixin_IndexController extends Zend_Controller_Action
                 $PicUrl = isset($datas['PicUrl']) ? trim($datas['PicUrl']) : '';
                 
                 // 使用闭包，提高相应速度
-                $recordUserUploadImage = function () use($datas)
-                {
-                    if (! empty($this->_appConfig['access_token'])) {
-                        $mediaInfo = $this->_weixin->getMediaManager()->download($datas['MediaId']);
-                    }
-                    $picture = $this->_app->uploadBytes($mediaInfo['name'], $mediaInfo['bytes']);
-                    $picture_id = $picture['file']['_id']['$id'];
-                    $objImage = new Campaign_Model_Calendar_Pics();
-                    $objImage->record($datas['FromUserName'], $picture_id);
-                    return true;
-                };
                 $content = '默认图片回复';
             }
             // 图片逻辑结束
@@ -272,45 +250,9 @@ class Weixin_IndexController extends Zend_Controller_Action
                 return false;
             }
             
-            // 我的优惠券查询
-            $couponModel = new Campaign_Model_User_Coupon();
-            if ($content == '我的优惠' || $content == '我的优惠券') {
-                // 获取用户的优惠券
-                $msg = $couponModel->getCouponsMsg($FromUserName);
-                if ($msg !== false) {
-                    $response = $this->_weixin->getMsgManager()
-                        ->getReplySender()
-                        ->replyText($msg);
-                } else {
-                    $content = "没有优惠券";
-                    $response = followUrl($this->anwser($content), array(
-                        'FromUserName' => $FromUserName
-                    ));
-                }
-            }             // 获取优惠券的优惠码
-            elseif (preg_match("/^[a-y]{1}$/", $content)) {
-                // 查询优惠券信息
-                $coupon = $couponModel->getCouponByAlpha($FromUserName, $content);
-                $msg = $coupon['code'];
-                if ($msg !== false) {
-                    if ($coupon['coupon_name'] == '一号店10元抵用券') {
-                        $msg = "亲，你的一号店抵用券代码是：{$msg}\n可通过电脑登陆1号店官网，激活抵用券代码进行兑换。";
-                    }
-                    $response = $this->_weixin->getMsgManager()
-                        ->getReplySender()
-                        ->replyText($msg);
-                } else {
-                    $content = "默认回复";
-                    $response = followUrl($this->anwser($content), array(
-                        'FromUserName' => $FromUserName
-                    ));
-                }
-            } else {
-                $response = followUrl($this->anwser($content), array(
+            $response = followUrl($this->anwser($content), array(
                     'FromUserName' => $FromUserName
-                ));
-            }
-            
+            ));
             // 输出响应结果
             echo $response;
             
@@ -332,12 +274,9 @@ class Weixin_IndexController extends Zend_Controller_Action
              */
             
             // 将一些执行很慢的逻辑，放在这里执行，提高微信的响应速度开始
-            if (isset($recordUserUploadImage)) {
-                $recordUserUploadImage();
-            }
-            if (isset($userPoint)) {
-                $userPoint();
-            }
+
+            
+            
             // 将一些执行很慢的逻辑，放在这里执行，提高微信的响应速度结束
             
             return true;
