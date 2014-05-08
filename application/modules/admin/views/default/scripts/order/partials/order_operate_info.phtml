@@ -1,0 +1,65 @@
+<ul style="padding:0; margin: 0; list-style-type:none; color: #CC0000;">
+<li style="border: 1px solid #CC0000; background: #FFFFCC; padding: 10px; margin-bottom: 5px;" ><?php echo $this->order_info;?></li>
+</ul>
+<!-- 订单列表 -->
+<form method="post" action="<?php echo $this->form_act_batch;?>" name="listForm" onsubmit="return check()">
+<div class="list-div" id="listDiv">
+
+<table cellpadding="3" cellspacing="1">
+<tr>
+<th>订单号</th>
+<th><?php echo $this->translate('all_status');?></th>
+<th><?php echo $this->translate('op_you_can');?></th>
+<th><?php echo $this->translate('handler');?></th>
+<tr>
+<?php foreach ($this->order_list as $key => $order) {?>
+<tr>
+<td valign="top" nowrap="nowrap">
+<input type="checkbox" name="ids[]" value="<?php echo $order["order_id"];?>" ><?php echo $order["out_trade_no"];?>
+</td>
+<td align="center" valign="top" nowrap="nowrap">
+<?php echo $this->getTranslateList('os',$order["order_status"]);?>,
+<?php echo $this->getTranslateList('ps',$order["pay_status"]);?>,
+<?php echo $this->getTranslateList('ss',$order["shipping_status"]);?>
+</td>
+<td align="center" valign="top" nowrap="nowrap">
+<?php 
+$order_list_fail = '';
+foreach($order->operable_list as $key => $value)
+{
+	if($key != $this->operation)
+	{
+		$order_list_fail .= $this->translate('op_' . $key) . ',';
+	}
+}
+echo $order_list_fail;
+?>
+</td>
+<td align="center" valign="top"nowrap="nowrap">
+<a href="<?php echo $this->config['global']['path']?>admin/order/info/order_id/<?php echo $order["order_id"];?>"><?php echo $this->translate('detail');?></a>
+</td>
+</tr>
+<?php } ?>
+</table>
+</div>
+</form>
+
+<script language="JavaScript">
+function check()
+{
+	var snArray = new Array();
+	var eles = document.forms['listForm'].elements;
+	for (var i=0; i<eles.length; i++)
+	{
+		if (eles[i].tagName == 'INPUT' && eles[i].type == 'checkbox' && eles[i].checked && eles[i].value != 'on')
+		{
+			snArray.push(eles[i].value);
+		}
+	}
+	if (snArray.length == 0)
+	{
+		return false;
+	}
+	return true;
+}
+</script>

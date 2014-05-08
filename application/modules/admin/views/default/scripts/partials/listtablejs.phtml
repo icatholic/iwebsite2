@@ -1,0 +1,19 @@
+<script type="text/javascript" language="JavaScript">
+<!--
+$(document).ready(function(){
+	listTable.url = '<?php echo $this->getControllerUrl();?>';
+	listTable.imagepath = '<?php echo $this->getResourceUrl();?>/';
+	<?php if($this->record_count){?>
+	listTable.recordCount = <?php echo $this->record_count;?>;
+	<?php }?>
+	<?php if($this->page_count){?>
+	listTable.pageCount = <?php echo $this->page_count;?>;
+	<?php }?>
+	<?php if($this->filter){?>
+	<?php foreach ($this->filter as $key => $item) {?>
+	listTable.filter.<?php echo $key;?> = '<?php echo $item;?>';
+	<?php }?>
+	<?php }?>
+});
+//-->
+</script>

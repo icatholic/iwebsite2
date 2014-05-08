@@ -1,0 +1,114 @@
+<html>
+<head>
+	<script src="jquery.js"></script>
+	<script src="listtolist.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#select1").dblclick(function() {$.listTolist("select1","select2","move",false);});
+			$("#select2").dblclick(function() {$.listTolist("select2","select1","move",false);});
+			$("#moveright").click(function() {$.listTolist("select1","select2","move",false);});
+			$("#moverightall").click(function() {$.listTolist("select1","select2","move",true);});
+			$("#moveleft").click(function() {$.listTolist("select2","select1","move",false);});
+			$("#moveleftall").click(function() {$.listTolist("select2","select1","move",true);});
+			
+			$("#select3").dblclick(function() {$.listTolist("select3","select4","append",false);});
+			$("#select4").dblclick(function() {$.listTolist("select4","select3","append",false);});
+			$("#appendright").click(function() {$.listTolist("select3","select4","append",false);});
+			$("#appendrightall").click(function() {$.listTolist("select3","select4","append",true);});
+			$("#appendleft").click(function() {$.listTolist("select4","select3","append",false);});
+			$("#appendleftall").click(function() {$.listTolist("select4","select3","append",true);});
+			
+			$("#select5").dblclick(function() {$.list2list("select5","select6",false);});
+			$("#select6").dblclick(function() {$.list2list("select6","select5",false);});
+			$("#transright").click(function() {$.list2list("select5","select6",false);});
+			$("#transrightall").click(function() {$.list2list("select5","select6",true);});
+			$("#transleft").click(function() {$.list2list("select6","select5",false);});
+			$("#transleftall").click(function() {$.list2list("select6","select5",true);});
+		});
+	</script>
+</head>
+<body>
+<form action="#" method="post">
+	<p>移动(move)测试:</p>
+	<label for="select1">select1</label>
+	<select id="select1" style="width:100px" size="5" multiple="multiple">
+		<option value="1">number 1</option>
+		<option value="2">number 2</option>
+		<option value="3">number 3</option>
+		<option value="4">number 4</option>
+		<option value="5">number 5</option>
+		<option value="6">number 6</option>
+		<option value="7">number 7</option>
+		<option value="8">number 8</option>
+		<option value="9">number 9</option>
+		<option value="10">number 10</option>
+		<option value="11">number 11</option>
+	</select>
+	<label for="select2">select2</label>
+	<select id="select2" style="width:100px" size="5" multiple="multiple">
+		<option value="4">number 4</option>
+		<option value="5">number 5</option>
+		<option value="6">number 6</option>
+	</select>
+	<br />
+	<button id="moveright">右移</button>
+	<button id="moverightall">全部右移</button>
+	<button id="moveleft">左移</button>
+	<button id="moveleftall">全部左移</button>
+	<hr />
+	<p>追加(append)测试:</p>
+	<label for="select3">select3</label>
+	<select id="select3" style="width:100px" size="5" multiple="multiple">
+		<option value="1">number 1</option>
+		<option value="2">number 2</option>
+		<option value="3">number 3</option>
+		<option value="4">number 4</option>
+		<option value="5">number 5</option>
+		<option value="6">number 6</option>
+		<option value="7">number 7</option>
+		<option value="8">number 8</option>
+		<option value="9">number 9</option>
+		<option value="10">number 10</option>
+		<option value="11">number 11</option>
+	</select>
+	<label for="select4">select4</label>
+	<select id="select4" style="width:100px" size="5" multiple="multiple">
+		<option value="4">number 4</option>
+		<option value="5">number 5</option>
+		<option value="6">number 6</option>
+	</select>
+	<br />
+	<button id="appendright">右移</button>
+	<button id="appendrightall">全部右移</button>
+	<button id="appendleft">左移</button>
+	<button id="appendleftall">全部左移</button>
+	<hr />
+	<p>list2list测试:</p>
+	<label for="select5">select5</label>
+	<select id="select5" style="width:100px" size="5" multiple="multiple">
+		<option value="1">number 1</option>
+		<option value="2">number 2</option>
+		<option value="3">number 3</option>
+		<option value="4">number 4</option>
+		<option value="5">number 5</option>
+		<option value="6">number 6</option>
+		<option value="7">number 7</option>
+		<option value="8">number 8</option>
+		<option value="9">number 9</option>
+		<option value="10">number 10</option>
+		<option value="11">number 11</option>
+	</select>
+	<label for="select6">select6</label>
+	<select id="select6" style="width:100px" size="5" multiple="multiple">
+		<option value="4">number 4</option>
+		<option value="5">number 5</option>
+		<option value="6">number 6</option>
+	</select>
+	<br />
+	<button id="transright">右移</button>
+	<button id="transrightall">全部右移</button>
+	<button id="transleft">左移</button>
+	<button id="transleftall">全部左移</button>
+</form>
+</body>
+</html>

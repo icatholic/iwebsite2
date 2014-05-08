@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="robots" content="noindex, nofollow" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>管理中心</title>
+<link rel="stylesheet" href="<?php echo $this->config['global']['path']?>scripts/jquery/ui-theme/jquery-ui-1.8.custom.css" type="text/css" media="screen" />
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-ui-1.8.custom.min.js"></script>
+
+<style type="text/css" media="all">
+body {
+  margin: 0;
+  padding: 0;
+  background: #80BDCB;
+  cursor: e-resize;
+}
+</style>
+<script type="text/javascript" language="JavaScript">
+<!--
+var arrowrightImage = "<?php echo $this->getResourceUrl()?>img/arrow_right.gif";
+var arrowleftImage = "<?php echo $this->getResourceUrl()?>img/arrow_left.gif";
+
+function toggleMenu()
+{
+	frmBody = parent.document.getElementById('frame-body');
+	imgArrow = document.getElementById('img');
+
+	if (frmBody.cols == "0, 10, *")
+	{
+		frmBody.cols="200, 10, *";
+		imgArrow.src = arrowleftImage;
+	}
+	else
+	{
+		frmBody.cols="0, 10, *";
+		imgArrow.src = arrowrightImage;
+	}
+}
+
+var orgX = 0;
+function document_mousedown(e)
+{
+	var evt = e;
+	orgX = evt.clientX;
+	if ($.browser.msie) document.getElementById('tbl').setCapture();
+};
+
+function document_mouseup(e)
+{
+	var evt = e;
+	frmBody = parent.document.getElementById('frame-body');
+	frmWidth = frmBody.cols.substr(0, frmBody.cols.indexOf(','));
+	frmWidth = (parseInt(frmWidth) + (evt.clientX - orgX));
+	frmBody.cols = frmWidth + ", 10, *";
+	if ($.browser.msie) document.releaseCapture();
+};
+
+$(document).ready(function(){
+	$(this).mousedown(document_mousedown);
+	$(this).mouseup(document_mouseup);
+});
+
+//-->
+</script>
+</head>
+<body>
+<table height="100%" cellspacing="0" cellpadding="0" id="tbl">
+<tr height="100%">
+<td valign="middle">
+<a href="javascript:toggleMenu();"><img src="<?php echo $this->getResourceUrl()?>img/arrow_left.gif" width="10" height="30" id="img" border="0" /></a>
+</td>
+</tr>
+</table>
+</body>
+</html>

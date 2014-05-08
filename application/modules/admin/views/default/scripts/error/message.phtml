@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="robots" content="noindex, nofollow" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>管理中心 -  系统信息</title>
+<link href="<?php echo $this->getResourceUrl()?>css/general.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="<?php echo $this->getResourceUrl()?>css/main.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="<?php echo $this->config['global']['path']?>js/calendar/calendar.css" media="screen" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="<?php echo $this->config['global']['path']?>scripts/jquery/ui-theme/jquery-ui-1.8.custom.css" type="text/css" media="screen" />
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-ui-1.8.custom.min.js"></script>
+</head>
+<body>
+<h1>
+<span class="action-span1"><a href="<?php echo $this->config['global']['path']?>/admin/index/main">管理中心</a> </span>
+<span id="search_id" class="action-span1"></span>
+<div style="clear:both"></div>
+</h1>
+
+<div class="list-div">
+<div style="background:#FFF; padding: 20px 50px; margin: 2px;">
+<table align="center" width="400">
+<tr>
+<td width="50" valign="top">
+<?php if($this->msg_type==0){?>
+<img src="<?php echo $this->getResourceUrl()?>img/information.gif" width="32" height="32" border="0" alt="information" />
+<?php } elseif ($this->msg_type==1){?>
+<img src="<?php echo $this->getResourceUrl()?>img/warning.gif" width="32" height="32" border="0" alt="warning" />
+<?php } else {?>
+<img src="<?php echo $this->getResourceUrl()?>img/confirm.gif" width="32" height="32" border="0" alt="confirm" />
+<?php } ?>
+</td>
+<td style="font-size: 14px; font-weight: bold"><?php echo $this->msg_detail; ?></td>
+</tr>
+<tr>
+<td></td>
+<td id="redirectionMsg"><?php if($this->auto_redirect){echo '如果您不做出选择，将在 <span id="spanSeconds">3</span> 秒后跳转到第一个链接地址。';}?></td>
+</tr>
+<tr>
+<td></td>
+<td>
+<ul style="margin:0; padding:0 10px" class="msg-link">
+<?php foreach ($this->links as $link) {?>
+<li><a href="<?php echo $link['href']; ?>" 
+<?php if(isset($link['target'])){?> target="<?php echo $link['target']; ?>"<?php }?>>
+<?php echo $link['text']; ?>
+</a></li>
+<?php }?>
+</ul>
+</td>
+</tr>
+</table>
+</div>
+</div>
+
+<?php if($this->auto_redirect){?>
+<script language="JavaScript">
+<!--
+var seconds = 3;
+var defaultUrl = "<?php echo $this->default_url;?>";
+
+$(document).ready(function(){
+	if (defaultUrl == 'javascript:history.go(-1)' && window.history.length == 0)
+	{
+		document.getElementById('redirectionMsg').innerHTML = '';
+		return;
+	}
+	window.setInterval(redirection, 1000);
+});
+
+function redirection()
+{
+	if (seconds <= 0)
+	{
+		window.clearInterval();
+		return;
+	}
+	seconds --;
+	document.getElementById('spanSeconds').innerHTML = seconds;
+
+	if (seconds == 0)
+	{
+		window.clearInterval();
+		location.href = defaultUrl;
+	}
+}
+//-->
+</script>
+<?php }?>
+</body>
+</html>

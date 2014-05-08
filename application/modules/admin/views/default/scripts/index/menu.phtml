@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="robots" content="noindex, nofollow" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>管理中心</title>
+<link href="<?php echo $this->getResourceUrl()?>css/general.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="<?php echo $this->getResourceUrl()?>css/menu.css" media="screen" rel="stylesheet" type="text/css" />
+
+<link rel="stylesheet" href="<?php echo $this->config['global']['path']?>scripts/jquery/ui-theme/jquery-ui-1.8.custom.css" type="text/css" media="screen" />
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-ui-1.8.custom.min.js"></script>
+<script language="JavaScript">
+<!--
+var collapse_all = "闭合";
+var expand_all = "展开";
+var menuplusImage = '<?php echo $this->getResourceUrl()?>img/menu_plus.gif';
+var menuminusImage = '<?php echo $this->getResourceUrl()?>img/menu_minus.gif';
+var cookieName = "_<?php echo $this->admin_id;?>";
+//-->
+</script>
+
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>js/utils.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/json/json2.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/jquery/menu.js"></script>
+</head>
+
+<body>
+<div id="tabbar-div">
+<p>
+<span style="float:right; padding: 3px 5px;" >
+<a href="javascript:toggleCollapse();">
+<img id="toggleImg" src="<?php echo $this->getResourceUrl()?>img/menu_minus.gif" width="9" height="9" border="0" alt="闭合" />
+</a>
+</span>
+<span class="tab-front" id="menu-tab">菜单</span>
+</p>
+</div>
+<div id="main-div">
+<div id="menu-list">
+<ul>
+
+<li class="explode"  key="04_order"  name="menu">订单管理 
+<ul>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/order/list" target="main-frame">订单列表</a></li>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/order/orderquery" target="main-frame">订单查询</a></li>
+</ul>
+</li>
+</div>
+<div id="help-div" style="display:none">
+<h1 id="help-title"></h1>
+<div id="help-content"></div>
+</div>
+</div>
+</body>
+</html>

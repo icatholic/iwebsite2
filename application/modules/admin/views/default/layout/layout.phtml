@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="robots" content="noindex, nofollow" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>管理中心</title>
+<link href="<?php echo $this->getResourceUrl()?>css/general.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="<?php echo $this->getResourceUrl()?>css/main.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="<?php echo $this->config['global']['path']?>js/calendar/calendar.css" media="screen" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="<?php echo $this->config['global']['path']?>scripts/jquery/ui-theme/jquery-ui-1.8.custom.css" type="text/css" media="screen" />
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-ui-1.8.custom.min.js"></script>
+
+<script language="JavaScript">
+<!--	
+//这里把JS用到的所有语言都赋值到这里
+var process_request = "正在处理您的请求...";
+var goodsname_not_null = "商品名不能为空！";
+var todolist_caption = "记事本";
+var todolist_autosave = "自动保存";
+var todolist_save = "保存";
+var todolist_clear = "清除";
+var todolist_confirm_save = "是否将更改保存到记事本？";
+var todolist_confirm_clear = "是否清空内容？";
+var remove_confirm = "删除订单将清除该订单的所有信息。您确定要这么做吗？";
+var confirm_merge = "您确实要合并这两个订单吗？";
+var input_price = "自定义价格";
+var pls_search_user = "请搜索并选择会员";
+var confirm_drop = "确认要删除该商品吗？";
+var invalid_goods_number = "商品数量不正确";
+var pls_search_goods = "请搜索并选择商品";
+var pls_select_area = "请完整选择所在地区";
+var pls_select_shipping = "请选择配送方式";
+var pls_select_payment = "请选择支付方式";
+var pls_select_pack = "请选择包装";
+var pls_select_card = "请选择贺卡";
+var pls_input_note = "请您填写备注！";
+var pls_input_cancel = "请您填写取消原因！";
+var pls_select_refund = "请选择退款方式！";
+var pls_select_agency = "请选择办事处！";
+var pls_select_other_agency = "该订单现在就属于这个办事处，请选择其他办事处！";
+var loading = "加载中...";
+var expand_all = "展开";
+var collapse_all = "闭合";
+var shop_name_not_null = "商店名称不能为空";
+var good_name_not_null = "商品名称不能为空";
+var good_category_not_null = "商品分类不能为空";
+var good_number_not_number = "商品数量不是数值";
+var good_price_not_number = "商品价格不是数值";
+
+var Sunday = "星期日";
+var Monday = "星期一";
+var Tuesday = "星期二";
+var Wednesday = "星期三";
+var Thursday = "星期四";
+var Friday = "星期五";
+var Saturday = "星期六";
+var Sun = "日";
+var Mon = "一";
+var Tue = "二";
+var Wed = "三";
+var Thu = "四";
+var Fri = "五";
+var Sat = "六";
+var January = "一月";
+var February = "二月";
+var March = "三月";
+var April = "四月";
+var May = "五月";
+var June = "六月";
+var July = "七月";
+var Aguest = "八月";
+var September = "九月";
+var October = "十月";
+var November = "十一月";
+var December = "十二月";
+var Jan = "一月";
+var Feb = "二月";
+var Mar = "三月";
+var Apr = "四月";
+var Jun = "六月";
+var Jul = "七月";
+var Agu = "八月";
+var Sep = "九月";
+var Oct = "十月";
+var Nov = "十一月";
+var Dec = "十二月";
+var calendar_help = "帮助";
+var calendar_about1 = "选择日期:\r\n- 点击 \xab, \xbb 按钮选择年份\r\n- 点击 ";
+var calendar_about2 = " 按钮选择月份\r\n- 长按以上按钮可从菜单中快速选择年份或月份";
+var calendar_about_time = "\r\n\r\n选择时间:\r\n- 点击小时或分钟可使改数值加一\r\n- 按住Shift键点击小时或分钟可使改数值减一\r\n- 点击拖动鼠标可进行快速选择";
+var prev_year = "上一年 (按住出菜单)";
+var prev_month = "上一月 (按住出菜单)";
+var go_today = "转到今日";
+var next_month = "下一月 (按住出菜单)";
+var next_year = "下一年 (按住出菜单)";
+var sel_date = "选择日期";
+var drag_to_move = "拖动";
+var part_today = "(今日)";
+var day_first = "最左边显示";
+var calendar_close = "关闭";
+var calendar_today = "今日";
+var time_part = "(Shift-)点击鼠标或拖动改变值";
+var calendar_wk = "周";
+var calendar_day = "日";
+var calendar_time = "时间";
+
+var span_edit_help = "点击修改内容";
+var href_sort_help = "点击对列表排序";
+
+var root_path = '<?php echo $this->config['global']['path']?>';
+//-->
+</script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>js/utils.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/json/json2.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/jquery/listdiv.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/jquery/listtable.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/jquery/selectzone.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/jquery/listtolist.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/colorselector.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/validator.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>js/calendar/calendar.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/jquery/tab.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>js/jquery/region.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/common.js"></script>
+
+<script language="JavaScript">
+<!--
+/**
+ * 标签上鼠标移动事件的处理函数
+ * @return
+ */
+function document_mouseenter(event)
+{
+	var obj = event.target;
+	if (typeof(obj.onclick) == 'function' && 
+			obj.onclick.toString().indexOf('listTable.edit') != -1)
+	{
+		obj.title = span_edit_help;
+		obj.style.cssText = 'background: #278296;';
+		obj.onmouseout = function(e)
+		{
+			this.style.cssText = '';
+		};
+	}
+	else if (typeof(obj.href) != 'undefined' && 
+			obj.href.indexOf('listTable.sort') != -1)
+	{
+		obj.title = href_sort_help;
+	}
+}
+
+function document_scroll(event)
+{
+	document.getElementById('popMsg').style.top = (document.body.scrollTop + document.body.clientHeight - document.getElementById('popMsg').offsetHeight) + "px";
+};
+
+/* *
+ * 显示载入信息
+ */
+function showLoader(event,request,settings)
+{
+  document.getElementsByTagName('body').item(0).style.cursor = "wait";
+
+  if (top.frames['header-frame'])
+  {
+    top.frames['header-frame'].document.getElementById("load-div").style.display = "block";
+  }
+  else
+  {
+    var obj = document.getElementById('loader');
+
+    if ( ! obj && process_request)
+    {
+      obj = document.createElement("DIV");
+      obj.id = "loader";
+      obj.innerHTML = process_request;
+
+      document.body.appendChild(obj);
+    }
+  }
+}
+
+/* *
+ * 隐藏载入信息
+ */
+function hideLoader(event,request,settings)
+{
+  document.getElementsByTagName('body').item(0).style.cursor = "auto";
+  if (top.frames['header-frame'])
+  {
+    setTimeout(function(){top.frames['header-frame'].document.getElementById("load-div").style.display = "none"}, 10);
+  }
+  else
+  {
+    try
+    {
+      var obj = document.getElementById("loader");
+      obj.style.display = 'none';
+      document.body.removeChild(obj);
+    }
+    catch (ex)
+    {}
+  }
+}
+
+$(document).ready(function(){
+	$(this).mouseover(document_mouseenter);
+	$(this).scroll(document_scroll);
+	$(this).ajaxComplete(hideLoader);
+	$(this).ajaxSend(showLoader);
+});
+//-->
+</script>
+
+</head>
+<body>
+<h1>
+<?php echo $this->showNav(); ?>
+</h1>
+<?php echo $this->layout()->content. PHP_EOL;?>
+<br />
+
+<script language="JavaScript">
+<!--
+$(document).ready(function(){
+	// 开始检查订单
+    //startCheckOrder();
+});
+//-->
+</script>
+<!-- 新订单提示信息 -->
+<div id="popMsg">
+<table cellspacing="0" cellpadding="0" width="100%" bgcolor="#cfdef4" border="0">
+<tr>
+<td style="color: #0f2c8c" width="30" height="24"></td>
+<td style="font-weight: normal; color: #1f336b; padding-top: 4px;padding-left: 4px" valign="middle" width="100%"> 新订单通知</td>
+<td style="padding-top: 2px;padding-right:2px" valign="middle" align="right" width="19">
+<span title="关闭" style="cursor: hand;cursor:pointer;color:red;font-size:12px;font-weight:bold;margin-right:4px;" onclick="Message.close()" >×</span>
+</td>
+</tr>
+<tr>
+<td style="padding-right: 1px; padding-bottom: 1px" colspan="3" height="70">
+<div id="popMsgContent">
+<p>您有 <strong style="color:#ff0000" id="spanNewOrder">0</strong>
+ 个新订单以及 <strong style="color:#ff0000" id="spanNewPaid">0</strong>
+ 个新付款的订单</p>
+<p align="center" style="word-break:break-all">
+<a href="<?php echo $this->config['global']['path']?>admin/order/list"><span style="color:#ff0000">点击查看新订单</span></a>
+</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

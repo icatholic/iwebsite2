@@ -1,0 +1,165 @@
+<form action="<?php echo $this->config['global']['path']?>admin/order/operate" method="post" name="theForm">
+<div class="list-div" style="margin-bottom: 5px">
+<table width="100%" cellpadding="3" cellspacing="1">
+<tr>
+<td colspan="4">
+<div align="center">
+<input name="prev" type="button" class="button" onClick="location.href='<?php echo $this->config['global']['path']?>admin/order/info/order_id/<?php echo $this->prev_id;?>';" value="前一个订单" <?php if(!$this->prev_id){?>disabled<?php } ?> />
+<input name="next" type="button" class="button" onClick="location.href='<?php echo $this->config['global']['path']?>admin/order/info/order_id/<?php echo $this->next_id;?>';" value="后一个订单" <?php if(!$this->next_id){?>disabled<?php } ?> />
+<input type="button" onclick="window.open('<?php echo $this->config['global']['path']?>admin/order/info/order_id/<?php echo $this->order["_id"];?>/download/1')" class="button" value="下载订单" />
+</div>
+</td>
+</tr>
+<tr>
+<th colspan="4">基本信息</th>
+</tr>
+<tr>
+<td width="18%"><div align="right"><strong>订单号：</strong></div></td>
+<td width="34%"><?php echo $this->order["out_trade_no"];?></td>
+<td width="15%"><div align="right"><strong>订单状态：</strong></div></td>
+<td><?php echo $this->renderOrderStatus($this->order)?></td>
+</tr>
+<tr>
+<td><div align="right"><strong>购货人：</strong></div></td>
+<td><?php echo $this->order["OpenId"];?></td>
+<td><div align="right"><strong>下单时间：</strong></div></td>
+<td><?php echo empty($this->order["uma_time_start"])?'':$this->order["uma_time_start"];?></td>
+</tr>
+<tr>
+<td><div align="right"><strong>支付方式：</strong></div></td>
+<td>微信支付</td>
+<td><div align="right"><strong>付款时间：</strong></div></td>
+<td><?php echo $this->order["uma_time_end"];?></td>
+</tr>
+<tr>
+<td><div align="right"><strong>配送方式：</strong></div></td>
+<td>NA</td>
+<td><div align="right"><strong>发货时间：</strong></div></td>
+<td>NA</td>
+</tr>
+<tr>
+<td><div align="right"><strong>发货单号：</strong></div></td>
+<td>NA</td>
+<td><div align="right"><strong>订单来源：</strong></div></td>
+<td>来伊份微商城</td>
+</tr>
+<tr>
+<td><div align="right"><strong>银行订单号：</strong></div></td>
+<td><?php echo $this->order["bank_billno"];?></td>
+<td><div align="right"><strong>财付通订单号：</strong></div></td>
+<td><?php echo $this->order["transaction_id"];?></td>
+</tr>
+
+<th colspan="4">
+收货人信息
+</th>
+</tr>
+<tr>
+<td><div align="right"><strong>收货人：</strong></div></td>
+<td><?php echo $this->escape(empty($this->order["consignee_name"])?'':$this->order["consignee_name"]);?></td>
+<td><div align="right"><strong>手机：</strong></div></td>
+<td><?php echo $this->escape(empty($this->order["consignee_tel"])?'':$this->order["consignee_tel"]);?></td>
+</tr>
+<tr>
+<td><div align="right"><strong>地址：</strong></div></td>
+<td><?php echo $this->escape(empty($this->order["consignee_address"])?'':$this->order["consignee_address"]);?></td>
+<td><div align="right"><strong>邮编：</strong></div></td>
+<td><?php echo $this->escape(empty($this->order["consignee_zipcode"])?'':$this->order["consignee_zipcode"]);?></td>
+</tr>
+
+</table>
+</div>
+
+<div class="list-div" style="margin-bottom: 5px">
+<table width="100%" cellpadding="3" cellspacing="1">
+<tr>
+<th colspan="8" scope="col">
+商品信息
+</th>
+</tr>
+<tr>
+<td scope="col"><div align="center"><strong>商品名称</strong></div></td>
+<td scope="col"><div align="center"><strong>商品号</strong></div></td>
+<td scope="col"><div align="center"><strong>价格</strong></div></td>
+<td scope="col"><div align="center"><strong>数量</strong></div></td>
+<td scope="col"><div align="center"><strong>库存</strong></div></td>
+<td scope="col"><div align="center"><strong>小计</strong></div></td>
+</tr>
+<?php foreach ($this->goods_list as $goods) {?>
+<tr>
+<td>
+<?php echo $goods["gname"];?>
+</td>
+<td><?php echo $goods["gid"];?></td>
+<td><div align="right"><?php echo $this->renderPrice($this->order["gprize"]);?></div></td>
+<td><div align="right"><?php echo $this->order["gnum"];?></div></td>
+<td><div align="right"><?php echo $goods["stock_num"];?></div></td>
+<td><div align="right"><?php echo $this->renderPrice($this->order["gnum"] * $this->order["gprize"]);?></div></td>
+</tr>
+<?php } ?>
+
+<tr>
+<td></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td><div align="right"><strong>合计：</strong></div></td>
+<td><div align="right"><?php echo $this->renderPrice($this->order["product_fee"]);?></div></td>
+</tr>
+</table>
+</div>
+
+<div class="list-div" style="margin-bottom: 5px">
+<table width="100%" cellpadding="3" cellspacing="1">
+<tr>
+<th>
+费用信息
+</th>
+</tr>
+<tr>
+<td>
+<div align="right">
+商品总金额：<strong><?php echo $this->renderPrice($this->order["product_fee"]);?></strong>
+- 折扣：<strong><?php echo $this->renderPrice($this->order["discount"]);?></strong> 
++  物流费用：<strong><?php echo $this->renderPrice($this->order["transport_fee"]);?></strong>
+</div>
+</td>
+<tr>
+<td>
+<div align="right"> 
+= 订单总金额：<strong><?php echo $this->renderPrice($this->order["total_fee"]);?></strong>
+</div>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="list-div" style="margin-bottom: 5px">
+<table cellpadding="3" cellspacing="1">
+<tr>
+<th colspan="6">操作信息</th>
+</tr>
+<tr>
+<td><div align="right"><strong>操作备注：</strong></div></td>
+<td colspan="5"><textarea name="action_note" cols="80" rows="3"></textarea></td>
+</tr>
+<tr>
+<td><div align="right"></div>
+<div align="right"><strong>当前可执行操作：</strong></div></td>
+<td colspan="5">
+<input name="after_service" type="submit" value="售后" class="button" />
+<input name="order_id" type="hidden" value="<?php echo $this->order["_id"];?>">
+</td>
+</tr>
+
+<tr>
+<th>操作者</th>
+<th>操作时间</th>
+<th>订单状态</th>
+<th>付款状态</th>
+<th>发货状态</th>
+<th>备注</th>
+</tr>
+</table>
+</div>
+</form>

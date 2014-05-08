@@ -1,0 +1,39 @@
+<table cellpadding="3" cellspacing="1">
+<tr>
+<th>
+<input onclick='listTable.selectAll(this, "ids")' type="checkbox" /><a href="javascript:listTable.sort('out_trade_no', 'DESC'); ">订单号</a><?php echo $this->sort_out_trade_no;?>
+</th>
+<th><a href="javascript:listTable.sort('uma_time_start', 'DESC'); ">下单时间</a><?php echo $this->sort_uma_time_start;?></th>
+<th><a href="javascript:listTable.sort('consignee_name', 'DESC'); ">收货人</a><?php echo $this->sort_consignee_name;?></th>
+<th><a href="javascript:listTable.sort('total_fee', 'DESC'); ">总金额</a><?php echo $this->sort_total_fee;?></th>
+<th>订单状态</th>
+<th>操作</th>
+<tr>
+<?php foreach ($this->list as $okey => $order) {?>
+<tr>
+<td valign="top" nowrap="nowrap">
+<input type="checkbox" name="ids[]" value="<?php echo $order["_id"];?>" >
+<a href="<?php echo $this->config['global']['path']?>admin/order/info/order_id/<?php echo $order["_id"];?>" name = "<?php echo $order["_id"];?>" id="order_<?php echo $okey;?>"><?php echo $order["out_trade_no"];?></a>
+</td>
+<td valign="top" nowrap="nowrap"><?php echo $this->escape($order["OpenId"]);?><br /><?php echo !empty($order["uma_time_start"]) ?$order["uma_time_start"]:'';?></td>
+<td align="left" valign="top">
+<?php echo $this->escape($order["consignee_name"]);?>
+<br /><?php echo $this->escape($order["consignee_tel"]);?> 
+<br /><?php echo $this->escape($order["consignee_zipcode"]);?>
+<br /><?php echo $this->escape($order["consignee_address"]);?>
+</td>
+<td align="right" valign="top" nowrap="nowrap"><?php echo $this->renderPrice($order["total_fee"]);?></td>
+<td align="center" valign="top" nowrap="nowrap"><?php echo $this->renderOrderStatus($order);?></td>
+<td align="center" valign="top"nowrap="nowrap"><a href="<?php echo $this->config['global']['path']?>admin/order/info/order_id/<?php echo $order["_id"];?>">查看</a></td>
+</tr>
+<?php } ?>
+</table>
+
+<!--分页 -->
+<table id="page-table" cellspacing="0">
+<tr>
+<td align="right" nowrap >
+<?php echo $this->partial('partials/page.phtml',$this); ?>
+</td>
+</tr>
+</table>

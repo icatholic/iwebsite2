@@ -1,0 +1,24 @@
+<html>
+<head>
+<meta http-equiv="robots" content="noindex, nofollow" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/Javascript" language="JavaScript">
+//<![CDATA[
+if (window.top != window)
+{
+	window.top.location.href = document.location.href;
+}
+//]]>
+</script>
+<frameset rows="76,*" framespacing="0" border="0">
+	<frame src="<?php echo $this->config['global']['path']?>admin/index/top" id="header-frame" name="header-frame" frameborder="0" scrolling="no" />
+	<frameset cols="180, 10, *" framespacing="0" border="0" id="frame-body">
+		<frame src="<?php echo $this->config['global']['path']?>admin/index/menu" id="menu-frame" name="menu-frame" frameborder="0" scrolling="yes" />
+		<frame src="<?php echo $this->config['global']['path']?>admin/index/drag" id="drag-frame" name="drag-frame" frameborder="0" scrolling="no" />
+		<frame src="<?php echo $this->config['global']['path']?>admin/index/main" id="main-frame" name="main-frame" frameborder="0" scrolling="yes" />
+	</frameset>
+</frameset>
+</head>
+<body>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!-- 订单搜索 -->
+<div class="form-div">
+<form action="javascript:searchOrder()" name="searchForm">
+<img src="<?php echo $this->getResourceUrl()?>img/icon_search.gif" width="26" height="22" border="0" alt="SEARCH" />
+订单号
+<input name="out_trade_no" type="text" id="out_trade_no" size="15">
+收货人
+<input name="consignee_name" type="text" id="consignee_name" size="15">
+<!-- 
+订单状态
+<?php echo $this->showOrderStatusSelect("status");?>
+ -->
+<input type="submit" value="搜索" class="button" />
+</form>
+</div>
+
+<!-- 订单列表 -->
+<form method="post" action="<?php echo $this->form_act_batch;?>" name="listForm" onsubmit="return check()">
+<div class="list-div" id="listDiv">
+<?php echo $this->partial('order/partials/order_list.phtml',$this); ?>
+</div>
+<div>
+<!-- 
+<input name="confirm" type="button" id="btnSubmit" value="确认" class="button" disabled onclick="changeAction(this.name)" />
+<input name="invalid" type="button" id="btnSubmit1" value="无效" class="button" disabled onclick="changeAction(this.name)" />
+<input name="cancel" type="button" id="btnSubmit2" value="取消" class="button" disabled onclick="changeAction(this.name)" />
+<input name="remove" type="button" id="btnSubmit3" value="移除" class="button" disabled onclick="changeAction(this.name)" />
+ -->
+<input name="download" type="button" id="btnSubmit4" value="下载订单" class="button" disabled onclick="changeAction(this.name)" />
+<input id="operation" name="operation" type="hidden" value="" />
+</div>
+</form>
+<?php echo $this->partial('partials/listtablejs.phtml',$this); ?>
+
+<script language="JavaScript">
+
+/**
+ * 搜索订单
+ */
+function searchOrder()
+{
+	listTable.filter['out_trade_no'] = Utils.trim(document.forms['searchForm'].elements['out_trade_no'].value);
+	listTable.filter['consignee_name'] = Utils.trim(document.forms['searchForm'].elements['consignee_name'].value);
+	//listTable.filter['uma_order_status'] = document.forms['searchForm'].elements['status'].value;
+	listTable.filter['page'] = 1;
+	listTable.loadList();
+}
+
+function check()
+{
+	var snArray = new Array();
+	var eles = document.forms['listForm'].elements;
+	for (var i=0; i<eles.length; i++)
+	{
+		if (eles[i].tagName == 'INPUT' && eles[i].type == 'checkbox' && eles[i].checked && eles[i].value != 'on')
+		{
+			snArray.push(eles[i].value);
+		}
+	}
+	if (snArray.length == 0)
+	{
+		return false;
+	}
+	return true;
+}
+
+/**
+ * 显示订单商品及缩图
+ */
+var show_goods_layer = 'order_goods_layer';
+var goods_hash_table = new Object;
+var timer = new Object;
+
+/**
+ * 绑定订单号事件
+ *
+ * @return void
+ */
+function bind_order_event()
+{
+	var order_seq = 0;
+	while(true)
+	{	
+		var out_trade_no = document.getElementById("order_"+order_seq);
+		if (out_trade_no)
+		{
+			$("#order_"+order_seq).hover(
+				function(e)
+				{
+					try
+					{
+						window.clearTimeout(timer);
+					}
+					catch(e)
+					{
+					}
+					
+					var order_id = this.name;
+					show_order_goods(e, order_id, show_goods_layer);
+				},
+				function(e)
+				{
+					hide_order_goods(show_goods_layer);
+				}
+			);
+			order_seq++;
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+
+listTable.listCallback = function(result, txt) 
+{
+	if (result.error > 0) 
+	{
+		alert(result.message);
+	}
+	else 
+	{
+		try 
+		{
+			document.getElementById('listDiv').innerHTML = result.content;
+			bind_order_event();
+			if (typeof result.filter == "object") 
+			{
+				listTable.filter = result.filter;
+			}
+			listTable.pageCount = result.page_count;
+		}
+		catch(e)
+		{
+			alert(e.message);
+		}
+	}
+};
+
+/**
+ * 浏览器兼容式绑定Onload事件
+ *
+ */
+$(document).ready(function(){
+	bind_order_event();
+});
+
+/**
+ * 建立订单商品显示层
+ *
+ * @return void
+ */
+function create_goods_layer(id)
+{
+	$id = document.getElementById(id);
+	if (!$id)
+	{
+		var n_div = document.createElement('DIV');
+		n_div.id = id;
+		n_div.className = 'order-goods';
+		document.body.appendChild(n_div);
+		$("#"+id).hover(
+			function()
+			{
+				window.clearTimeout(window.timer);
+			},
+			function()
+			{
+				hide_order_goods(id);
+			}
+		);
+	}
+	else
+	{
+		$id.style.display = '';
+	}
+}
+
+/**
+ * 显示订单商品数据
+ *
+ * @return void
+ */
+function show_order_goods(e, order_id, layer_id)
+{
+	create_goods_layer(layer_id);
+	$layer_id = document.getElementById(layer_id);
+	$layer_id.style.top = (Utils.y(e) + 12) + 'px';
+	$layer_id.style.left = (Utils.x(e) + 12) + 'px';
+	if (typeof(goods_hash_table[order_id]) == 'object')
+	{
+		response_goods_info(goods_hash_table[order_id]);
+	}
+	else
+	{
+		$layer_id.innerHTML = loading;
+		
+		var data = new Object;
+		data.order_id = encodeURIComponent(order_id);
+		$.ajax({
+			type: 'POST',
+			url: '<?php echo $this->config['global']['path']?>admin/order/getgoodsinfo',
+			data:  data,
+			success: response_goods_info,
+			dataType: "json"
+		});
+	}
+}
+
+/**
+ * 隐藏订单商品
+ *
+ * @return void
+ */
+function hide_order_goods(layer_id)
+{
+	$layer_id = document.getElementById(layer_id);
+	window.timer = window.setTimeout('$layer_id.style.display = "none"', 500);
+}
+
+/**
+ * 处理订单商品的Callback
+ *
+ * @return void
+ */
+function response_goods_info(result)
+{
+	if (result.error > 0)
+	{
+		alert(result.message);
+		hide_order_goods(show_goods_layer);
+		return;
+	}
+	if (typeof(goods_hash_table[result.content[0].order_id]) == 'undefined')
+	{
+		goods_hash_table[result.content[0].order_id] = result;
+	}
+	document.getElementById(show_goods_layer).innerHTML = result.content[0].str;
+}
+
+function changeAction(action)
+{	
+	var frm = document.forms['listForm'];
+	document.getElementById("operation").value = action;
+	if(action != 'print' || action != 'download' )
+	{
+		frm.target = '_self';
+	}
+	else
+	{
+		frm.target = '_blank';
+	}
+	frm.submit();
+}
+</script>

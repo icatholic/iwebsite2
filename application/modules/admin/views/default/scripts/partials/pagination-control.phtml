@@ -1,0 +1,36 @@
+<?php if ($this->page_count){ 
+    // you need to add each of the request parameters to url 
+    $params = Zend_Controller_Front::getInstance()->getRequest()->getParams(); 
+    // remove the system parameters 
+    unset($params['module']); 
+    unset($params['controller']); 
+    unset($params['action']); 
+?>
+<!-- 分页 -->
+<table id="page-table" cellspacing="0">
+<tr>
+<td align="right" nowrap colspan="10">
+<div id="turn-page">
+总计 <span id="totalRecords"><?php echo $this->record_count;?></span>
+个记录分为 <span id="totalPages"><?php echo $this->page_count;?></span>
+页当前第 <span id="pageCurrent"><?php echo $this->filter['page'];?></span>
+页，每页 <input type='text' size='3' id='pageSize' value="<?php echo $this->filter['page_size'];?>" onkeypress="return listTable.changePageSize(event)" />
+<span id="page-link">
+<a href="javascript:listTable.gotoPageFirst()">第一页</a>
+<!-- Previous page link -->
+<a href="javascript:listTable.gotoPagePrev()">上一页</a>
+<?php if (isset($this->previous)): ?>
+<?php endif; ?>
+<!-- Next page link -->
+<?php if (isset($this->next)): ?>
+<?php endif; ?>
+
+<a href="javascript:listTable.gotoPageNext()">下一页</a>
+<a href="javascript:listTable.gotoPageLast()">最末页</a>
+<?php echo $this->showPageSelect("gotoPage",$this->page_count,$this->filter['page'],array("onchange"=>"listTable.gotoPage(this.value)"));?>
+</span>
+</div>
+</td>
+</tr>
+</table>
+<?php } ?>

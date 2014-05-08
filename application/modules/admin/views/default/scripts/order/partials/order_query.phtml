@@ -1,0 +1,61 @@
+<div class="main-div">
+<form action="<?php echo $this->form_act;?>" method="post" enctype="multipart/form-data" name="searchForm">
+<table cellspacing="1" cellpadding="3" width="100%">
+<tr>
+<td><div align="right"><strong>订单号：</strong></div></td>
+<td colspan="3"><input name="out_trade_no" type="text" id="out_trade_no" size="30"></td>
+</tr>
+<tr>
+<td><div align="right"><strong>微信ID：</strong></div></td>
+<td><input name="OpenId" type="text" id="OpenId" size="20"></td>
+<td><div align="right"><strong>收货人：</strong></div></td>
+<td><input name="consignee_name" type="text" id="consignee_name" size="20"></td>
+</tr>
+<tr>
+<td><div align="right"><strong>地址：</strong></div></td>
+<td><input name="consignee_address" type="text" id="consignee_address" size="20"></td>
+<td><div align="right"><strong>邮编：</strong></div></td>
+<td><input name="consignee_zipcode" type="text" id="consignee_zipcode" size="20"></td>
+</tr>
+<tr>
+<td><div align="right"><strong>手机：</strong></div></td>
+<td  colspan="3"><input name="consignee_tel" type="text" id="consignee_tel" size="20"></td>
+</tr>
+
+<tr>
+<td><div align="right"><strong>下单时间：</strong></div></td>
+<td>
+<input type="text" name="start_time" maxlength="60" size="20"  id="start_time_id" />
+<input name="start_time_btn" type="button" id="start_time_btn" onclick="return showCalendar('start_time_id', '%Y-%m-%d %H:%M:%S', '24', false, 'start_time_btn');" value="选择" class="button"/>
+~
+<input type="text" name="end_time" maxlength="60" size="20"  id="end_time_id" />
+<input name="end_time_btn" type="button" id="end_time_btn" onclick="return showCalendar('end_time_id', '%Y-%m-%d %H:%M:%S', '24', false, 'end_time_btn');" value="选择" class="button"/>
+</td>
+</tr>
+<tr>
+<td>
+<div align="right"><strong>付款状态</strong></div></td>
+<td  colspan="3">
+<?php echo $this->showOrderPaymentStatusSelect("pay_status");?>
+<strong>退款状态：</strong>
+<?php echo $this->showRefundStatusSelect("refund_status");?>
+</td>
+</tr>
+
+<tr>
+<td colspan="4">
+<div align="center">
+<input name="query" type="submit" class="button" id="query" value="搜索" />
+<input name="reset" type="reset" class='button' value='重置' />
+</div>
+</td>
+</tr>
+</table>
+</form>
+</div>
+
+<script language="JavaScript">
+$(document).ready(function(){
+	region.isAdmin = true;
+});
+</script>

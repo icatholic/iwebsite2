@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="robots" content="noindex, nofollow" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>管理中心</title>
+<link href="<?php echo $this->getResourceUrl()?>css/general.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="<?php echo $this->getResourceUrl()?>css/top.css" media="screen" rel="stylesheet" type="text/css" />
+
+<link rel="stylesheet" href="<?php echo $this->config['global']['path']?>scripts/jquery/ui-theme/jquery-ui-1.8.custom.css" type="text/css" media="screen" />
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-ui-1.8.custom.min.js"></script>
+
+<script type="text/javascript">
+//<![CDATA[
+var adminId = "<?php echo $this->admin_id?>";
+//]]>
+</script>
+
+</head>
+<body>
+<div id="header-div">
+<div id="logo-div" style="font-size:18px;color:#fff;padding-top:15px;">微信商城客服服务平台</div>
+<div id="license-div" style="bgcolor:#000000;"></div>
+<div id="submenu-div">
+<ul>
+<li><a href="javascript:window.top.frames['main-frame'].document.location.reload();window.top.frames['header-frame'].document.location.reload();">刷新</a></li>
+</ul>
+
+<div id="send_info" style="padding: 5px 10px 0 0; clear:right;text-align: right; color: #FF9900;width:40%;float: right;">
+登录用户：<?php echo $_SESSION ['admin_name']?>  
+<a href="<?php echo $this->config['global']['path']?>admin/user/logout" target="_top" class="fix-submenu">退出</a>
+</div>
+
+<div id="load-div" style="padding: 5px 10px 0 0; text-align: right; color: #FF9900; display: none;width:40%;float:right;">
+<img src="<?php echo $this->getResourceUrl()?>img/top_loader.gif" width="16" height="16" alt="正在处理您的请求..." style="vertical-align: middle" /> 
+正在处理您的请求...
+</div>
+</div>
+</div>
+
+<div id="menu-div">
+<ul>
+<li class="fix-spacel">&nbsp;</li>
+<li><a href="<?php echo $this->config['global']['path']?>admin/index/main" target="main-frame">起始页</a></li> 
+<li><a href="<?php echo $this->config['global']['path']?>admin/order/list" target="main-frame">订单列表</a></li>
+<li class="fix-spacer">&nbsp;</li>
+</ul>
+<br class="clear" />
+</div>
+</body>
+</html>

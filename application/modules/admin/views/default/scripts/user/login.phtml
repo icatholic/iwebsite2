@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="robots" content="noindex, nofollow" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>管理中心</title>
+<link href="<?php echo $this->getResourceUrl()?>css/general.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="<?php echo $this->getResourceUrl()?>css/main.css" media="screen" rel="stylesheet" type="text/css" />
+<style type="text/css">
+body {
+color: white;
+}
+</style>
+<script type="text/javascript">
+//<![CDATA[
+if (window.parent != window)
+{
+	window.top.location.href = location.href;
+}
+//]]>
+</script>
+</head>
+
+<body style="background: #278296">
+<form method="post" action="<?php echo $this->config['global']['path']?>admin/user/signin" name='theForm' >
+<table cellspacing="0" cellpadding="0" style="margin-top: 100px" align="center">
+<tr>
+<td>&nbsp;</td>
+<td style="padding-left: 50px">
+
+<table>
+<tr>
+<td>管理员姓名：</td>
+<td><input type="text"  name="username" /></td>
+</tr>
+<tr>
+<td>管理员密码：</td>
+<td><input type="password"  name="password" /></td>
+</tr>
+<tr>
+<td colspan="2">
+<input type="checkbox"  value="1"  name="remember"  id="remember" />
+<label for="remember">请保存我这次的登录信息。</label>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>
+<input type="submit" value="进入管理中心" class="button" />
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+</form>
+
+</body>
+</html>

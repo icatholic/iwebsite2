@@ -1,0 +1,8 @@
+<?php if($this->action_link){?>
+<span class="action-span"><a href="<?php echo $this->config['global']['path']."admin/".$this->action_link['href'];?>"><?php echo $this->action_link['text'];?></a></span>
+<?php }?>
+<?php if($this->action_link2){?><span class="action-span"><a href="<?php echo $this->action_link2['href'];?>"><?php echo $this->action_link2['text'];?></a>&nbsp;&nbsp;</span>
+<?php }?>
+<span class="action-span1"><a href="<?php echo $this->config['global']['path']?>admin/index/main">管理中心</a> </span>
+<span id="search_id" class="action-span1"><?php if($this->ur_here){ ?> -  <?php echo $this->ur_here;} ?></span>
+<div style="clear:both"></div>
