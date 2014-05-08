@@ -25,12 +25,41 @@ abstract class iWebsite_Controller_Action extends Zend_Controller_Action
 
     /**
      * 获取网站配置文件数组
-     * 
+     *
      * @return mixed
      */
     public function getConfig()
     {
         return Zend_Registry::get('config');
+    }
+    
+    /**
+     * 初始化
+     * @see Zend_Controller_Action::init()
+     */
+    public function init()
+    {
+        $module = $this->getRequest()->getModuleName();
+        $controller = $this->getRequest()->getControllerName();
+        $action = $this->getRequest()->getActionName();
+        $config = $this->getConfig();
+        
+        $this->assign('config', $config);
+        $this->assign('module', $module);
+        $this->assign('controller', $controller);
+        $this->assign('action', $action);
+        // 微信支付
+        // appId 公众号身份标识。
+        // appSecret 公众平台API(参考文档API 接口部分)的权限获取所需密钥Key，在使用所有公众平台API 时，都需要先用它去换取access_token，然后再进行调用。
+        // paySignKey公众号支付请求中用于加密的密钥Key，可验证商户唯一身份，PaySignKey对应于支付场景中的appKey 值。
+        // partnerId 财付通商户身份标识。
+        // partnerKey 财付通商户权限密钥Key。
+        $this->assign('appId', $config['iWeixin']['pay']['appId']);
+        $this->assign('appSecret', $config['iWeixin']['pay']['appSecret']);
+        $this->assign('appKey', $config['iWeixin']['pay']['paySignKey']);
+        $this->assign('partnerId', $config['iWeixin']['pay']['partnerId']);
+        $this->assign('partnerKey', $config['iWeixin']['pay']['partnerKey']);        
+        $this->assign('notify_url', $config['iWeixin']['pay']['notify_url']);
     }
 
     /**
