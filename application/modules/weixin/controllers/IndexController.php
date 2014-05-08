@@ -138,11 +138,23 @@ class Weixin_IndexController extends Zend_Controller_Action
                                                                   // var_dump($FromUserName, $Event, $EventKey, $Ticket);
                         $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
                         // 不同项目特定的业务逻辑开始
+                        if ($Event === 'subscribe') {
+                            $sence_id = str_ireplace('qrscene_', '', $EventKey);
+                        } else 
+                            if ($Event === 'SCAN') {
+                                $sence_id = $EventKey;
+                            }
+                        
+                        if ($sence_id == 2 || $sence_id == 1) {
+                            $content = '扫码2';
+                        }
                         // 不同项目特定的业务逻辑结束
                     }
                     
-                    //扫描二维码送优惠券
-                    $content = '首访回复';
+                    // 扫描二维码送优惠券
+                    if (empty($content)) {
+                        $content = '首访回复';
+                    }
                 } elseif ($Event == 'SCAN') { // 扫描带参数二维码事件 用户已关注时的事件推送
                     $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
                     $onlyRevieve = true;
@@ -169,9 +181,9 @@ class Weixin_IndexController extends Zend_Controller_Action
                 }
             }
             
-            if($content=='首访回复1'||$content=='首访回复') {
+            if ($content == '首访回复1' || $content == '首访回复') {
                 $rst = doGet("http://kotexcrm.umaman.com/campaign/coupon/index?FromUserName={$FromUserName}");
-                //$rst = json_decode($rst,true);
+                // $rst = json_decode($rst,true);
             }
             
             // 语音逻辑开始
@@ -262,7 +274,7 @@ class Weixin_IndexController extends Zend_Controller_Action
             
             // 我的优惠券查询
             $couponModel = new Campaign_Model_User_Coupon();
-            if ($content == '我的优惠'||$content == '我的优惠券') {
+            if ($content == '我的优惠' || $content == '我的优惠券') {
                 // 获取用户的优惠券
                 $msg = $couponModel->getCouponsMsg($FromUserName);
                 if ($msg !== false) {
@@ -281,7 +293,7 @@ class Weixin_IndexController extends Zend_Controller_Action
                 $coupon = $couponModel->getCouponByAlpha($FromUserName, $content);
                 $msg = $coupon['code'];
                 if ($msg !== false) {
-                    if($coupon['coupon_name']=='一号店10元抵用券') {
+                    if ($coupon['coupon_name'] == '一号店10元抵用券') {
                         $msg = "亲，你的一号店抵用券代码是：{$msg}\n可通过电脑登陆1号店官网，激活抵用券代码进行兑换。";
                     }
                     $response = $this->_weixin->getMsgManager()
