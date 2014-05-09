@@ -27,22 +27,26 @@ class Weixin_IndexController extends Zend_Controller_Action
 
     public function init()
     {
-        $this->getHelper('viewRenderer')->setNoRender(true);
-        $this->_source = new Weixin_Model_Source();
-        $this->_keyword = new Weixin_Model_Keyword();
-        $this->_reply = new Weixin_Model_Reply();
-        $this->_app = new Weixin_Model_Application();
-        $this->_user = new Weixin_Model_User();
-        $this->_not_keyword = new Weixin_Model_NotKeyword();
-        $this->_menu = new Weixin_Model_Menu();
-        $this->_qrcode = new Weixin_Model_Qrcode();
-        
-        $this->_app->setTokenCache(60); // 设定token缓存
-        $this->_appConfig = $this->_app->getToken();
-        
-        $this->_weixin = new Weixin\Client();
-        if (! empty($this->_appConfig['access_token'])) {
-            $this->_weixin->setAccessToken($this->_appConfig['access_token']);
+        try {
+            $this->getHelper('viewRenderer')->setNoRender(true);
+            $this->_source = new Weixin_Model_Source();
+            $this->_keyword = new Weixin_Model_Keyword();
+            $this->_reply = new Weixin_Model_Reply();
+            $this->_app = new Weixin_Model_Application();
+            $this->_user = new Weixin_Model_User();
+            $this->_not_keyword = new Weixin_Model_NotKeyword();
+            $this->_menu = new Weixin_Model_Menu();
+            $this->_qrcode = new Weixin_Model_Qrcode();
+            
+            $this->_app->setTokenCache(60); // 设定token缓存
+            $this->_appConfig = $this->_app->getToken();
+            
+            $this->_weixin = new Weixin\Client();
+            if (! empty($this->_appConfig['access_token'])) {
+                $this->_weixin->setAccessToken($this->_appConfig['access_token']);
+            }
+        } catch (Exception $e) {
+            var_dump($e);
         }
     }
 
@@ -124,9 +128,7 @@ class Weixin_IndexController extends Zend_Controller_Action
             if ($MsgType == 'event') { // 接收事件推送
                 if ($Event == 'subscribe') { // 关注事件
                                              // EventKey 事件KEY值，qrscene_为前缀，后面为二维码的参数值
-                    
-
-                    
+                                             
                     // Ticket 二维码的ticket，可用来换取二维码图片
                     if (! empty($Ticket) || ! empty($EventKey)) { // 扫描带参数二维码事件 用户未关注时，进行关注后的事件推送
                                                                   // var_dump($FromUserName, $Event, $EventKey, $Ticket);
@@ -139,7 +141,7 @@ class Weixin_IndexController extends Zend_Controller_Action
                                 $sence_id = $EventKey;
                             }
                         
-                        if($sence_id>0) {
+                        if ($sence_id > 0) {
                             $content = "扫码{$sence_id}";
                         }
                         // 不同项目特定的业务逻辑结束
@@ -251,7 +253,7 @@ class Weixin_IndexController extends Zend_Controller_Action
             }
             
             $response = followUrl($this->anwser($content), array(
-                    'FromUserName' => $FromUserName
+                'FromUserName' => $FromUserName
             ));
             // 输出响应结果
             echo $response;
@@ -274,8 +276,6 @@ class Weixin_IndexController extends Zend_Controller_Action
              */
             
             // 将一些执行很慢的逻辑，放在这里执行，提高微信的响应速度开始
-
-            
             
             // 将一些执行很慢的逻辑，放在这里执行，提高微信的响应速度结束
             
