@@ -142,7 +142,7 @@ class Weixin_IndexController extends Zend_Controller_Action
                             }
                         
                         if ($sence_id > 0) {
-                            $content = "扫码{$sence_id}";
+                            $content = "扫描二维码{$sence_id}";
                         }
                         // 不同项目特定的业务逻辑结束
                     }
