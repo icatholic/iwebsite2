@@ -38,7 +38,6 @@ class Weixin_IndexController extends Zend_Controller_Action
             $this->_menu = new Weixin_Model_Menu();
             $this->_qrcode = new Weixin_Model_Qrcode();
             
-            $this->_app->setTokenCache(60); // 设定token缓存
             $this->_appConfig = $this->_app->getToken();
             
             $this->_weixin = new Weixin\Client();
