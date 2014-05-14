@@ -72,7 +72,7 @@ class Weixin_Model_Keyword extends iWebsite_Plugin_Mongo
     private function match($str)
     {
         $str = strtolower(trim($str));
-        if (preg_match_all("/(?:[a-z'\-\.\/\:_@0-9]+|[\x80-\xff]{3})/i", $str, $match)) {
+        if (preg_match_all("/(?:[a-z'\-\.\/\:_@0-9#\?\!\,\;]+|[\x80-\xff]{3})/i", $str, $match)) {
             return $match[0];
         }
         return array();
