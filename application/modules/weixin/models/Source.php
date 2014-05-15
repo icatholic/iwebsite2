@@ -48,6 +48,10 @@ class Weixin_Model_Source extends iWebsite_Plugin_Mongo
             );
         }
         
+        $this->ensureIndex(array(
+            'coordinate' => '2d'
+        ));
+        
         return $datas;
     }
 

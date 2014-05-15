@@ -9,8 +9,8 @@ class iDatabase
      * @var string
      */
     private $_wsdl = 'http://cloud.umaman.com/service/database/index?wsdl';
-    //private $_wsdl = 'http://localhost/service/database/index?wsdl';
-
+    // private $_wsdl = 'http://localhost/service/database/index?wsdl';
+    
     /**
      * 是否每次加载WSDL 默认为false
      *
@@ -24,8 +24,8 @@ class iDatabase
      * @var string
      */
     private $_namespace = 'http://cloud.umaman.com/service/database/index';
-    //private $_namespace = 'http://localhost/service/database/index';
-
+    // private $_namespace = 'http://localhost/service/database/index';
+    
     /**
      * 传统采用SOAP上传文件，如果文件过大，解析xml会出现问题
      * 故采用http协议本身的multi part的方式通过form表单进行提交
@@ -140,7 +140,7 @@ class iDatabase
         $this->_rand = sha1(time());
         $this->_key_id = $key_id;
         
-        $this->setLocal(APPLICATION_ENV==='production' ? true : false);
+        $this->setLocal(APPLICATION_ENV === 'production' ? true : false);
     }
 
     /**
@@ -162,13 +162,12 @@ class iDatabase
     {
         $this->_local = is_bool($local) ? $local : false;
     }
-    
+
     /**
      * 设定驱动WriteConcern值
      */
-    public function setWriteConcern() {
-        
-    }
+    public function setWriteConcern()
+    {}
 
     /**
      * 建立soap链接
@@ -226,9 +225,9 @@ class iDatabase
             ));
             return $this->_client;
         } else {
-            fb("local","LOG");
+            fb("local", "LOG");
             $this->_client = new iWebsite_Local_Database();
-            $this->_client->authenticate($this->_project_id, $this->_rand, $this->sign(),$this->_key_id);
+            $this->_client->authenticate($this->_project_id, $this->_rand, $this->sign(), $this->_key_id);
             $this->_client->setCollection($this->_collection_alias);
             return $this->_client;
         }
@@ -491,7 +490,7 @@ class iDatabase
      * @param array $options            
      * @return boolean
      */
-    public function ensureIndex($keys, $options)
+    public function ensureIndex($keys, $options = array())
     {
         try {
             return $this->result($this->_client->ensureIndex($this->serialize($keys), $this->serialize($options)));
@@ -616,7 +615,8 @@ class iDatabase
     }
 
     /**
-     * 序列化 
+     * 序列化
+     *
      * @param array $arr            
      * @return mixed
      */
