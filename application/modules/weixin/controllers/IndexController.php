@@ -159,9 +159,9 @@ class Weixin_IndexController extends Zend_Controller_Action
                                                   // Latitude 地理位置纬度
                                                   // Longitude 地理位置经度
                                                   // Precision 地理位置精度
-                    $Latitude = isset($datas['Latitude']) ? trim($datas['Latitude']) : 0;
-                    $Longitude = isset($datas['Longitude']) ? trim($datas['Longitude']) : 0;
-                    $Precision = isset($datas['Precision']) ? trim($datas['Precision']) : 0;
+                    $Latitude = isset($datas['Latitude']) ? floatval($datas['Latitude']) : 0;
+                    $Longitude = isset($datas['Longitude']) ? floatval($datas['Longitude']) : 0;
+                    $Precision = isset($datas['Precision']) ? floatval($datas['Precision']) : 0;
                     $onlyRevieve = true;
                     // 不同项目特定的业务逻辑开始
                     // 不同项目特定的业务逻辑结束
@@ -210,7 +210,7 @@ class Weixin_IndexController extends Zend_Controller_Action
             // 处理地理位置信息开始
             if ($MsgType == 'location') { // 接收普通消息----地理位置消息
                                           // Location_X 地理位置维度
-                                          // Location_Y 地理位置精度
+                                          // Location_Y 地理位置经度
                                           // Scale 地图缩放大小
                 $Location_X = isset($datas['Location_X']) ? trim($datas['Location_X']) : 0;
                 $Location_Y = isset($datas['Location_Y']) ? trim($datas['Location_Y']) : 0;
