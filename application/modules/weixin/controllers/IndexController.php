@@ -133,13 +133,7 @@ class Weixin_IndexController extends Zend_Controller_Action
                                                                   // var_dump($FromUserName, $Event, $EventKey, $Ticket);
                         $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
                         // 不同项目特定的业务逻辑开始
-                        if ($Event === 'subscribe') {
-                            $sence_id = str_ireplace('qrscene_', '', $EventKey);
-                        } else 
-                            if ($Event === 'SCAN') {
-                                $sence_id = $EventKey;
-                            }
-                        
+                        $sence_id = intval(str_ireplace('qrscene_', '', $EventKey));
                         if ($sence_id > 0) {
                             $content = "扫描二维码{$sence_id}";
                         }
@@ -152,10 +146,11 @@ class Weixin_IndexController extends Zend_Controller_Action
                     }
                 } elseif ($Event == 'SCAN') { // 扫描带参数二维码事件 用户已关注时的事件推送
                     $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
-                    $onlyRevieve = true;
+                    //$onlyRevieve = true;
                     // EventKey 事件KEY值，是一个32位无符号整数
                     // Ticket 二维码的ticket，可用来换取二维码图片
                     // 不同项目特定的业务逻辑开始
+                    $content = "扫描二维码{$EventKey}";
                     // 不同项目特定的业务逻辑结束
                 } elseif ($Event == 'unsubscribe') { // 取消关注事件
                                                          // 不同项目特定的业务逻辑开始
