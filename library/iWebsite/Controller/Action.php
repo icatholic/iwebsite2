@@ -32,9 +32,10 @@ abstract class iWebsite_Controller_Action extends Zend_Controller_Action
     {
         return Zend_Registry::get('config');
     }
-    
+
     /**
      * 初始化
+     * 
      * @see Zend_Controller_Action::init()
      */
     public function init()
@@ -58,7 +59,7 @@ abstract class iWebsite_Controller_Action extends Zend_Controller_Action
         $this->assign('appSecret', $config['iWeixin']['pay']['appSecret']);
         $this->assign('appKey', $config['iWeixin']['pay']['paySignKey']);
         $this->assign('partnerId', $config['iWeixin']['pay']['partnerId']);
-        $this->assign('partnerKey', $config['iWeixin']['pay']['partnerKey']);        
+        $this->assign('partnerKey', $config['iWeixin']['pay']['partnerKey']);
         $this->assign('notify_url', $config['iWeixin']['pay']['notify_url']);
     }
 
@@ -210,7 +211,9 @@ abstract class iWebsite_Controller_Action extends Zend_Controller_Action
             return json_encode(array(
                 'success' => false,
                 'error_code' => $code,
-                'error_msg' => $msg
+                'error_msg' => $msg,
+                'errorCode' => $code,
+                'errorMsg' => $msg
             ));
         }
     }
