@@ -138,18 +138,11 @@ class Weixinshop_OrderController extends iWebsite_Controller_Action
                 $isOk = $modelOrder->isOK($newOrderInfo['trade_state'], $newOrderInfo['trade_mode']);
                 
                 if ($isOk) { // 发送客服消息
-                    $config = Zend_Registry::get('config');
-                    $token = $config['iWeixin']['token'];
-                    $project_id = $config['iWeixin']['project_id'];
-                    $weixin = new iWeixin2($project_id, $token);
                     $total_fee = number_format($newOrderInfo['total_fee'] / 100, 2);
-                    $content = "你支付了{$total_fee}元人民币,成功购买商品号为{$newOrderInfo['ProductId']} {$newOrderInfo['body']}的商品";
-                    $weixin->getWeixinMsgManager()
-                        ->getWeixinCustomMsgSender()
-                        ->setToUser($OpenId);
-                    $weixin->getWeixinMsgManager()
-                        ->getWeixinCustomMsgSender()
-                        ->sendText($content);
+                    $content = "你支付了{$total_fee}元人民币,成功购买{$newOrderInfo['body']}的商品";
+                    
+                    $modelWeixinApplication = new Weixin_Model_Application();
+                    $modelWeixinApplication->notify($OpenId, $content);
                 }
             }
         } catch (Exception $e) {
@@ -160,7 +153,7 @@ class Weixinshop_OrderController extends iWebsite_Controller_Action
     }
 
     /**
-     * 显示发货地址页面
+     * 显示发货地址页面,这个作为测试用的。
      */
     public function addressAction()
     {

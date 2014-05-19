@@ -110,11 +110,14 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             $cart = self::getCookie('cart');
             $cart = $cart ? $cart : array();
             if (empty($cart)) {
-                exit($this->result(true, "购物车没有内容"));
+                echo ($this->result("购物车没有内容"));
+                return true;
             }
-            exit($this->response(true, "OK", $cart));
+            echo ($this->result("OK", $cart));
+            return true;
         } catch (Exception $e) {
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -127,14 +130,18 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             $goodsId = trim($this->get('goodsId', '')); // 商品ID
             $num = intval($this->get('num')); // 商品数量
             if (empty($goodsId)) {
-                exit($this->response(false, "商品ID为空"));
+                echo ($this->error("-1", "商品ID为空"));
+                return false;
             }
             if (empty($num)) {
-                exit($this->response(false, "数量不能为空或0"));
+                echo ($this->error("-2", "数量不能为空或0"));
+                return false;
             }
             if (($num) < 0) {
-                exit($this->response(false, "数量不正确"));
+                echo ($this->error("-3", "数量不正确"));
+                return false;
             }
+            
             // 从COOKIE中获取内容
             $cart = self::getCookie('cart');
             $cart = $cart ? $cart : array();
@@ -145,7 +152,8 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
                 $modelGoods = new Weixinshop_Model_Goods();
                 $info = $modelGoods->getInfoById($goodsId);
                 if (empty($info)) {
-                    exit($this->response(false, "商品ID不存在"));
+                    echo ($this->error("-4", "商品ID不存在"));
+                    return false;
                 }
                 $cart[$goodsId]['name'] = $info['gname']; // 商品名
                 $cart[$goodsId]['prize'] = $info['gprize']; // 商品单价
@@ -153,9 +161,11 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             }
             // 最新的内容存入COOKIE中
             self::setCookie('cart', $cart);
-            exit($this->response(true, "OK", $cart));
+            echo ($this->result("OK", $cart));
+            return true;
         } catch (Exception $e) {
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -168,13 +178,16 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             $goodsId = trim($this->get('goodsId', '')); // 商品ID
             $num = intval($this->get('num')); // 商品数量
             if (empty($goodsId)) {
-                exit($this->response(false, "商品ID为空"));
+                echo ($this->error("-1", "商品ID为空"));
+                return false;
             }
             if (empty($num)) {
-                exit($this->response(false, "数量不能为空或0"));
+                echo ($this->error("-2", "数量不能为空或0"));
+                return false;
             }
             if (($num) < 0) {
-                exit($this->response(false, "数量不正确"));
+                echo ($this->error("-3", "数量不正确"));
+                return false;
             }
             // 从COOKIE中获取内容
             $cart = self::getCookie('cart');
@@ -182,13 +195,16 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             if (key_exists($goodsId, $cart)) {
                 $cart[$goodsId]['num'] = $num;
             } else {
-                exit($this->response(false, "商品ID不存在"));
+                echo ($this->error("-4", "商品ID不存在"));
+                return false;
             }
             // 最新的内容存入COOKIE中
             self::setCookie('cart', $cart);
-            exit($this->response(true, "OK", $cart));
+            echo ($this->result("OK", $cart));
+            return true;
         } catch (Exception $e) {
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -200,7 +216,8 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
         try {
             $goodsId = trim($this->get('goodsId', '')); // 商品ID
             if (empty($goodsId)) {
-                exit($this->response(false, "商品ID为空"));
+                echo ($this->error("-1", "商品ID为空"));
+                return false;
             }
             // 从COOKIE中获取内容
             $cart = self::getCookie('cart');
@@ -208,14 +225,17 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             if (key_exists($goodsId, $cart)) {
                 unset($cart[$goodsId]);
             } else {
-                exit($this->response(false, "商品ID不存在"));
+                echo ($this->error("-2", "商品ID不存在"));
+                return false;
             }
             // 最新的内容存入COOKIE中
             self::setCookie('cart', $cart);
             
-            exit($this->response(true, "OK", $cart));
+            echo ($this->result("OK", $cart));
+            return true;
         } catch (Exception $e) {
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -228,9 +248,11 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             $cart = array();
             // 最新的内容存入COOKIE中
             self::setCookie('cart', $cart);
-            exit($this->response(true, "OK", $cart));
+            echo ($this->result("OK", $cart));
+            return true;
         } catch (Exception $e) {
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -256,9 +278,11 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
                     $info['amount'] += $num * $prize;
                 }
             }
-            exit($this->response(true, "OK", $info));
+            echo ($this->result("OK", $info));
+            return true;
         } catch (Exception $e) {
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 

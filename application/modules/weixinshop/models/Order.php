@@ -477,8 +477,8 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         $token = $config['iWeixin']['token'];
         $project_id = $config['iWeixin']['project_id'];
         
-        $tokenServer = new Weixin\Token\Server($config['iWeixin']['pay']['appId'], $config['iWeixin']['pay']['appSecret']);
-        $token = $tokenServer->getAccessToken();
+        $modelWeixinApplication = new Weixin_Model_Application();
+        $token = $modelWeixinApplication->getToken();
         
         $iWeixinPay = new Weixin\Pay();
         $iWeixinPay->setAppId($config['iWeixin']['pay']['appId']);

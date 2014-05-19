@@ -12,34 +12,15 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
 
     private $notify_url = "";
 
-    private $weixin;
-
     private $errorLog = null;
 
     public function init()
     {
         parent::init();
-        
-        $this->errorLog = new Weixinshop_Model_PayErrorLog();
-        
         $this->getHelper('viewRenderer')->setNoRender(true);
-        $config = Zend_Registry::get('config');
-        $this->notify_url = $config['iWeixin']['pay']['notify_url'];
-        $token = $config['iWeixin']['token'];
-        $project_id = $config['iWeixin']['project_id'];
-        
-        $this->weixin = new Weixin\Client();
-        $tokenServer = new Weixin\Token\Server($config['iWeixin']['pay']['appId'], $config['iWeixin']['pay']['appSecret']);
-        $token = $tokenServer->getAccessToken();
-        
-        $iWeixinPay = new Weixin\Pay();
-        $iWeixinPay->setAppId($config['iWeixin']['pay']['appId']);
-        $iWeixinPay->setAppSecret($config['iWeixin']['pay']['appSecret']);
-        $iWeixinPay->setPaySignKey($config['iWeixin']['pay']['paySignKey']);
-        $iWeixinPay->setPartnerId($config['iWeixin']['pay']['partnerId']);
-        $iWeixinPay->setPartnerKey($config['iWeixin']['pay']['partnerKey']);
-        $iWeixinPay->setAccessToken($token['access_token']);
-        $this->weixinPay = $iWeixinPay;
+        $this->errorLog = new Weixinshop_Model_PayErrorLog();
+        $modelOrder = new Weixinshop_Model_Order();
+        $this->weixinPay = $modelOrder->getWeixinPayInstance();
     }
 
     /**
@@ -83,10 +64,12 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             $orderInfo = $modelOrder->createOrder($OpenId, $goodsList);
             
             $_SESSION['orderInfo'] = $orderInfo;
-            exit($this->result("处理结束", $orderInfo));
+            echo ($this->result("处理结束", $orderInfo));
+            return true;
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -154,10 +137,12 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             $modelConsignee->log($orderInfo['consignee_province'], $orderInfo['consignee_city'], $orderInfo['consignee_area'], $orderInfo['consignee_name'], $orderInfo['consignee_address'], $orderInfo['consignee_tel'], $orderInfo['consignee_zipcode'], $orderInfo['OpenId'], $orderInfo['_id']->__toString());
             
             $_SESSION['orderInfo'] = $orderInfo;
-            exit($this->result("处理结束", $orderInfo));
+            echo ($this->result("处理结束", $orderInfo));
+            return true;
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -205,16 +190,28 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
                 throw new Exception("AppSignature签名校验无效:{$checkRet['sign']}", - 1);
             }
             
-            // 判断商品是否有效
-            $modelGoods = new Weixinshop_Model_Goods();
-            $goodsInfo = $modelGoods->getInfoByGid($postData['ProductId']);
-            if (empty($goodsInfo)) {
-                throw new Exception("商品号无效", - 2);
+            // 检查商品的信息
+            $ProductIds = array(
+                $postData['ProductId']
+            );
+            $nums = array(
+                1
+            );
+            $goodsList = $modelGoods->getList(0, $ProductIds);
+            foreach ($ProductIds as $index => $ProductId) {
+                if (! key_exists($ProductId, $goodsList)) {
+                    throw new Exception("商品号{$ProductId}的商品不存在");
+                } else {
+                    // 商品购买在库数检查
+                    if (! $modelGoods->hasStock($ProductId, $nums[$index])) {
+                        throw new Exception("该商品已卖完");
+                    }
+                    $goodsList[$ProductId]['num'] = $nums[$index];
+                }
             }
-            
             // 生成订单
             $modelOrder = new Weixinshop_Model_Order();
-            $orderInfo = $modelOrder->createOrder($postData['OpenId'], $postData['ProductId'], $goodsInfo['body'], $goodsInfo['gprize'], 1, $this->notify_url, $goodsInfo['attach'], $goodsInfo['goods_tag'], $goodsInfo['transport_fee'], $goodsInfo['composite_sku_no']);
+            $orderInfo = $modelOrder->createOrder($postData['OpenId'], $goodsList);
             
             // 获取Package
             $package = $orderInfo['package'];
@@ -233,7 +230,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
         $modelPayNativePackageResult->log($postData['AppId'], $postData['OpenId'], $postData['IsSubscribe'], $postData['ProductId'], $postData['TimeStamp'], $postData['NonceStr'], $postData['AppSignature'], $postData['SignMethod'], $postStr, $RetCode, $RetErrMsg, $out_trade_no, $package, $ret, $calc_appSignature);
         
         echo $ret;
-        exit();
+        return true;
     }
 
     /**
@@ -495,7 +492,8 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
          * success 处理成功，微信系统收到此结果后不再进行后续通知
          * fail 或其它字符处理不成功，微信收到此结果或者没有收到任何结果，系统通过补单机制再次通知
          */
-        exit($ret['notify_result'] . $ret['error']);
+        echo ($ret['notify_result'] . $ret['error']);
+        return true;
     }
 
     /**
@@ -537,10 +535,12 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             
             $result = array();
             $result['isOk'] = empty($isOk) ? 0 : 1;
-            exit($this->result("处理结束", $result));
+            echo ($this->result("处理结束", $result));
+            return true;
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -658,10 +658,12 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             // 处理投诉
             $modelPayFeedback = new Weixinshop_Model_PayFeedback();
             $feedbackInfo = $modelPayFeedback->handle($postData['AppId'], $postData['TimeStamp'], $postData['OpenId'], $postData['MsgType'], $postData['FeedBackId'], $postData['TransId'], $postData['Reason'], $postData['Solution'], $postData['ExtInfo'], $postData['PicInfo'], $postData['AppSignature'], $postData['SignMethod'], $postStr, $calc_appSignature);
-            exit($this->result("处理结束"));
+            echo ($this->result("处理结束"));
+            return true;
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -674,10 +676,12 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             $OpenId = $this->getRequest()->getCookie("FromUserName", '');
             $modelConsignee = new Weixinshop_Model_Consignee();
             $consigneeInfo = $modelConsignee->getLastInfoByOpenid($OpenId);
-            exit($this->result("处理结束", $consigneeInfo));
+            echo ($this->result("处理结束", $consigneeInfo));
+            return true;
         } catch (Exception $e) {
             $this->errorLog->log($e);
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
