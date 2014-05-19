@@ -10,7 +10,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
 }
 
 defined('APPLICATION_PATH') || define('APPLICATION_PATH', realpath(dirname(__FILE__) . '/../application'));
-defined('APPLICATION_ENV') || define('APPLICATION_ENV', 'development'); // [production|development]
+defined('APPLICATION_ENV') || define('APPLICATION_ENV', 'production'); // [production|development]
 
 set_include_path(implode(PATH_SEPARATOR, array(
     realpath(APPLICATION_PATH . '/../library'),
@@ -19,11 +19,13 @@ set_include_path(implode(PATH_SEPARATOR, array(
 
 if (APPLICATION_ENV === 'production') {
     require 'iWebsite2/define.php';
+    require 'iWebsite2/vendor/autoload.php';
+} else {
+    require APPLICATION_PATH . '/../vendor/autoload.php';
 }
 require 'Zend/Application.php';
 
 // 自动加载系统类库
-include_once (APPLICATION_PATH . '/../vendor/autoload.php');
 
 $application = new Zend_Application(APPLICATION_ENV, APPLICATION_PATH . '/configs/application.ini');
 $application->bootstrap()->run();
