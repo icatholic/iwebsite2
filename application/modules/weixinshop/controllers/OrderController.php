@@ -205,7 +205,7 @@ class Weixinshop_OrderController extends iWebsite_Controller_Action
                 $addrSign = $this->getAddrSign($appid, $timeStamp, $nonceStr, $accessToken, $url);
                 $this->assign("addrSign", $addrSign);
             } else {
-                if (IsWeixinBrowser()) { // 如果不是微信浏览器的时候
+                if (isWeixinBrowser()) { // 如果不是微信浏览器的时候
                                          // 微信授权
                     $callbackUrl = urlencode($url);
                     header("Location: http://131224fg0402.umaman.com/weixin/campaign/authorize?scope=snsapi_base&state={$state}&callbackUrl={$callbackUrl}");
