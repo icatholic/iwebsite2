@@ -7,13 +7,13 @@ class Weixin_PageController extends Zend_Controller_Action
 
     private $_app;
 
-    private $_appConfig;
+    private $_appInfo;
 
     public function init()
     {
         try {
             $this->_app = new Weixin_Model_Application();
-            $this->_appConfig = $this->_app->getApplicationInfo();
+            $this->_appInfo = $this->_app->getApplicationInfo();
         } catch (Exception $e) {
             var_dump(exceptionMsg($e));
         }
@@ -36,8 +36,8 @@ class Weixin_PageController extends Zend_Controller_Action
                 $this->view->assign('image', isset($page['picture']) ? $page['picture'] : '');
                 $this->view->assign('date', date("Y-m-d", $page['__CREATE_TIME__']->sec));
                 $this->view->assign('content', isset($page['content']) ? $page['content'] : '');
-                $this->view->assign('weixin_id', isset($this->_appConfig['weixin_id']) ? $this->_appConfig['weixin_id'] : '');
-                $this->view->assign('weixin_name', isset($this->_appConfig['weixin_name']) ? $this->_appConfig['weixin_name'] : '');
+                $this->view->assign('weixin_id', isset($this->_appInfo['weixin_id']) ? $this->_appInfo['weixin_id'] : '');
+                $this->view->assign('weixin_name', isset($this->_appInfo['weixin_name']) ? $this->_appInfo['weixin_name'] : '');
             }
         } catch (Exception $e) {
             var_dump(exceptionMsg($e));
