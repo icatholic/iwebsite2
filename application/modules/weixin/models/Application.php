@@ -41,6 +41,18 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
     }
 
     /**
+     * 获取应用的信息
+     * @return array
+     */
+    public function getApplicationInfo()
+    {
+        $application = $this->findOne(array(
+            'is_product' => true
+        ));
+        return $application;
+    }
+
+    /**
      * 获取有效的token信息
      *
      * @throws Exception
@@ -84,7 +96,6 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
             if ((time() + $this->_expire) > $token['access_token_expire']->sec) {
                 $this->_expire = $token['access_token_expire']->sec - time();
             }
-
         }
         return $token;
     }

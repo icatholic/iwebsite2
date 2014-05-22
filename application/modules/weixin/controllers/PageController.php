@@ -13,7 +13,7 @@ class Weixin_PageController extends Zend_Controller_Action
     {
         try {
             $this->_app = new Weixin_Model_Application();
-            $this->_appConfig = $this->_app->getToken();
+            $this->_appConfig = $this->_app->getApplicationInfo();
         } catch (Exception $e) {
             var_dump(exceptionMsg($e));
         }
