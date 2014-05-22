@@ -42,7 +42,7 @@ class Weixin_Model_Reply extends iWebsite_Plugin_Mongo
                         'title' => $reply['title'],
                         'description' => $reply['description'],
                         'picurl' => $index == 0 ? $reply['picture'] : $reply['icon'],
-                        'url' => isset($reply['page']) ? 'http://' . $_SERVER["HTTP_HOST"] . '/weixin/page/index/id/' . $reply['page'] : $reply['url']
+                        'url' => !empty($reply['url']) ? $reply['url'] : (isset($reply['page']) ? HOST_URL . 'weixin/page/index/id/' . $reply['page'] : '')
                     ));
                 }
                 return $this->_weixin->getMsgManager()

@@ -39,6 +39,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         $this->_config = $this->getOptions();
         Zend_Registry::set('config', $this->_config);
+        defined('HOST_URL') || define('HOST_URL', 'http://' . $_SERVER['HTTP_HOST'] . $this->_config['resources']['frontController']['baseUrl']);
     }
 
     protected function _initLoader()
@@ -325,6 +326,5 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         Zend_Search_Lucene_Analysis_Analyzer::setDefault(new iWebsite_Plugin_Lucene_Scws());
         Zend_Search_Lucene::setResultSetLimit(0); // 0表示无限制，全部返回
     }
-
 }
 

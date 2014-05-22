@@ -4,24 +4,15 @@ class Weixin_PageController extends Zend_Controller_Action
 {
 
     private $_weixin;
-
-    private $_user;
-
+    
     private $_app;
-
-    private $_config;
+    
+    private $_appConfig;
 
     public function init()
     {
-        $this->getHelper('viewRenderer')->setNoRender(true);
-        $this->_config = Zend_Registry::get('config');
-        $this->_user = new Weixin_Model_User();
         $this->_app = new Weixin_Model_Application();
         $this->_appConfig = $this->_app->getToken();
-        $this->_weixin = new Weixin\Client();
-        if (! empty($this->_appConfig['access_token'])) {
-            $this->_weixin->setAccessToken($this->_appConfig['access_token']);
-        }
     }
 
     public function indexAction()
