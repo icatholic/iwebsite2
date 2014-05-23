@@ -343,7 +343,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
 
     /**
      * 获取所有符合条件的数据，做findAndModify
-     * 
+     *
      * @param array $query            
      */
     private function getSharedKeyToQuery(array $query = null)
@@ -429,11 +429,21 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
     public function aggregate($pipeline, $op = NULL, $op1 = NULL)
     {
         if (! $this->_noAppendQuery) {
-            array_unshift($pipeline, array(
-                '$match' => array(
-                    '__REMOVED__' => false
-                )
-            ));
+            if (isset($pipeline[0]['$geoNear'])) {
+                $first = array_shift($pipeline);
+                array_unshift($pipeline, array(
+                    '$match' => array(
+                        '__REMOVED__' => false
+                    )
+                ));
+                array_unshift($pipeline, $first);
+            } else {
+                array_unshift($pipeline, array(
+                    '$match' => array(
+                        '__REMOVED__' => false
+                    )
+                ));
+            }
         }
         
         return parent::aggregate($pipeline);
@@ -834,7 +844,7 @@ class iWebsite_Local_MongoCollection extends \MongoCollection
         
         $keys = array_keys($object);
         foreach ($keys as $key) {
-            //$key = strtolower($key);
+            // $key = strtolower($key);
             if (! in_array($key, $this->_updateHaystack, true)) {
                 throw new \Exception('$key must contain ' . join(',', $this->_updateHaystack));
             }
