@@ -77,7 +77,7 @@ class Lottery_Model_Rule extends iWebsite_Plugin_Mongo
         }, $list);
         
         // 按照概率从高到底的次序排序
-        rsort($groupList, SORT_NUMERIC);
+        ksort($groupList, SORT_NUMERIC);
         
         // 按分组随机排序
         $resultList = array();
