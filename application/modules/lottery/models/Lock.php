@@ -25,7 +25,11 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
                 'activity_id' => $activity_id
             ));
             if ($this->_lockInfo == null) {
-                throw new Exception("请设定活动编号");
+                $this->_lockInfo = $this->insert(array(
+                    'activity_id' => $activity_id,
+                    'unique_array' => array(),
+                    'log' => array()
+                ));
             }
         }
         return $this->_lockInfo;
