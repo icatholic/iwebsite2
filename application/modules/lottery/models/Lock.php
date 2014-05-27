@@ -94,10 +94,13 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
      * @param string $uniqueId            
      * @throws Exception
      */
-    public function release()
+    public function release($activity_id = null, $uniqueId = null)
     {
-        $activity_id = static::$activity_id;
-        $uniqueId = static::$uniqueId;
+        if (empty($activity_id))
+            $activity_id = static::$activity_id;
+        
+        if (empty($uniqueId))
+            $uniqueId = static::$uniqueId;
         
         $uniqueId = strval($uniqueId);
         $lockInfo = $this->getLockByActivity($activity_id);
@@ -120,8 +123,11 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
      * @param string $activity_id            
      * @param int $expire            
      */
-    public function expireRelease($activity_id, $expire = 300)
+    public function expireRelease($activity_id = null, $expire = 300)
     {
+        if (empty($activity_id))
+            $activity_id = static::$activity_id;
+        
         $expire = intval($expire);
         $lockInfo = $this->findOne(array(
             'activity_id' => $activity_id
