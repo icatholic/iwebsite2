@@ -317,6 +317,9 @@ class Lottery_IndexController extends iWebsite_Controller_Action
     
     public function __destruct() {
         $this->_lock->release();
+        if(rand(0,9)===1) {
+            $this->_lock->expireRelease();
+        }
     }
 }
 
