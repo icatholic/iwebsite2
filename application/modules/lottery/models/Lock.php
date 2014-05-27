@@ -9,6 +9,10 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
 
     private $_lockInfo = null;
 
+    private static $activity_id;
+
+    private static $uniqueId;
+
     /**
      * 获取锁定信息,在活动使用锁之前，请在锁集合中创建该活动的锁
      *
@@ -36,12 +40,14 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
      */
     public function lock($activity_id, $uniqueId)
     {
+        static::$activity_id = $activity_id;
+        static::$uniqueId = $uniqueId;
+        
         $uniqueId = strval($uniqueId);
         $lockInfo = $this->getLockByActivity($activity_id);
         if ($lockInfo == null) {
             throw new Exception("活动不存在");
         }
-        
         
         $options = array();
         $options['query'] = array(
@@ -62,7 +68,7 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
                     '$sort' => array(
                         'time' => 1
                     ),
-                    '$slice' => -1000
+                    '$slice' => - 1000
                 )
             )
         );
@@ -70,12 +76,12 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
         $options['new'] = false;
         $rst = $this->findAndModify($options);
         if (! empty($rst['value'])) {
-            if (in_array($uniqueId, $rst['value']['unique_array'],true)) {
+            if (in_array($uniqueId, $rst['value']['unique_array'], true)) {
                 // 已经被锁定
                 return true;
             }
         } else {
-            fb($rst,'LOG');
+            fb($rst, 'LOG');
         }
         // 尚未被锁定，但是目前已经锁定
         return false;
@@ -88,8 +94,11 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
      * @param string $uniqueId            
      * @throws Exception
      */
-    public function release($activity_id, $uniqueId)
+    public function release()
     {
+        $activity_id = static::$activity_id;
+        $uniqueId = static::$uniqueId;
+        
         $uniqueId = strval($uniqueId);
         $lockInfo = $this->getLockByActivity($activity_id);
         if ($lockInfo == null) {
@@ -122,7 +131,7 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
         $expiredUniqueIds = array();
         
         $arr = $lockInfo['log'];
-        if (!empty($arr)) {
+        if (! empty($arr)) {
             foreach ($arr as $one) {
                 if ($one['time'] < $expired) {
                     $expiredUniqueIds[] = $one['unique'];

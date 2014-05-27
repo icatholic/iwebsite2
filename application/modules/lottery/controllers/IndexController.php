@@ -26,6 +26,10 @@ class Lottery_IndexController extends iWebsite_Controller_Action
     private $_user;
     
     private $_lock;
+    
+    private $_activity_id;
+    
+    private $_uniqueId;
 
     public function init()
     {
@@ -108,6 +112,9 @@ class Lottery_IndexController extends iWebsite_Controller_Action
                 echo $this->error(500, "活动尚未开始");
                 return false;
             }
+            
+            //如果是活跃的项目，那么对于参与终于进行lock，防止并发请求导致的问题。
+            $this->_lock->lock($activity_id, $uniqueId);
             
             // 产生用户身份信息
             $this->_identity->setSource($source);
@@ -306,6 +313,10 @@ class Lottery_IndexController extends iWebsite_Controller_Action
         } catch (Exception $e) {
             exit($this->error(505, $e->getFile() . $e->getLine() . $e->getMessage()));
         }
+    }
+    
+    public function __destruct() {
+        $this->_lock->release();
     }
 }
 
