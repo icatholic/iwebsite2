@@ -51,7 +51,7 @@ class Weixininvitation_Model_InvitationGotDetail extends iWebsite_Plugin_Mongo
         $data['invitation_id'] = $invitation_id; // 邀请函ID
         $data['owner_FromUserName'] = $owner_FromUserName; // 发送邀请函的FromUserName
         $data['got_FromUserName'] = $got_FromUserName; // 领邀请函的FromUserName
-        $data['got_time'] = APPLICATION_CURRENT_TIME; // 获取时间
+        $data['got_time'] = new MongoDate(); // 获取时间
         $info = $this->insert($data);
         return $info;
     }
