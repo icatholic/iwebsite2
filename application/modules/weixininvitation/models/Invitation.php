@@ -43,7 +43,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         $data['invited_total'] = $invited_total; // 接受邀请总次数
         $data['send_time'] = new MongoDate(); // 发送时间
         $data['lock'] = 0; // 未锁定
-        $data['expire'] = 0; // 过期时间
+        $data['expire'] = new MongoDate(); // 过期时间
         $info = $this->insert($data);
         return $info;
     }
