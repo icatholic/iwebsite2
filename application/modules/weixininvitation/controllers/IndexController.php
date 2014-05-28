@@ -169,7 +169,6 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             if ($isGot) {
                 throw new Exception("已领过", - 6);
             }
-            
             // 增加接受邀请函处理
             try {
                 // 检查是否锁定，如果没有锁定加锁
@@ -182,12 +181,12 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
                 $this->assign('InvitationGotInfo', $InvitationGotInfo);
                 
                 // 领取次数加一
-                $modelInvitation->incGotNum($invitationId);
+                $modelInvitation->incInvitedNum($invitationId);
                 // unlock
                 // 释放锁定
                 $modelInvitation->unlock($invitationId);
             } catch (Exception $e) {
-                throw new Exception("系统发生了错误", $e->getCode());
+                throw $e;
             }
         } catch (Exception $e) {
             var_dump(exceptionMsg($e));
