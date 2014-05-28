@@ -128,10 +128,11 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $db = array();
         $default = new iDatabase('52dce281489619e902452b46', '11111111', '53059145489619c06a3dc01f');
         $db['default'] = $default;
-        $db['weixin'] = $default;
+        $db['weixin'] = $default;//微信
         $db['lottery'] = $default;
-        $db['weixinshop'] = $default;
+        $db['weixinshop'] = $default;//微信商城
         $db['iFreight'] = $default;
+        $db['weixininvitation'] = $default;//微信邀请
         Zend_Registry::set('db', $db);
     }
 
