@@ -46,8 +46,8 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
                 echo ($this->error(- 1, "微信ID不能为空"));
                 return false;
             }
-            $nickname = trim($this->get('nickname', ''));
-            $desc = trim($this->get('desc', ''));
+            $nickname = trim($this->get('nickname', '')); // 邀请函昵称
+            $desc = trim($this->get('desc', '')); // 邀请函说明
             if (empty($nickname)) {
                 echo ($this->error(- 2, "昵称不能为空"));
                 return false;
@@ -56,7 +56,9 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
                 echo ($this->error(- 3, "说明不能为空"));
                 return false;
             }
-            
+            $worth = intval($this->get('worth', '0')); // 价值
+            $invited_total = intval($this->get('invited_total', '1')); // 接受邀请总次数
+                                                                       
             // 获取发送过几次邀请函
             $modelInvitation = new Weixininvitation_Model_Invitation();
             $count = $modelInvitation->getSentCount($FromUserName);
@@ -65,7 +67,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             }
             
             // 生成邀请函
-            $recordInfo = $modelInvitation->create($FromUserName, $nickname, $desc);
+            $recordInfo = $modelInvitation->create($FromUserName, $nickname, $desc, $worth, $invited_total);
             
             // 发送成功
             echo ($this->result("OK", $recordInfo));
