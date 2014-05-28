@@ -163,7 +163,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         
         $query = array(
             '_id' => $info['_id'],
-            'lock' => 1,
+            'lock' => true,
             'invited_num' => array(
                 '$lt' => $info['invited_total']
             )
