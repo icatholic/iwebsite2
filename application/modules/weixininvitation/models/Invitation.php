@@ -42,7 +42,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         $data['invited_num'] = 0; // 接受邀请次数
         $data['invited_total'] = $invited_total; // 接受邀请总次数
         $data['send_time'] = new MongoDate(); // 发送时间
-        $data['lock'] = 0; // 未锁定
+        $data['lock'] = false; // 未锁定
         $data['expire'] = new MongoDate(); // 过期时间
         $info = $this->insert($data);
         return $info;
@@ -78,13 +78,12 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         $lock = $this->findOne(array(
             '_id' => myMongoId($invitationId)
         ));
-        
         if ($lock == null) {
             throw new Exception("未初始化锁");
         } else {
             $query = array(
                 '_id' => $lock['_id'],
-                'lock' => 0
+                'lock' => false
             );
         }
         
@@ -92,7 +91,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         $options['query'] = $query;
         $options['update'] = array(
             '$set' => array(
-                'lock' => 1,
+                'lock' => true,
                 'expire' => new MongoDate(time() + 300)
             )
         );
@@ -123,7 +122,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
             '_id' => myMongoId($invitationId)
         ), array(
             '$set' => array(
-                'lock' => 0,
+                'lock' => false,
                 'expire' => new MongoDate()
             )
         ));
@@ -140,7 +139,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
             '_id' => myMongoId($invitationId)
         ), array(
             '$set' => array(
-                'lock' => 0,
+                'lock' => false,
                 'expire' => array(
                     '$lte' => new MongoDate()
                 )
@@ -211,7 +210,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
 
     /**
      * 是否同一个人领了
-     * 
+     *
      * @param array $info            
      * @param string $FromUserName            
      * @return boolean
