@@ -49,6 +49,12 @@ abstract class iWebsite_Controller_Action extends Zend_Controller_Action
         $this->assign('module', $module);
         $this->assign('controller', $controller);
         $this->assign('action', $action);
+        
+        $path = $config['global']['path'];
+        $scheme = $this->getRequest()->getScheme();
+        $host = $this->getRequest()->getHttpHost();
+        $this->assign('http_host_name', "{$scheme}://{$host}{$path}");
+        
         // 微信支付
         // appId 公众号身份标识。
         // appSecret 公众平台API(参考文档API 接口部分)的权限获取所需密钥Key，在使用所有公众平台API 时，都需要先用它去换取access_token，然后再进行调用。
