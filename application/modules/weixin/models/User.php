@@ -60,10 +60,13 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
             if (! isset($userInfo['errcode'])) {
                 $userInfo['subscribe'] = $userInfo['subscribe'] == 1 ? true : false;
                 $userInfo['subscribe_time'] = new MongoDate($userInfo['subscribe_time']);
-            } elseif(!$range) {
+            } elseif (! $range) {
                 $userInfo = array();
                 $userInfo['subscribe'] = true;
                 $userInfo['subscribe_time'] = new MongoDate();
+            } else {
+                $userInfo = array();
+                $userInfo['subscribe'] = true;
             }
             
             return $this->update(array(
