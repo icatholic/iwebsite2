@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>爽动红PA专区</title>
+    <meta name="description" content="">
+    <!-- 移动平台-->
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="cleartype" content="on">
+
+
+    <!--For iOS web apps. Delete if not needed. https://github.com/h5bp/mobile-boilerplate/issues/94-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="">
+
+
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->path;?>weixin/css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->path;?>weixin/css/style.css?1006"/>
+    <style>
+        .coin { -webkit-transition: all .3s;  transition: all .3s;  }
+        .coin.drag { margin-top: -7.9%;   }
+    </style>
+    <script>
+        var htmlPath = "<?php echo $this->path;?>weixin/";
+        var shareData = {
+            img_url: "http://140318dg0012.umaman.com/weixin/images/logo.jpg",
+            img_width: 80,
+            img_height: 80,
+            link: 'http://140318dg0012.umaman.com/',
+            desc: '可口可乐爽动红PA专区',
+            title: '可口可乐爽动红PA专区',
+            appid: 0
+        };
+    </script>
+    <script type="text/javascript" src="<?php echo $this->path;?>weixin/js/seajs/sea.js"></script>
+    <script type="text/javascript" src="<?php echo $this->path;?>weixin/js/seajs/seajsConfig.js"></script>
+</head>
+<body>
+    <div class="wrapper" id="index">
+        <div class="coin drag">
+            <img src="<?php echo $this->path;?>weixin/images/header.jpg" alt="">
+            <div class="mycoin">
+                <div class="inner">
+                    <span><?php echo $this->score;?></span>
+                </div>
+            </div>
+            <img class="hudie" src="<?php echo $this->path;?>weixin/images/hudie.png" alt=""/>
+        </div>
+        <div class="mods">
+            <div class="row">
+                <!--<div class="mod mod1">
+                    <a href="#"><img src="<?php /*echo $this->path;*/?>weixin/images/mod1.jpg" alt=""></a>
+                    <img src="<?php /*echo $this->path;*/?>weixin/images/mod1_.jpg" alt="" class="close">
+                </div>
+                <div class="mod mod3">
+                    <a href="<?php /*echo $this->path;*/?>scan/result?code=1&FromUserName=<?php /*echo $this->FromUserName;*/?>"><img src="<?php /*echo $this->path;*/?>weixin/images/mod3.jpg" alt=""></a>
+                </div>
+                <div class="mod mod2">
+                    <a href="#"><img src="<?php /*echo $this->path;*/?>weixin/images/mod2.jpg" alt=""></a>
+                    <img src="<?php /*echo $this->path;*/?>weixin/images/mod2_.jpg" alt="" class="close">
+                </div>-->
+                <img src="<?php echo $this->path;?>weixin/images/mod123.jpg" alt=""/>
+                <a class="mod mod1" href="javascript:;"></a>
+                <a class="mod mod2" href="javascript:;"></a>
+                <a class="mod mod3" href="<?php echo $this->path; ?>scan/result?code=1&FromUserName=<?php echo $this->FromUserName; ?>"></a>
+            </div>
+            <div class="mod mod4">
+                <a href="<?php echo $this->path;?>weixin/wish.html?fromUserName=<?php echo $this->FromUserName;?>"><img src="<?php echo $this->path;?>weixin/images/mod4.jpg" alt=""></a>
+            </div>
+            <div class="mod mod5">
+                <a href="#"><img src="<?php echo $this->path;?>weixin/images/mod5.jpg" alt=""></a>
+                <img src="<?php echo $this->path;?>weixin/images/mod5_.jpg" alt="" class="close">
+            </div>
+            <div class="row">
+                <!--<div class="mod mod6">
+                    <a href="#"><img src="<?php /*echo $this->path;*/?>weixin/images/mod6.jpg" alt=""></a>
+                    <img src="<?php /*echo $this->path;*/?>weixin/images/mod6_.jpg" alt="" class="close">
+                </div>
+                <div class="mod mod7">
+                    <a href="#"><img src="<?php /*echo $this->path;*/?>weixin/images/mod7.jpg" alt=""></a>
+                    <img src="<?php /*echo $this->path;*/?>weixin/images/mod7_.jpg" alt="" class="close">
+                </div>-->
+                <img src="<?php echo $this->path;?>weixin/images/mod67.jpg" alt=""/>
+                <a class="mod mod6" href="javascript:;"></a>
+                <a class="mod mod7" href="javascript:;"></a>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: none">
+        <img src="<?php echo $this->path;?>weixin/images/hudie.gif" alt=""/>
+    </div>
+
+    <script type="text/javascript">
+        seajs.use("app/views-index");
+    </script>
+
+    <script type="text/javascript">
+        function shareTimeline() {
+            WeixinJSBridge.invoke('shareTimeline', shareData, function(res) {
+                _report('timeline', res.err_msg);
+            });
+        }
+
+        function shareFriend() {
+            WeixinJSBridge.invoke('sendAppMessage', shareData, function(res) {
+                _report('send_msg', res.err_msg);
+            })
+        }
+
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+            WeixinJSBridge.call('hideToolbar');
+            // 发送给好友
+            WeixinJSBridge.on('menu:share:appmessage', function(argv){
+                shareFriend();
+            });
+            // 分享到朋友圈
+            WeixinJSBridge.on('menu:share:timeline', function(argv){
+                shareTimeline();
+            });
+        }, false);
+    </script>
+
+</body>
+</html>
