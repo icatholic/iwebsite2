@@ -53,19 +53,24 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
         $check = $this->findOne(array(
             'openid' => $openid
         ));
-        if ($check == null || empty($check['subscribe']) || rand(0,100)==1) {
+        if ($check == null || empty($check['subscribe']) || rand(0, 100) == 1) {
             $userInfo = $this->_weixin->getUserManager()->getUserInfo($openid);
             if (! isset($userInfo['errcode'])) {
                 $userInfo['subscribe'] = $userInfo['subscribe'] == 1 ? true : false;
                 $userInfo['subscribe_time'] = new MongoDate($userInfo['subscribe_time']);
-                return $this->update(array(
-                    'openid' => $openid
-                ), array(
-                    '$set' => $userInfo
-                ), array(
-                    'upsert' => true
-                ));
+            } else {
+                $userInfo = array();
+                $userInfo['subscribe'] = true;
+                $userInfo['subscribe_time'] = new MongoDate();
             }
+            
+            return $this->update(array(
+                'openid' => $openid
+            ), array(
+                '$set' => $userInfo
+            ), array(
+                'upsert' => true
+            ));
         }
         return false;
     }
