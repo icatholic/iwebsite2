@@ -65,8 +65,7 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
                 $userInfo['subscribe'] = true;
                 $userInfo['subscribe_time'] = new MongoDate();
             } else {
-                $userInfo = array();
-                $userInfo['subscribe'] = true;
+                return false;
             }
             
             return $this->update(array(
