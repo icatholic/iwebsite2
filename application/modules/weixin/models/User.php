@@ -61,6 +61,7 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
                 $userInfo['subscribe'] = $userInfo['subscribe'] == 1 ? true : false;
                 $userInfo['subscribe_time'] = new MongoDate($userInfo['subscribe_time']);
             } elseif (! $range) {
+                //针对订阅号的情况，记录关注用户的openid
                 $userInfo = array();
                 $userInfo['subscribe'] = true;
                 $userInfo['subscribe_time'] = new MongoDate();
