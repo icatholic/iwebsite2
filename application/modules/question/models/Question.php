@@ -45,6 +45,21 @@ class Question_Model_Question  extends iWebsite_Plugin_Mongo
     		return $this->getQuestion($arrayQuery,$number,$arrayData);
     }
     
+    public function getAll($naireId)
+    {
+        $arrayReturn = array();
+        $oOption = new Question_Model_Option();
+        $arrayQuestion = $this->findAll(array('naire_id'=>$naireId),array('_id'=>-1));
+        
+        foreach ($arrayQuestion as $key => $val)
+        {
+            $arrayOptions = $oOption->findAll(array('question_id'=>$val['_id']->__toString()),array('key'=>1),array('key'=>true,'option'=>true));
+            $val['options'] = $arrayOptions;
+            $arrayReturn[$val['_id']->__toString()] = $val;
+        }
+        return $arrayReturn;
+    }
+    
     /*
     * 验证答题	//暂不考虑填空题
     * @para	m string $_id MONGODB ID
@@ -105,7 +120,7 @@ class Question_Model_Question  extends iWebsite_Plugin_Mongo
      * $naireId 问卷ID
      * 
      * */
-    public function answer($arrayAnswer,$userId,$naireId,$randId)
+    public function answer($arrayAnswer,$userId,$naireId,$randId = '')
     {
         $oNaire = new Question_Model_Naire();
         $this->arrayNaire = $oNaire->findOne(array('_id'=>$naireId));

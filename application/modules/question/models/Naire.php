@@ -15,8 +15,7 @@ class Question_Model_Naire  extends iWebsite_Plugin_Mongo
         	$arrayReturn['randId'] = '';
         	if(!$arrayNaire['is_rand'])	//非随机，获取所有题目
         	{
-        		$arrayQuestion = $oQuestion->findAll(array('naire_id'=>$naireId));
-        		$arrayQuestion = $arrayQuestion['datas'];
+        		$arrayQuestion = $oQuestion->getAll($naireId);
         	}
         	else //随机获得N题，组成问卷
         	{
