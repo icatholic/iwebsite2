@@ -1,0 +1,21 @@
+<form action='/exchange/index/ex' method='post'>
+<input type='hidden' name='user_id' value='<?php echo $this->user;?>'><br>
+<select name='rule'>
+<?php 
+foreach ($this->rule as $key => $val)
+{
+	echo "<option value='".$val['_id']."'>".$val['prize']['prize_name']."</option>";
+}
+?>
+</select>
+<input type='text' name='quantity' />
+<input type='submit' value='submit'>
+</form>
+
+兑换列表：<br>
+<?php 
+foreach ($this->list as $key => $val)
+{
+	echo date('Y-m-d H:i:s',$val['__CREATE_TIME__']->sec).' '.$val['prize']['prize_name'].' '.$val['quantity'].'<br>';
+}
+?>

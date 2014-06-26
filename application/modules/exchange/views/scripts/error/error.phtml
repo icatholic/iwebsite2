@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Zend Framework Application Error</title>
+</head>
+<body>
+	<h1>An error occurred</h1>
+	<h2><?php echo $this->message ?></h2>
+
+  <?php if (isset($this->exception)): ?>
+
+  <h3>Exception information:</h3>
+	<p>
+		<b>Message:</b> <?php echo $this->exception->getMessage()?>
+  </p>
+
+	<!-- 增加调试信息开始 -->
+<?php if ( isset($this->info ) ) { ?>
+<?php if ( 404 == $this->code ) { ?>
+  <p>
+		<b>Reason:</b> <?= $this->info ?></p>
+<?php } elseif (500 == $this->code) { ?>
+  <p>500</p>
+	<h4>Exception information:</h4>
+	<p>
+		<b>Message:</b><?php echo $this->info->getMessage(); ?></p>
+	<h4>Stack trace:</h4>
+	<pre><?php  $this->info->getTraceAsString() ?></pre>
+<?php } ?>
+<?php } ?>
+<!-- 增加调试信息结束 -->
+
+
+	<h3>Stack trace:</h3>
+	<pre><?php echo $this->exception->getTraceAsString()?>
+  </pre>
+
+	<h3>Request Parameters:</h3>
+	<pre><?php echo var_export($this->request->getParams(), true)?>
+  </pre>
+  <?php endif ?>
+
+</body>
+</html>
