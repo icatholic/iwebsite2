@@ -133,6 +133,10 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $db['weixinshop'] = $default;//微信商城
         $db['iFreight'] = $default;
         $db['weixininvitation'] = $default;//微信邀请
+        $db['weibo'] = $default;//微博
+        $db['weixinsign'] = $default;//微信签到
+        $db['weather'] = $default;//天气
+        
         Zend_Registry::set('db', $db);
     }
 

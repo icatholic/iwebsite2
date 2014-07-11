@@ -1,0 +1,37 @@
+
+	<div class="bg_img">
+		<img src="<?php echo $this->getResourceUrl()?>images/bg_01.jpg" alt="" class="img" />
+	</div>
+	<div class="detail_box">
+		<div class="tit absolute">
+			<p class="f_2 b">礼包送不停，华安伴你行！</p>
+		</div>
+		<div class="bg_icon absolute"><img src="<?php echo $this->getResourceUrl()?>images/icon_01.png" alt="" class="img" /></div>	
+		<div class="list absolute">
+			<ul>
+			<?php if(!empty($this->list)){?>
+            <?php foreach ($this->list as $invitation) {?>
+				<li class="f_1 <?php if($invitation['invited_num'] == $invitation['invited_total']){?>end<?php }?>">
+					<div class="div" onclick="javascript:window.location.href='<?php echo $this->config['global']['path']?>weixininvitation/index/details?FromUserName=<?php echo $this->FromUserName?>&invitationId=<?php echo myMongoId($invitation['_id'])?>'">
+						<p>发送时间：<?php echo date('Y年m月d日',($invitation['send_time']->sec))?></p>
+						<p>礼包内含份数：<span class="red"><?php echo ($invitation['invited_total'])?></span>份</p>
+						<p>已领取：<span class="red"><?php echo ($invitation['invited_num'])?></span>份  未领取：<span class="red"><?php echo ($invitation['invited_total']-$invitation['invited_num'])?></span>份</p>
+						<p>礼包内含剩余价值：<span class="red"><?php echo ($invitation['worth'])?></span></p>
+					</div>
+					<?php if($invitation['invited_num'] == $invitation['invited_total']){?>
+					<a href="javascript:;" class="block">已发完</a>
+					<?php }else{?>					
+					<a href="javascript:;" class="block weixinShare" pid="<?php echo myMongoId($invitation['_id'])?>">分享给好友</a>
+					<?php }?>
+				</li>
+				<?php }?>
+				<?php }else{?>
+				<li class="f_1">
+					<div class="div" style="color:#797979">
+						暂无发放记录
+					</div>
+				</li>
+				<?php }?>
+			</ul>
+		</div>
+	</div>

@@ -1,0 +1,22 @@
+
+	<div class="bg_img">
+		<img src="<?php echo $this->getResourceUrl()?>images/bg_01.jpg" alt="" class="img" />
+	</div>
+	<div class="receive_box">
+		<div class="tit absolute">
+			<p class="f_1">您从你的的好友<b><?php echo !empty($this->invitation) && !empty($this->invitation['nickname'])?$this->invitation['nickname']:""?></b>获取了一下的内容的邀请函：</p>
+		</div>
+		<div class="bg_icon absolute"><img src="<?php echo $this->getResourceUrl()?>images/icon_01.png" alt="" class="img" /></div>		
+		<div class="lingqu absolute">
+			<div class="shuo">
+				<p><?php echo nl2br(!empty($this->invitation) && !empty($this->invitation['desc'])?$this->invitation['desc']:"")?></p>
+			</div>
+			<div class="gua relative" id="guayigua">
+			     <p style="font-size:14px;">获取价值：<?php echo $this->got_worth?></p>
+			</div>
+			<div class="divID f_12" style="display:none;">ID: <span id="hasid"><?php echo $this->exchange_id?></span></div>
+			<div class="font f_14">
+				快刮开礼包瞧瞧吧！
+			</div>
+		</div>
+	</div>

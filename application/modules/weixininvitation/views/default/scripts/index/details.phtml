@@ -1,0 +1,32 @@
+
+	<div class="bg_img">
+		<img src="<?php echo $this->getResourceUrl()?>images/bg_01.jpg" alt="" class="img" />
+	</div>
+	<div class="detail_box">
+		<div class="tit absolute">
+			<p class="f_2 b">礼包送不停，华安伴你行！</p>
+		</div>
+		<div class="bg_icon absolute"><img src="<?php echo $this->getResourceUrl()?>images/icon_01.png" alt="" class="img" /></div>	
+		<div class="list absolute">
+			<ul>
+				<li class="f_1">
+					<div class="div">
+						<p class="p icon">发送时间：<?php echo date('y年m月d日',($this->invitation['send_time']->sec))?></p>
+						<p class="p icon">礼包内含份数：<span class="red"><?php echo ($this->invitation['invited_total'])?></span>份</p>
+						<p class="p icon">已领取：<span class="red"><?php echo ($this->invitation['invited_num'])?></span>份  未领取：<span class="red"><?php echo ($this->invitation['invited_total']-$this->invitation['invited_num'])?></span>份</p>
+						<p class="p icon">礼包内含剩余价值：<span class="red"><?php echo ($this->invitation['worth'])?></span></p>
+					</div>
+				</li>
+				<li class="f_0">
+				    <?php if(!empty($this->list)){?>
+					<div class="div">					
+            		<?php foreach ($this->list as $detail) {?>
+						<p><?php echo date('Y/m/d',($detail['got_time']->sec))?>  您发送的 价值为<span class="red"><?php echo $detail['got_worth']?></span> 的礼包被好友领取啦！</p>
+					<?php }?>					
+					</div>
+					<?php }?>
+					<a href="javascript:;" class="block weixinShare" pid="<?php echo $this->invitation['_id']?>">分享给好友</a>
+				</li>
+			</ul>
+		</div>
+	</div>

@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>微博</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=utf-8">
+<script src="<?php echo $this->getResourceUrl()?>js/jquery-1.8.0.min.js"></script>
+<script src="<?php echo $this->getResourceUrl()?>js/jquery.query.js"></script>
+<script src="<?php echo $this->getResourceUrl()?>js/jquery.cookie.js"></script>
+<script type="text/javascript">
+		var web_path = "<?php echo $this->config['global']['path']?>";
+		var source = 1;//weibo
+</script>
+</HEAD>
+
+<BODY topMargin=0>
+<button  id="authorize1" >微博授权</button><br/>
+<button  id="share1" >分享</button><br/>
+<button  id="post1" >POST</button><br/>
+<button  id="get1" >GET</button><br/>
+<button  id="getUserInfo" >获取微博用户信息</button><br/>
+<button  id="getFriends" >获取微博用户的朋友列表信息</button><br/>
+</body>
+
+<script language="javascript">
+	var App = {
+	    init : function(){
+	    	 // 用户微博授权
+	        $("#authorize1").size() && authorizeTest();
+	        // 用户微博分享
+	        $("#share1").size() && shareTest();
+		     // 用户微博POST
+	        $("#post1").size() && postTest();	
+		     // 用户微博POST
+	        $("#get1").size() && getTest();	
+		     // 获取微博用户信息
+	        $("#getUserInfo").size() && getUserInfoTest();	
+		     // 获取微博用户的朋友列表信息
+	        $("#getFriends").size() && getFriendsTest();	        
+	    }
+	};
+
+	$(document).ready(App.init);
+
+	//用户微博授权
+	function authorizeTest(){
+	    $("#authorize1").on("click",
+	        function(){
+	        	var callbackUrl = encodeURIComponent("http://140324fg0120icc/weibo/test/index?packageId=3456");
+	    		window.location.href = "http://140324fg0120icc/weibo/sns/index?redirect="+callbackUrl;
+	        }
+	    )
+	}
+	
+	//用户微博分享
+	function shareTest(){
+	    $("#share1").on("click",
+	        function(){
+	            var content = '微博接口测试';
+	            var pic_url = '';
+	            var params = {};
+	            var umaId=$.cookie('weibo[umaId]');
+	            var uid=$.cookie('weibo[uid]');
+	            var screen_name=$.cookie('weibo[screen_name]');
+	            params['umaId'] = umaId;
+	            params['uid'] = uid;
+	            params['screen_name'] = screen_name;
+	            params['content'] = content;
+	            params['pic_url'] = pic_url;
+	            params['follow'] = '1942631884';//自动关注微博UID 定海东
+	            //params['friendNum'] = 3;//随机@3个朋友
+	            //params['friends'] = ['@1','@2','@3'];//如果是指定@朋友的话
+	            
+	            $.ajax(
+	            {
+	                url:web_path+'weibo/index/share',
+	                type:'POST',
+	                data:params,
+	                dataType: "json",
+	                success:function(data) {
+	                    console.info(data);
+	                    if(data.success) {
+	                    	alert(data.result);
+	                    }
+	                    else {
+	                        alert(data.message);
+	                    }
+	                }
+	            });
+	        }
+	    )
+	}
+
+	//用户微博Post
+	function postTest(){
+	    $("#post1").on("click",
+	        function(){
+	            var params = {};
+	            var umaId=$.cookie('weibo[umaId]');	            
+	            var uid=$.cookie('weibo[uid]');
+	            var screen_name=$.cookie('weibo[screen_name]');
+	            params['umaId'] = umaId;
+	            params['url'] = 'statuses/update';
+	            params['multi'] = 'false';
+	            params['parameters'] = {status:'用户post测试',visible:0};
+	    		
+	            $.ajax(
+	            {
+	                url:web_path+'weibo/index/post',
+	                type:'POST',
+	                data:params,
+	                dataType: "json",
+	                success:function(data) {
+	                    console.info(data);
+	                    if(data.success) {
+	                    	alert(data.result);
+	                    }
+	                    else {
+	                        alert(data.message);
+	                    }
+	                }
+	            });
+	        }
+	    )
+	}
+
+	//用户微博Get
+	function getTest(){
+	    $("#get1").on("click",
+	        function(){
+	            var params = {};
+	            var umaId=$.cookie('weibo[umaId]');
+	            var uid=$.cookie('weibo[uid]');
+	            var screen_name=$.cookie('weibo[screen_name]');
+	            params['umaId'] = umaId;
+	            params['url'] = 'users/show';
+	            params['multi'] = 'false';
+	            params['parameters'] = {uid:'1596822015'};           
+	            $.ajax(
+	            {
+	                url:web_path+'weibo/index/get',
+	                type:'POST',
+	                data:params,
+	                dataType: "json",
+	                success:function(data) {
+	                    console.info(data);
+	                    if(data.success) {
+	                    	alert(data.result);
+	                    }
+	                    else {
+	                        alert(data.message);
+	                    }
+	                }
+	            });
+	        }
+	    )
+	}
+
+	//获取微博用户信息
+	function getUserInfoTest(){
+	    $("#getUserInfo").on("click",
+	        function(){
+            	var params = {};
+            	var umaId=$.cookie('weibo[umaId]');
+	            var uid=$.cookie('weibo[uid]');
+	            var screen_name=$.cookie('weibo[screen_name]');
+	            params['umaId'] = umaId;
+		        params['uid'] = uid;
+			     $.ajax(
+			     {
+			     	url:web_path+'weibo/index/get-user-info',
+			     	type:'POST',
+			     	data:params,
+			     	dataType: "json",
+			     	success:function(data) {
+			     		console.info(data);
+					     if(data.success) {
+					     	alert(data.result);
+					     }
+					     else {
+					     	alert(data.message);
+					     }
+			     	}
+			     });
+	        }
+	    )
+	}
+	
+	//获取微博用户的朋友列表信息
+	function getFriendsTest(){
+	    $("#getFriends").on("click",
+	        function(){
+	            var params = {};
+	            var umaId=$.cookie('weibo[umaId]');
+	            var uid=$.cookie('weibo[uid]');
+	            var screen_name=$.cookie('weibo[screen_name]');
+	            params['umaId'] = umaId;
+		        params['uid'] = uid;
+		        $.ajax(
+	   		     {
+	   		     	url:web_path+'weibo/index/get-friend-list',
+	   		     	type:'POST',
+	   		     	data:params,
+	   		     	dataType: "json",
+	   		     	success:function(data) {
+	   		     		console.info(data);
+	   				     if(data.success) {
+	   				     	alert(data.result);
+	   				     }
+	   				     else {
+	   				     	alert(data.message);
+	   				     }
+	   		     	}
+	   		     });
+	        }
+	    )
+	}
+  </script>
+</html>

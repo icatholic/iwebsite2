@@ -1,2 +1,136 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>发礼包</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<meta name="format-detection" content="telephone=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="description" content="">
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta http-equiv="cleartype" content="on">
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/index.css?g=<?php echo time()?>"/>
+    <script type="text/javascript">
+		var webpath = "<?php echo $this->config['global']['path'] ?>";		
+		var prize_pic = "<?php echo $this->prize_pic?>";//奖品图片
+		var sendNum = "<?php echo $this->sendNum?>";// 发礼包次数
+		var url = "<?php echo $this->url?>";// URL
+		var isGot = "<?php echo $this->isGot?>"; //已领
+		var errMsg = "<?php echo $this->errMsg?>";// error message
+		var http_host_name ="<?php echo $this->http_host_name?>";//域名	
+		var integralInfo = "<?php echo $this->current_integral?>";	//当前积分
+
+		var isSame = "<?php echo $this->isSame?>"; //同一个人领
+		var isPackageGot = "<?php echo $this->isPackageGot?>"; //已领
+		var isOver = "<?php echo $this->isOver?>"; //礼包已领完
+		var isFinished = "<?php echo $this->isFinished?>"; //活动结束
+		var isPrized = "<?php echo $this->isPrized?>"; //已获奖
+		var prize_name = "<?php echo $this->prize_name?>";//奖品名称
+		var exchange_id = "<?php echo $this->exchange_id?>";//奖品ID
+		var is_prizeinfo_set = "<?php echo $this->is_prizeinfo_set?>";//奖品用户信息是否已提交
+		var FromUserName = "<?php echo $this->FromUserName?>";// FromUserName
+	</script>
+    <script src="<?php echo $this->getResourceUrl()?>js/jquery-1.8.0.min.js"></script>
+    <script src="<?php echo $this->getResourceUrl()?>js/jquery.query.js"></script>
+    <script src="<?php echo $this->getResourceUrl()?>js/wScratchPad.js"></script>
+    <script src="<?php echo $this->getResourceUrl()?>js/huaan.index.js?t=<?php echo time()?>"></script>
+</head>
+<body>
+<div class="wrap relative zoom" style="font-size:320%;">
 <?php
 echo $this->layout()->content;
+?>
+	<!--浮动-->
+	<div class="tanBg absolute" style="display:none;"></div>
+	<div class="tanBox absolute" style="display:none;">
+		<!-- 未领礼包 -->
+		<div class="tan_list nolibaoTan f_16" style="display:none;">
+			<div class="font1">您还没获得礼包哦~先发一个礼包给您的朋友</div>
+			<div class="btn_box">
+				<a href="javascript:;" class="block btn2 fr" id="nolibaoBtn" style="float:none;display:block;margin:0 auto;">确认</a>
+			</div>
+		</div>
+		<!-- 消耗积分 -->
+		<div class="tan_list jifenTan f_16" style="display:none;">
+			<div class="font1">是否确定？</div>
+			<div class="btn_box">
+				<a href="javascript:;" class="block btn1 fl cancel closeTanBtn">取消</a>
+				<a href="javascript:;" class="block btn2 fr" id="jifenBtn">确认</a>
+			</div>
+		</div>
+		<!-- 积分不足 -->
+		<div class="tan_list jifenbuzuTan f_16" style="display:none;">
+			<div class="t_c f_18">您的积分不足</div>
+			<p class="f_14 t_c" style="padding-bottom:10px;">参与华安官微各项活动都可以<br />赚取积分，快来试试把！</p>
+			<div class="btn_box t_c">
+				<a href="<?php echo $this->config['global']['path']?>user/index/index?FromUserName=<?php echo $this->FromUserName?>?>" class="inlineBlock btn1">才气账房</a>
+			</div>
+		</div>
+		<!-- 收货地址信息 -->
+		<div class="infoTan tan_list f_16" style="display:none;">
+			<p class="f_333 f_16" style="text-align: center;">恭喜您获得了<?php echo $this->prize_name?>！</p>
+			<p class="f_333 f_12" style="text-align: center;">请务必准确填写以下信息领取奖品</p>
+			<p class="f_333 f_12" style="text-align: center;padding-bottom:5px;">ID:<?php echo $this->exchange_id?></p>
+			<ul class="input">
+				<li style="border-top:1px solid #adaeb1;"><label class="block fl">姓名:</label><input id="name" type="text" class="f_16 fl" /></li>
+				<li><label class="block fl">手机号:</label><input id="mobile" type="text" class="f_16 fl" /></li>
+				<!-- <li><label class="block fl">地址:</label><input id="address" type="text" class="f_16 fl" /></li> -->				
+			</ul>
+			<p class="f_16 f_333" style="text-align: center;height: 40px;line-height: 40px;padding-top:5px;display:none;" id="infoPrompt">请输入正确的手机号格式</p>
+			<div class="btn_box" style="padding-top:5px;">
+				<a href="javascript:;" class="block btn1 fl cancel closeTanBtn">取消</a>
+				<a href="javascript:;" class="block btn2 fr" id="infoBtn">确认</a>
+			</div>
+		</div>
+	</div>
+
+	<!-- load -->
+	<div class="load absolute" style="display: none;left:50%;top:50%;margin:-15px 0 0 -62px">
+    	<p class="fl font f_16" id="loadHtml">数据加载中</p>
+	</div>
+	<!-- 微信分享提示 -->
+	<div class="weixin_tishi absolute" style="display:none;">
+		<img src="<?php echo $this->getResourceUrl()?>images/share_tishi.png" alt="" class="img" />
+	</div>
+</div>
+<script type="text/javascript">
+var shareArr = ['','','',''];
+document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+    WeixinJSBridge.on('menu:share:timeline', function(argv){
+        WeixinJSBridge.invoke('shareTimeline',{
+            "img_url":shareArr[3],
+            "link":shareArr[2],
+            "desc":shareArr[1],
+            "title":shareArr[0]
+        },function(res){
+            //alert('res');
+        });
+    });
+    WeixinJSBridge.on('menu:share:appmessage', function(argv){
+        WeixinJSBridge.invoke('sendAppMessage',{
+            "appid":'',
+            "img_url":shareArr[3],
+            "link":shareArr[2],
+            "desc":shareArr[1],
+            "title":shareArr[0]
+        },function(res){
+            //alert('res');
+        });
+    });
+    WeixinJSBridge.call('hideToolbar');
+});
+</script>
+<script type="text/javascript">
+    if(errMsg!=''){ 
+    	$('body').html('非法访问'); 
+   	}
+</script>
+</body>
+</html>
