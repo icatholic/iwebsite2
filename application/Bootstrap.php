@@ -226,6 +226,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         }
         Zend_Registry::set('outputCache', $outputCache);
         
+        $cache = Zend_Registry::get('cache');
+        
         // 手动清空缓存
         if (isset($_GET['page_cache_clean_all']) && (isset($_GET['password']) && $_GET['password'] == date("ymdh"))) {
             switch ($_GET['page_cache_clean_all']) {
