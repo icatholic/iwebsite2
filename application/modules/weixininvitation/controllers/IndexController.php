@@ -199,7 +199,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             
             $modelInvitationWaitGetDetail = new Weixininvitation_Model_InvitationWaitGetDetail();
             
-            if (! empty($invitation['is_need_subscibed'])) { // 如果需要微信关注的话
+            if (! empty($invitation['is_need_subscribed'])) { // 如果需要微信关注的话
                 $isSubscribed = $this->isSubscribed($FromUserName); // 判断是否关注
                 if (empty($isSubscribed)) { // 未关注的话,跳转到某个提示关注的页面
                     if (empty($invitation['subscibe_hint_url'])) {

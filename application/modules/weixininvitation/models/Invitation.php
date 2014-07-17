@@ -26,12 +26,14 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * 根据邀请内容ID获取信息
      *
      * @param string $FromUserName            
+     * @param number $activity            
      * @return array
      */
-    public function getInfoByFromUserName($FromUserName)
+    public function getInfoByFromUserName($FromUserName, $activity = 0)
     {
         $query = array(
-            'FromUserName' => $FromUserName
+            'FromUserName' => $FromUserName,
+            'activity' => $activity
         );
         $info = $this->findOne($query);
         return $info;
@@ -49,11 +51,14 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * @param number $personal_receive_num            
      * @param boolean $is_need_subscribed            
      * @param string $subscibe_hint_url            
+     * @param number $activity            
+     * @param array $memo            
      * @return array
      */
-    public function create($FromUserName, $url, $nickname, $desc, $worth = 0, $invited_total = 0, $personal_receive_num = 0, $is_need_subscribed = false, $subscibe_hint_url = "")
+    public function create($FromUserName, $url, $nickname, $desc, $worth = 0, $invited_total = 0, $personal_receive_num = 0, $is_need_subscribed = false, $subscibe_hint_url = "", $activity = 0, array $memo = array())
     {
         $data = array();
+        $data['activity'] = $activity; // 邀请活动
         $data['FromUserName'] = $FromUserName; // 微信ID
         $data['url'] = $url; // 邀请函URL
         $data['nickname'] = $nickname; // 邀请函昵称
@@ -67,6 +72,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         $data['personal_receive_num'] = $personal_receive_num; // 个人领取次数，如果为0，不限制
         $data['lock'] = false; // 未锁定
         $data['expire'] = new MongoDate(); // 过期时间
+        $data['memo'] = $memo; // 备注
         $info = $this->insert($data);
         return $info;
     }
@@ -83,13 +89,15 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * @param number $personal_receive_num            
      * @param boolean $is_need_subscribed            
      * @param string $subscibe_hint_url            
+     * @param number $activity            
+     * @param array $memo            
      * @return array
      */
-    public function getOrCreateByFromUserName($FromUserName, $url, $nickname, $desc, $worth = 0, $invited_total = 0, $personal_receive_num = 0, $is_need_subscribed = false, $subscibe_hint_url = "")
+    public function getOrCreateByFromUserName($FromUserName, $url, $nickname, $desc, $worth = 0, $invited_total = 0, $personal_receive_num = 0, $is_need_subscribed = false, $subscibe_hint_url = "", $activity = 0, array $memo = array())
     {
-        $info = $this->getInfoByFromUserName($FromUserName);
+        $info = $this->getInfoByFromUserName($FromUserName, $activity);
         if (empty($info)) {
-            $info = $this->create($FromUserName, $url, $nickname, $desc, $worth, $invited_total, $personal_receive_num, $is_need_subscribed, $subscibe_hint_url);
+            $info = $this->create($FromUserName, $url, $nickname, $desc, $worth, $invited_total, $personal_receive_num, $is_need_subscribed, $subscibe_hint_url, $activity, $memo);
         }
         return $info;
     }
@@ -98,12 +106,14 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * 发送邀请次数
      *
      * @param string $FromUserName            
+     * @param number $activity            
      * @return int
      */
-    public function getSentCount($FromUserName)
+    public function getSentCount($FromUserName, $activity = 0)
     {
         $count = $this->count(array(
-            'FromUserName' => $FromUserName
+            'FromUserName' => $FromUserName,
+            'activity' => $activity
         ));
         return $count;
     }
@@ -242,17 +252,19 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * 分页读取某个用户的全部邀请函
      *
      * @param string $FromUserName            
+     * @param number $activity            
      * @param number $page            
      * @param number $limit            
      * @return array
      */
-    public function getListByPage($FromUserName, $page = 1, $limit = 10)
+    public function getListByPage($FromUserName, $activity = 0, $page = 1, $limit = 10)
     {
         $sort = array(
             'send_time' => - 1
         );
         $query = array();
         $query['FromUserName'] = $FromUserName;
+        $query['activity'] = $activity;
         $list = $this->find($query, $sort, ($page - 1) * $limit, $limit);
         return $list;
     }
