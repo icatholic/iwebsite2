@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>积分测试</title>
+</head>
+
+<body>
+<p>用户选择</p>
+<form id="form1" name="form1" method="get" action="/score/index/test">
+    <select name="mobile" id="moblie">
+        <?php foreach($this->users as $user){?>
+            <option><?php echo $user["mobile"]; ?></option>
+        <?php } ?>
+    </select>
+    <p>积点机制选择</p>
+    <p>
+      <select name="rule_id" id="rule_id">
+        <?php foreach($this->rules as $rule){?>
+            <option value="<?php echo $rule["_id"]; ?>"><?php echo $rule["rule_name"]; ?></option>
+        <?php } ?>
+      </select>
+    </p>
+    <p>
+      <input type="submit" value="执行积分操作" />
+    </p>
+</form>
+
+</body>
+</html>

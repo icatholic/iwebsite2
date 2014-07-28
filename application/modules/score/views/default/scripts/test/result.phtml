@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>积分测试-用户积分详情</title>
+</head>
+
+<body>
+<table width="100%" border="1">
+  <tr>
+    <th scope="col">用户</th>
+    <th scope="col">积点总数</th>
+    <th scope="col">获得积点总数</th>
+    <th scope="col">冻结积点总数</th>
+    <th scope="col">使用积点总数</th>
+    <th scope="col">过期积点总数</th>
+  </tr>
+  <tr>
+    <td><?php echo $this->current_user["mobile"]; ?></td>
+    <td><?php echo $this->current_user["score"]; ?></td>
+    <td><?php echo $this->current_user["score_total"]; ?></td>
+    <td><?php echo $this->current_user["score_freeze"]; ?></td>
+    <td><?php echo $this->current_user["score_use"]; ?></td>
+    <td><?php echo $this->current_user["score_expire"]; ?></td>
+  </tr>
+</table>
+<table width="100%" border="1">
+  <tr>
+    <th scope="col">积分机制名称</th>
+    <th scope="col">原因</th>
+    <th scope="col">来源</th>
+    <th scope="col">点数</th>
+    <th scope="col">有效性</th>
+    <th scope="col">操作时间</th>
+  </tr>
+  <?php foreach($this->results as $result){?>
+    <tr>
+    	<td><?php echo $result["rule_name"]; ?></td>
+        <td><?php echo $result["reason"]; ?></td>
+        <td><?php if($result["source"]==1){echo "游戏";}elseif($result["source"]==2){echo "社交";}elseif($result["source"]==3){echo "签到";}elseif($result["source"]==4){echo "消费";}elseif($result["source"]==5){echo "其他";} ?></td>
+        <td><?php echo $result["score"]; ?></td>
+        <td><?php if($result["valid"]==true){echo "有效";}elseif($result["valid"]==false){echo "过期";} ?></td>
+        <td><?php echo date('Y-m-d H:i:s',$result["op_time"]->sec); ?></td>
+    </tr>
+  <?php } ?>
+</table>
+
+</form>
+
+</body>
+</html>
