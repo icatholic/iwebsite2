@@ -23,28 +23,82 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
     }
 
     /**
+     * 根据邀请内容ID获取信息
+     *
+     * @param string $FromUserName            
+     * @param number $activity            
+     * @return array
+     */
+    public function getInfoByFromUserName($FromUserName, $activity = 0)
+    {
+        $query = array(
+            'FromUserName' => $FromUserName,
+            'activity' => $activity
+        );
+        $info = $this->findOne($query);
+        return $info;
+    }
+
+    /**
      * 生成邀请函
      *
      * @param string $FromUserName            
+     * @param string $url            
      * @param string $nickname            
      * @param string $desc            
      * @param number $worth            
      * @param number $invited_total            
+     * @param number $personal_receive_num            
+     * @param boolean $is_need_subscribed            
+     * @param string $subscibe_hint_url            
+     * @param number $activity            
+     * @param array $memo            
      * @return array
      */
-    public function create($FromUserName, $nickname, $desc, $worth = 0, $invited_total = 1)
+    public function create($FromUserName, $url, $nickname, $desc, $worth = 0, $invited_total = 0, $personal_receive_num = 0, $is_need_subscribed = false, $subscibe_hint_url = "", $activity = 0, array $memo = array())
     {
         $data = array();
+        $data['activity'] = $activity; // 邀请活动
         $data['FromUserName'] = $FromUserName; // 微信ID
+        $data['url'] = $url; // 邀请函URL
         $data['nickname'] = $nickname; // 邀请函昵称
         $data['desc'] = $desc; // 邀请函详细
         $data['worth'] = $worth; // 价值
         $data['invited_num'] = 0; // 接受邀请次数
-        $data['invited_total'] = $invited_total; // 接受邀请总次数
+        $data['invited_total'] = $invited_total; // 接受邀请总次数，如果为0，不限制
         $data['send_time'] = new MongoDate(); // 发送时间
+        $data['is_need_subscribed'] = $is_need_subscribed; // 是否需要微信关注
+        $data['subscibe_hint_url'] = $subscibe_hint_url; // 微信关注提示页面链接
+        $data['personal_receive_num'] = $personal_receive_num; // 个人领取次数，如果为0，不限制
         $data['lock'] = false; // 未锁定
         $data['expire'] = new MongoDate(); // 过期时间
+        $data['memo'] = $memo; // 备注
         $info = $this->insert($data);
+        return $info;
+    }
+
+    /**
+     * 根据FromUserName生成或获取邀请函
+     *
+     * @param string $FromUserName            
+     * @param string $url            
+     * @param string $nickname            
+     * @param string $desc            
+     * @param number $worth            
+     * @param number $invited_total            
+     * @param number $personal_receive_num            
+     * @param boolean $is_need_subscribed            
+     * @param string $subscibe_hint_url            
+     * @param number $activity            
+     * @param array $memo            
+     * @return array
+     */
+    public function getOrCreateByFromUserName($FromUserName, $url, $nickname, $desc, $worth = 0, $invited_total = 0, $personal_receive_num = 0, $is_need_subscribed = false, $subscibe_hint_url = "", $activity = 0, array $memo = array())
+    {
+        $info = $this->getInfoByFromUserName($FromUserName, $activity);
+        if (empty($info)) {
+            $info = $this->create($FromUserName, $url, $nickname, $desc, $worth, $invited_total, $personal_receive_num, $is_need_subscribed, $subscibe_hint_url, $activity, $memo);
+        }
         return $info;
     }
 
@@ -52,12 +106,14 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * 发送邀请次数
      *
      * @param string $FromUserName            
+     * @param number $activity            
      * @return int
      */
-    public function getSentCount($FromUserName)
+    public function getSentCount($FromUserName, $activity = 0)
     {
         $count = $this->count(array(
-            'FromUserName' => $FromUserName
+            'FromUserName' => $FromUserName,
+            'activity' => $activity
         ));
         return $count;
     }
@@ -151,10 +207,12 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * 增加接受邀请次数
      *
      * @param string $invitationId            
+     * @param int $minusWorth
+     *            减少的价值
      * @throws Exception
      * @return boolean
      */
-    public function incInvitedNum($invitationId)
+    public function incInvitedNum($invitationId, $minusWorth = 0)
     {
         $info = $this->getInfoById($invitationId);
         if (empty($info)) {
@@ -172,7 +230,8 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         $options['query'] = $query;
         $options['update'] = array(
             '$inc' => array(
-                'invited_num' => 1
+                'invited_num' => 1,
+                'worth' => $minusWorth
             )
         );
         $options['new'] = false;
@@ -193,17 +252,19 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * 分页读取某个用户的全部邀请函
      *
      * @param string $FromUserName            
+     * @param number $activity            
      * @param number $page            
      * @param number $limit            
      * @return array
      */
-    public function getListByPage($FromUserName, $page = 1, $limit = 10)
+    public function getListByPage($FromUserName, $activity = 0, $page = 1, $limit = 10)
     {
         $sort = array(
             'send_time' => - 1
         );
         $query = array();
         $query['FromUserName'] = $FromUserName;
+        $query['activity'] = $activity;
         $list = $this->find($query, $sort, ($page - 1) * $limit, $limit);
         return $list;
     }
@@ -230,7 +291,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      */
     public function isOver($info)
     {
-        $isOver = ($info['invited_num'] >= $info['invited_total']) ? true : false;
+        $isOver = (! empty($info['invited_total']) && $info['invited_num'] >= $info['invited_total']) ? true : false;
         return $isOver;
     }
 }

@@ -1,0 +1,56 @@
+	<div class="bg_img">
+		<img src="<?php echo $this->getResourceUrl()?>images/bg_01.jpg" alt="" class="img" />
+	</div>
+	<div class="home_box" style="display:block;">
+		<div class="tit absolute f_1 b">谁说大人不能过儿童节？</div>
+		<div class="people absolute"><img src="<?php echo $this->getResourceUrl()?>images/home_img02.png" alt="" class="img" /></div>
+		<div class="prize absolute"><img src="<?php echo $this->getResourceUrl()?>images/home_img01.png" alt="" class="img" /></div>
+		<div class="bg_icon absolute"><img src="<?php echo $this->getResourceUrl()?>images/icon_01.png" alt="" class="img" /></div>
+		<div class="btn_box absolute">
+			<a href="javascript:;" class="block btn1 fl" id="fahongbaoBtn">发礼包</a>
+			<?php if(empty($this->isGot)){?>
+				<a href="javascript:;" class="block btn2 fl" id="weilingquBtn">领礼包</a>
+			<?php }else{?>	
+			<?php if(empty($this->url)){?>
+				<a href="javascript:;" class="block btn2 fl" id="linglibaoBtn">领礼包</a>
+			<?php }else{?>					
+				<a href="<?php echo $this->url?>" class="block btn2 fl">领礼包</a>
+			<?php }?>
+			<?php }?>
+		</div>
+		<div class="bottom_link absolute f_1">
+			<a href="<?php echo $this->config['global']['path']?>weixininvitation/index/list?FromUserName=<?php echo $this->FromUserName?>" class="inlineBlock">已发礼包</a>&nbsp;&nbsp;
+		</div>
+	</div>
+	<div class="fahongbao_box" style="display:none;">
+		<div class="tit absolute">
+			<p class="f_1">你开心时，我会陪你开心；</p>
+			<p class="f_1">你不开心时，我会“红”你开心！</p>
+			<p class="f_2 b">礼包送不停，华安伴你行！</p>
+		</div>
+		<div class="bg_icon absolute"><img src="<?php echo $this->getResourceUrl()?>images/icon_01.png" alt="" class="img" /></div>
+		<div class="forms absolute">
+			<div class="shuo">
+				<textarea name="textarea" class="f_3 inputFocus" rows="3" id="desc">输入你想说的话，可以文青、可以唯美、可以伤感、可以抒情、可以……</textarea>
+			</div>
+			<div class="name">
+				<input type="text" name="" class="fr ipt f_3" id="nickname">
+				<label class="f_4 fr">我的署名：</label>
+			</div>
+			<div class="name">
+				<input type="text" name="" class="fr ipt f_3" id="worth">
+				<label class="f_4 fr">价值：</label>
+			</div>
+			<div class="name">
+				<input type="text" name="" class="fr ipt f_3" id="invited_total">
+				<label class="f_4 fr">邀请总次数：</label>
+			</div>
+			<div class="name">
+				<input type="text" name="" class="fr ipt f_3" id="invited_url">
+				<label class="f_4 fr">URL：</label>
+			</div>
+			<div class="btn_box">
+				<a href="javascript:;" class="inlineBlock btn1" id="hongTaBtn">发送邀请！</a>
+			</div>
+		</div>
+	</div>

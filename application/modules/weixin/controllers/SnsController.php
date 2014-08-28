@@ -50,7 +50,7 @@ class Weixin_SnsController extends Zend_Controller_Action
             $redirectUri .= '/' . $moduleName;
             $redirectUri .= '/' . $controllerName;
             $redirectUri .= '/callback';
-            $redirectUri .= '?redirect=' . $redirect;
+            $redirectUri .= '?redirect=' . urlencode($redirect);
             
             if (isset($_SESSION['iWeixin']['accessToken'])) {
                 $redirect = isset($_GET['redirect']) ? urldecode($_GET['redirect']) : '';

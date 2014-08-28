@@ -1617,3 +1617,47 @@ function getClassMethodArgumentCacheKey($class,$method) {
     $obj = new ReflectionMethod($class,$method);
     return crc32(serialize($obj->getParameters()));
 }
+
+
+/**
+ * 显示金额
+ * @param number $money
+ * @return string
+ */
+function showMoney($money)
+{
+    return sprintf("%01.2f", $money);
+}
+
+
+/**
+ * 获取弧度
+ * @param number $d
+ * @return number
+ */
+function rad($d)
+{
+    return $d * M_PI / 180.0;
+}
+
+/**
+ * 获取2个经纬度之间的距离（米）
+ * @param number $lat1
+ * @param number $lng1
+ * @param number $lat2
+ * @param number $lng2
+ * @return number
+ */
+function GetDistance($lat1, $lng1, $lat2, $lng2)
+{
+    $EARTH_RADIUS = 6378.137; // 地球半径 千米
+    $radlat1 = rad($lat1);
+    $radlat2 = rad($lat2);
+    $a = $radlat1 - $radlat2;
+    $b = rad($lng1) - rad($lng2);
+
+    $s = 2 * asin(sqrt(pow(sin($a / 2), 2) + cos($radlat1) * cos($radlat2) * pow(sin($b / 2), 2)));
+    $s = $s * $EARTH_RADIUS;
+    $s = round($s * 10000) / 10000;
+    return $s * 1000; // 米
+}

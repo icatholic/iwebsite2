@@ -15,6 +15,7 @@ class iWebsite_Plugin_Admin extends Zend_Controller_Plugin_Abstract
             ->setErrorHandlerAction('error');
         
         if ($module == 'admin') {
+            $front->setParam('noViewRenderer', false);
         }
         
         // 针对管理系统的的权限设定

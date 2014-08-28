@@ -210,8 +210,10 @@ abstract class iWebsite_Controller_Action extends Zend_Controller_Action
         if (! empty($jsonpcallback)) {
             return $jsonpcallback . '(' . json_encode(array(
                 'success' => false,
-                'message' => $msg,
-                'result' => $result
+                'error_code' => $code,
+                'error_msg' => $msg,
+                'errorCode' => $code,
+                'errorMsg' => $msg
             )) . ')';
         } else {
             return json_encode(array(
