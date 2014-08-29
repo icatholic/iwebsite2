@@ -8,7 +8,7 @@
 <link href="<?php echo $this->getResourceUrl()?>css/menu.css" media="screen" rel="stylesheet" type="text/css" />
 
 <link rel="stylesheet" href="<?php echo $this->config['global']['path']?>scripts/jquery/ui-theme/jquery-ui-1.8.custom.css" type="text/css" media="screen" />
-<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-1.8.2.min.js"></script>
 <script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/jquery/jquery-ui-1.8.custom.min.js"></script>
 <script language="JavaScript">
 <!--
@@ -20,7 +20,7 @@ var cookieName = "_<?php echo $this->admin_id;?>";
 //-->
 </script>
 
-<script type="text/javascript" src="<?php echo $this->config['global']['path']?>js/utils.js"></script>
+<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/utils.js"></script>
 <script type="text/javascript" src="<?php echo $this->config['global']['path']?>scripts/json/json2.js"></script>
 <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/jquery/menu.js"></script>
 </head>
@@ -39,13 +39,44 @@ var cookieName = "_<?php echo $this->admin_id;?>";
 <div id="main-div">
 <div id="menu-list">
 <ul>
-
+<?php if(!empty($_SESSION['roleInfo']) && $_SESSION['roleInfo']['name'] == '运维'){?>
+<li class="explode"  key="03_goods"  name="menu">商品管理 
+<ul>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/goods/list" target="main-frame">商品列表</a></li>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/goods/add" target="main-frame">添加新商品</a></li>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/category/list" target="main-frame">商品分类</a></li>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/sku/list" target="main-frame">SKU列表</a></li>
+</ul>
+</li>
+<?php }?>
 <li class="explode"  key="04_order"  name="menu">订单管理 
 <ul>
 <li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/order/list" target="main-frame">订单列表</a></li>
-<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/order/orderquery" target="main-frame">订单查询</a></li>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/order/orderquery" target="main-frame">订单查询&导出</a></li>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/order/upload?op=shipping" target="main-frame">订单批量导入</a></li>
 </ul>
 </li>
+
+<li class="explode"  key="05_trace"  name="menu">维权管理 
+<ul>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/payfeedback/list" target="main-frame">维权列表</a></li>
+</ul>
+</li>
+
+<li class="explode"  key="05_trace"  name="menu">溯源管理 
+<ul>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/trace/list" target="main-frame">溯源列表</a></li>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/trace/upload" target="main-frame">溯源批量导入</a></li>
+</ul>
+</li>
+<!--
+<li class="explode" key="10_priv_admin" name="menu">权限管理 
+<ul>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/privilege/list" target="main-frame">管理员列表</a></li>
+<li class="menu-item"><a href="<?php echo $this->config['global']['path']?>admin/role/list" target="main-frame">角色管理</a></li>
+</ul>
+</li>
+-->
 </div>
 <div id="help-div" style="display:none">
 <h1 id="help-title"></h1>

@@ -77,7 +77,6 @@ org.eclipse.php.formatter.core.formatter.insert_new_line_after_opening_brace_in_
 org.eclipse.php.formatter.core.formatter.insert_new_line_before_catch_in_try_statement=false
 org.eclipse.php.formatter.core.formatter.insert_new_line_before_closing_brace_in_array_initializer=true
 org.eclipse.php.formatter.core.formatter.insert_new_line_before_else_in_if_statement=false
-org.eclipse.php.formatter.core.formatter.insert_new_line_before_finally_in_try_statement=false
 org.eclipse.php.formatter.core.formatter.insert_new_line_before_while_in_do_statement=false
 org.eclipse.php.formatter.core.formatter.insert_new_line_in_empty_block=false
 org.eclipse.php.formatter.core.formatter.insert_new_line_in_empty_method_body=false
@@ -86,7 +85,6 @@ org.eclipse.php.formatter.core.formatter.insert_space_after_arrow_in_array_creat
 org.eclipse.php.formatter.core.formatter.insert_space_after_arrow_in_field_access=false
 org.eclipse.php.formatter.core.formatter.insert_space_after_arrow_in_foreach=true
 org.eclipse.php.formatter.core.formatter.insert_space_after_arrow_in_method_invocation=false
-org.eclipse.php.formatter.core.formatter.insert_space_after_arrow_in_yield=true
 org.eclipse.php.formatter.core.formatter.insert_space_after_assignment_operator=true
 org.eclipse.php.formatter.core.formatter.insert_space_after_binary_operator=true
 org.eclipse.php.formatter.core.formatter.insert_space_after_closing_brace_in_block=true
@@ -127,7 +125,6 @@ org.eclipse.php.formatter.core.formatter.insert_space_before_arrow_in_array_crea
 org.eclipse.php.formatter.core.formatter.insert_space_before_arrow_in_field_access=false
 org.eclipse.php.formatter.core.formatter.insert_space_before_arrow_in_foreach=true
 org.eclipse.php.formatter.core.formatter.insert_space_before_arrow_in_method_invocation=false
-org.eclipse.php.formatter.core.formatter.insert_space_before_arrow_in_yield=true
 org.eclipse.php.formatter.core.formatter.insert_space_before_assignment_operator=true
 org.eclipse.php.formatter.core.formatter.insert_space_before_binary_operator=true
 org.eclipse.php.formatter.core.formatter.insert_space_before_closing_bracket_in_array_reference=false

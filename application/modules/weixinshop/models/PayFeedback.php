@@ -84,8 +84,6 @@ class Weixinshop_Model_PayFeedback extends iWebsite_Plugin_Mongo
         $data['TimeStamp'] = $TimeStamp;
         // OpenId是支付该笔订单的用户ID，商户可通过公众号其他接口为付款用户服务。
         $data['OpenId'] = $OpenId;
-        // AppSignature是字段名称：签名；字段来源：对前面的其他字段不appKey按照字典序排序后，使用SHA1算法得到的结果。由商户生成后传入。
-        $data['AppId'] = $AppId;
         // MsgType是通知类型 request 用户提交投诉 confirm 用户确认消除投诉 reject 用户拒绝消除投诉
         $data['MsgType'] = $MsgType;
         // FeedBackId是投诉单号
@@ -113,22 +111,53 @@ class Weixinshop_Model_PayFeedback extends iWebsite_Plugin_Mongo
         // 判断数据是否存在
         $info = $this->getInfoByFeedBackId($data['FeedBackId']);
         if (empty($info)) {
+            // 回复内容
+            $data['reply_content'] = "";
+            // 是否已处理结束
+            $data['is_finished'] = false;
+            $data['result_id'] = "";
+            $data['process_status'] = 1;//维权中
             // 投诉次数
             $data['feedback_times'] = 1;
             $result = $this->insert($data);
         } else {
-            $options = array(
-                "query" => array(
-                    "_id" => $info['_id']
-                ),
-                "update" => array(
-                    '$set' => $data,
-                    '$inc' => array(
-                        'feedback_times' => 1
-                    )
-                ),
-                "new" => true
-            );
+            if (trim($data['MsgType']) == 'request') { // 如果是对同一个订单再次发起维权,这种情况目前是不存在的
+                $data['process_status'] = 1;//维权中
+                $options = array(
+                    "query" => array(
+                        "_id" => $info['_id']
+                    ),
+                    "update" => array(
+                        '$set' => $data,
+                        '$inc' => array(
+                            'feedback_times' => 1
+                        )
+                    ),
+                    "new" => true
+                );
+            } else { // 回复 (用户提交投诉 confirm 用户确认消除投诉 reject的时候)
+                     
+                // 处理投诉结果
+                $modelPayFeedbackResult = new Weixinshop_Model_PayFeedbackResult();
+                $feedbackResultInfo = $modelPayFeedbackResult->handle($data['AppId'], $data['TimeStamp'], $data['OpenId'], $data['MsgType'], $data['FeedBackId'], $data['TransId'], $data['Reason'], $data['Solution'], $data['ExtInfo'], $data['PicInfo'], $data['AppSignature'], $data['SignMethod'], $data['PostData'], $data['calc_appSignature'], myMongoId($info['_id']));
+                
+                // 更新原来的记录
+                $data = array();
+                $data['is_finished'] = true;
+                $data['result_id'] = myMongoId($feedbackResultInfo['_id']);
+                $data['process_status'] = 3;//维权结束
+                
+                $options = array(
+                    "query" => array(
+                        "_id" => $info['_id']
+                    ),
+                    "update" => array(
+                        '$set' => $data
+                    ),
+                    "new" => true
+                );
+            }
+            
             $return_result = $this->findAndModify($options);
             $result = $return_result["value"];
         }

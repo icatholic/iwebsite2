@@ -18,7 +18,7 @@ class User_Model_Bind extends iWebsite_Plugin_Mongo
     //根据微信获取用户ID
     public function getIdByWeixin($FromUserName)
     {
-    	$arrayUser = $this->findOne(array('info.openId'=>$FromUserName));
+    	$arrayUser = $this->findOne(array('info.openid'=>$FromUserName));
     	if(isset($arrayUser['user_id']))
     		return $arrayUser['user_id'];
     	else
@@ -37,7 +37,6 @@ class User_Model_Bind extends iWebsite_Plugin_Mongo
     
     public function bind($type,$uniqueValue,$arrayData)
     {
-        var_dump($arrayData);
         $arrayTmp = $this->findOne(array('bind_id'=>$arrayData['_id']->__toString()));
         if($arrayTmp == null) //未绑定过
         {
@@ -65,14 +64,14 @@ class User_Model_Bind extends iWebsite_Plugin_Mongo
             	}
                 
             }
-            return $arrayUser['_id'];
+            return $arrayUser;
         }
         else
         {
             $oUser = new User_Model_User();
             $arrayUser = $oUser->findOne(array('_id'=>$arrayTmp['user_id']));
             if($arrayUser['unique'] == $uniqueValue)
-                return $arrayTmp['user_id'];
+                return $arrayTmp;
             
             throw new Exception('该账号已被绑定',1001);
         	return false;

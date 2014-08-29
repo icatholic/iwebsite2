@@ -12,6 +12,8 @@ class iWebsite_Plugin_Weixin extends Zend_Controller_Plugin_Abstract
             if ($FromUserName) {
                 $extraArray = array(); // 可进行自定义扩展
                 $extraArray['FromUserName'] = $FromUserName;
+                $extraArray['timestamp'] = Zend_Registry::get('__TIME_STAMP__');
+                $extraArray['signkey'] = Zend_Registry::get('__SIGN_KEY__');
                 $filters = array(
                     'jpg',
                     'jpeg',

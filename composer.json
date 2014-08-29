@@ -11,7 +11,10 @@
     "phpmailer/phpmailer" : "v5.2.7",
     "browscap/browscap-php": "1.0.*@dev",
     "icatholic/weixin": "dev-master",
-    "react/promise": "2.0.*@dev"
+    "react/promise": "2.0.*@dev",
+    "phpunit/phpunit": "4.2.*",
+    "phpunit/phpunit-selenium": ">=1.2",
+    "AlloVince/EvaOAuth": "dev-master"
   },
   "keywords" : [ "iwebsite2", "zf1.12" ],
   "config" : {

@@ -158,4 +158,8 @@ class Lottery_Model_Identity extends iWebsite_Plugin_Mongo
         $rst = $this->findAndModify($options);
         return $rst['value'];
     }
+    
+    public function checkRunLimit() {
+        
+    }
 }

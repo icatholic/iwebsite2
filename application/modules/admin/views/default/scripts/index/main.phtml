@@ -1,20 +1,46 @@
 <!-- start order statistics -->
-<!--  
 <div class="list-div">
 <table cellspacing='1' cellpadding='3'>
 <tr>
-<th colspan="4" class="group-title">订单统计信息</th>
+<th colspan="8" class="group-title">订单统计信息</th>
 </tr>
 <tr>
-<td><a href="<?php echo $this->config['global']['path']?>admin/order/list">待支付订单:</a></td>
-<td><strong><?php echo $this->order['await_pay'];?></strong></td>
-<td><a href="<?php echo $this->config['global']['path']?>admin/order/list">已支付订单数:</a></td>
-<td><strong><?php echo $this->order['paid'];?></strong></td>
+<td width="12.5%">未支付订单数(今日):</td>
+<td width="12.5%"><strong><?php echo $this->order['daily_unpay'];?></strong></td>
+<td width="12.5%">已支付,待发货订单数(今日):</td>
+<td width="12.5%"><strong><?php echo $this->order['daily_paid_unship'];?></strong></td>
+<td width="12.5%">已发货订单数(今日):</td>
+<td width="12.5%"><strong><?php echo $this->order['daily_shipped'];?></strong></td>
+<td width="12.5%">已取消订单数(今日):</td>
+<td width="12.5%"><strong><?php echo $this->order['daily_cancel'];?></strong></td>
 </tr>
+
+<tr>
+<td width="12.5%">未支付订单数(本周):</td>
+<td width="12.5%"><strong><?php echo $this->order['weekly_unpay'];?></strong></td>
+<td width="12.5%">已支付,待发货订单数(本周):</td>
+<td width="12.5%"><strong><?php echo $this->order['weekly_paid_unship'];?></strong></td>
+<td width="12.5%">已发货订单数(本周):</td>
+<td width="12.5%"><strong><?php echo $this->order['weekly_shipped'];?></strong></td>
+<td width="12.5%">已取消订单数(本周):</td>
+<td width="12.5%"><strong><?php echo $this->order['weekly_cancel'];?></strong></td>
+</tr>
+
+<tr>
+<td width="12.5%">未支付订单数(本月):</td>
+<td width="12.5%"><strong><?php echo $this->order['monthly_unpay'];?></strong></td>
+<td width="12.5%">已支付,待发货订单数(本月):</td>
+<td width="12.5%"><strong><?php echo $this->order['monthly_paid_unship'];?></strong></td>
+<td width="12.5%">已发货订单数(本月):</td>
+<td width="12.5%"><strong><?php echo $this->order['monthly_shipped'];?></strong></td>
+<td width="12.5%">已取消订单数(本月):</td>
+<td width="12.5%"><strong><?php echo $this->order['monthly_cancel'];?></strong></td>
+</tr>
+
 </table>
 </div>
 <br />
--->
+
 <!-- end order statistics -->
 
 <!-- start system information -->

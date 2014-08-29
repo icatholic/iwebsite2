@@ -13,6 +13,7 @@ class Weixinshop_Model_GoodsCategory extends iWebsite_Plugin_Mongo
     public function getDefaultSort()
     {
         $sort = array(
+            'show_order' => - 1,
             '_id' => - 1
         );
         return $sort;
@@ -23,7 +24,9 @@ class Weixinshop_Model_GoodsCategory extends iWebsite_Plugin_Mongo
      */
     public function getQuery()
     {
-        $query = array();
+        $query = array(
+            'is_show' => true
+        );
         return $query;
     }
 

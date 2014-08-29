@@ -23,25 +23,28 @@
 <td><div align="right"><strong>购货人：</strong></div></td>
 <td><?php echo $this->order["OpenId"];?></td>
 <td><div align="right"><strong>下单时间：</strong></div></td>
-<td><?php echo empty($this->order["uma_time_start"])?'':$this->order["uma_time_start"];?></td>
+<td><?php echo empty($this->order["uma_time_start"])?'':date("Y-m-d H:i:s",$this->order["uma_time_start"]->sec);?></td>
 </tr>
 <tr>
 <td><div align="right"><strong>支付方式：</strong></div></td>
 <td>微信支付</td>
 <td><div align="right"><strong>付款时间：</strong></div></td>
-<td><?php echo $this->order["uma_time_end"];?></td>
+<td><?php echo (empty($this->order["uma_time_end"]) || empty($this->order["time_end"]))?'':date("Y-m-d H:i:s",$this->order["uma_time_end"]->sec);?></td>
 </tr>
 <tr>
-<td><div align="right"><strong>配送方式：</strong></div></td>
-<td>NA</td>
+<td><div align="right"><strong>快递公司：</strong></div></td>
+<td>
+<?php if(!empty($this->order["uma_shipping_status"]) && ($this->order["uma_shipping_status"] == SS_SHIPPED)){ echo $this->order["uma_shipping_memo"]["shipping_express_name"]; }else{?>
+<?php echo $this->escape(empty($this->order["freight_campany"])?'':$this->order["freight_campany"]);?>
+<?php }?></td>
 <td><div align="right"><strong>发货时间：</strong></div></td>
-<td>NA</td>
+<td><?php echo (empty($this->order["uma_shipping_time"]) || empty($this->order["uma_shipping_status"]))?'':date("Y-m-d H:i:s",$this->order["uma_shipping_time"]->sec);?></td>
 </tr>
 <tr>
 <td><div align="right"><strong>发货单号：</strong></div></td>
-<td>NA</td>
+<td><?php if(!empty($this->order["uma_shipping_status"]) && ($this->order["uma_shipping_status"] == SS_SHIPPED)){ echo $this->order["uma_shipping_memo"]["shipping_no"]; }else{?>NA<?php }?></td>
 <td><div align="right"><strong>订单来源：</strong></div></td>
-<td>来伊份微商城</td>
+<td>微商城</td>
 </tr>
 <tr>
 <td><div align="right"><strong>银行订单号：</strong></div></td>
@@ -61,6 +64,12 @@
 <td><?php echo $this->escape(empty($this->order["consignee_tel"])?'':$this->order["consignee_tel"]);?></td>
 </tr>
 <tr>
+<td><div align="right"><strong>省份：</strong></div></td>
+<td><?php echo $this->escape(empty($this->order["consignee_province"])?'':$this->order["consignee_province"]);?></td>
+<td><div align="right"><strong>城市：</strong></div></td>
+<td><?php echo $this->escape(empty($this->order["consignee_city"])?'':$this->order["consignee_city"]);?></td>
+</tr>
+<tr>
 <td><div align="right"><strong>地址：</strong></div></td>
 <td><?php echo $this->escape(empty($this->order["consignee_address"])?'':$this->order["consignee_address"]);?></td>
 <td><div align="right"><strong>邮编：</strong></div></td>
@@ -73,39 +82,75 @@
 <div class="list-div" style="margin-bottom: 5px">
 <table width="100%" cellpadding="3" cellspacing="1">
 <tr>
-<th colspan="8" scope="col">
+<th colspan="7" scope="col">
 商品信息
 </th>
 </tr>
 <tr>
-<td scope="col"><div align="center"><strong>商品名称</strong></div></td>
-<td scope="col"><div align="center"><strong>商品号</strong></div></td>
-<td scope="col"><div align="center"><strong>价格</strong></div></td>
-<td scope="col"><div align="center"><strong>数量</strong></div></td>
-<td scope="col"><div align="center"><strong>库存</strong></div></td>
-<td scope="col"><div align="center"><strong>小计</strong></div></td>
+<td width="40%"  scope="col"><div align="center"><strong>商品名称</strong></div></td>
+<td width="30%"  scope="col"><div align="center"><strong>商品号</strong></div></td>
+<td width="10%"  scope="col"><div align="center"><strong>价格</strong></div></td>
+<td width="10%"  scope="col"><div align="center"><strong>数量</strong></div></td>
+<!-- 
+<td width="30%"  scope="col"><div align="center"><strong>库存</strong></div></td>
+ -->
+<td width="10%"  scope="col"><div align="center"><strong>小计</strong></div></td>
 </tr>
 <?php foreach ($this->goods_list as $goods) {?>
 <tr>
 <td>
-<?php echo $goods["gname"];?>
+<?php echo $goods["name"];?>
 </td>
 <td><?php echo $goods["gid"];?></td>
-<td><div align="right"><?php echo $this->renderPrice($this->order["gprize"]);?></div></td>
-<td><div align="right"><?php echo $this->order["gnum"];?></div></td>
+<td><div align="right"><?php echo $this->renderPrice($goods["prize"]);?></div></td>
+<td><div align="right"><?php echo $goods["num"];?></div></td>
+<!-- 
 <td><div align="right"><?php echo $goods["stock_num"];?></div></td>
-<td><div align="right"><?php echo $this->renderPrice($this->order["gnum"] * $this->order["gprize"]);?></div></td>
+ -->
+<td><div align="right"><?php echo $this->renderPrice($goods["num"] * $goods["prize"]);?></div></td>
 </tr>
 <?php } ?>
-
 <tr>
 <td></td>
-<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td><div align="right"><strong>合计：</strong></div></td>
 <td><div align="right"><?php echo $this->renderPrice($this->order["product_fee"]);?></div></td>
 </tr>
+</table>
+</div>
+
+<div class="list-div" style="margin-bottom: 5px">
+<table width="100%" cellpadding="3" cellspacing="1">
+<tr>
+<th colspan="7" scope="col">
+商品SKU信息
+</th>
+</tr>
+<tr>
+<td width="40%"  scope="col"><div align="center"><strong>SKU名称</strong></div></td>
+<td width="30%"  scope="col"><div align="center"><strong>SKU号</strong></div></td>
+<td width="10%"  scope="col"><div align="center"><strong>价格</strong></div></td>
+<td width="10%"  scope="col"><div align="center"><strong>数量</strong></div></td>
+<!-- 
+<td width="30%"  scope="col"><div align="center"><strong>库存</strong></div></td>
+ -->
+<td width="10%"  scope="col"><div align="center"><strong>小计</strong></div></td>
+</tr>
+<?php foreach ($this->sku_list as $sku) {?>
+<tr>
+<td>
+<?php echo $sku["name"];?>
+</td>
+<td><?php echo $sku["no"];?></td>
+<td><div align="right"><?php echo $this->renderPrice($sku["prize"]);?></div></td>
+<td><div align="right">-</div></td>
+<!-- 
+<td><div align="right"><?php echo $sku["stock_num"];?></div></td>
+ -->
+<td><div align="right">-</div></td>
+</tr>
+<?php } ?>
 </table>
 </div>
 
@@ -147,7 +192,47 @@
 <td><div align="right"></div>
 <div align="right"><strong>当前可执行操作：</strong></div></td>
 <td colspan="5">
+<?php if($this->operable_list["confirm"]){?>
+<input name="confirm" type="submit" value="确认" class="button" />
+<?php } ?>
+<?php if($this->operable_list["pay"]){?>
+<input name="pay" type="submit" value="付款" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["unpay"]){?>
+<input name="unpay" type="submit" value="设为未付款" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["prepare"]){?>
+<input name="prepare" type="submit" value="配货" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["split"]){?>
+<input name="ship" type="submit" value="生成发货单" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["ship"]){?>
+<input name="ship" type="submit" value="发货" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["unship"]){?>
+<input name="unship" type="submit" value="未发货" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["receive"]){?>
+<input name="receive" type="submit" value="已收货" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["cancel"]){?>
+<input name="cancel" type="submit" value="取消" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["invalid"]){?>
+<input name="invalid" type="submit" value="无效" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["return"]){?>
+<input name="return" type="submit" value="退货" class="button" />
+<?php } ?> 
+<?php if($this->operable_list["to_delivery"]){?>
+<input name="to_delivery" type="submit" value="去发货" class="button"/>
+<input name="order_sn" type="hidden" value="<?php echo $this->order["order_sn"];?>" />
+<?php } ?> 
 <input name="after_service" type="submit" value="售后" class="button" />
+<?php if($this->operable_list["remove"]){?>
+<input name="remove" type="submit" value="删除" class="button" />
+<?php } ?>
 <input name="order_id" type="hidden" value="<?php echo $this->order["_id"];?>">
 </td>
 </tr>
@@ -160,6 +245,18 @@
 <th>发货状态</th>
 <th>备注</th>
 </tr>
+<?php if(!empty($this->action_list)){?>
+<?php foreach ($this->action_list as $action) {?>
+<tr>       
+<td><div align="center"><?php echo $action["action_user"];?></div></td>
+<td><div align="center"><?php echo date("Y-m-d H:i:s",$action["log_time"]->sec);?></div></td>
+<td><div align="center"><?php echo $this->renderInfo('os',$action["order_status"]);?></div></td>
+<td><div align="center"><?php echo $this->renderInfo('ps',$action["pay_status"]);?></div></td>
+<td><div align="center"><?php echo $this->renderInfo('ss',$action["shipping_status"]);?></div></td>
+<td><?php echo nl2br($action["action_note"]);?></td>
+</tr>
+<?php } ?>
+<?php } ?>
 </table>
 </div>
 </form>

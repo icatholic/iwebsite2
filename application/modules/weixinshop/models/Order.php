@@ -57,11 +57,26 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         return $info;
     }
 
+    public function getProductFee(array $goodsList)
+    {
+        $product_fee = 0;
+        foreach ($goodsList as $goods) {
+            $product_fee += $goods['num'] * $goods['prize'];
+        }
+        return $product_fee; // $prize * $gnum;
+    }
+
+    public function getTotalFee($transport_fee, $product_fee)
+    {
+        return $transport_fee + $product_fee;
+    }
+
     /**
      * 生成订单
      *
      * @param string $OpenId            
      * @param array $goodsList            
+     * @param string $ProductId            
      * @param string $body            
      * @param string $attach            
      * @param string $goods_tag            
@@ -73,6 +88,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
      * @param string $consignee_address            
      * @param string $consignee_tel            
      * @param string $consignee_zipcode            
+     * @param string $freight_campany            
      * @param int $fee_type            
      * @param string $input_charset            
      * @param string $bank_type            
@@ -80,25 +96,32 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
      * @throws Exception
      * @return array
      */
-    public function createOrder($OpenId, array $goodsList, $body = "", $attach = "", $goods_tag = "", $transport_fee = 0, $consignee_province = "", $consignee_city = "", $consignee_area = "", $consignee_name = "", $consignee_address = "", $consignee_tel = "", $consignee_zipcode = "", $fee_type = 1, $input_charset = "GBK", $bank_type = "WX", $signType = 'sha1')
+    public function createOrder($OpenId, array $goodsList, $ProductId = "", $body = "", $attach = "", $goods_tag = "", $transport_fee = 0, $consignee_province = "", $consignee_city = "", $consignee_area = "", $consignee_name = "", $consignee_address = "", $consignee_tel = "", $consignee_zipcode = "", $freight_campany = "", $fee_type = 1, $input_charset = "UTF-8", $bank_type = "WX", $signType = 'SHA1')
     {
         $data = array();
         // 商户系统内部的订单号
-        $data['out_trade_no'] = $this->createOutTradeNo();
+        $out_trade_no = $this->createOutTradeNo();
+        $data['out_trade_no'] = $out_trade_no;
         
         // 微信号
         $data['OpenId'] = $OpenId;
-        
-        // 商品号
-        $data['ProductId'] = "";
-        
-        // 商品详细
-        if (empty($body)) {
-            foreach ($goodsList as $key => $goods) {
-                $body .= $goods['gname']; // 商品详细
+        if (empty($ProductId)) {
+            foreach ($goodsList as $gid => $goods) {
+                $ProductId .= ($gid . ","); // 商品号
             }
         }
-        $data['body'] = $body;
+        // 商品号
+        $data['ProductId'] = trim($ProductId, ",");
+        
+        if (empty($body)) {
+            foreach ($goodsList as $gid => $goods) {
+                $body .= ($goods['name'] . ","); // 商品详细
+            }
+        }
+        
+        // 商品详细
+        $data['body'] = mb_substr(trim($body, ","), 0, 128, 'utf-8');
+        // $data['body'] = trim($body, ",");
         
         // 附加数据
         $data['attach'] = $attach;
@@ -106,7 +129,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         $data['goods_tag'] = $goods_tag;
         // 购买数量
         $gnum = 0;
-        foreach ($goodsList as &$goods) {
+        foreach ($goodsList as $goods) {
             $gnum += $goods['num'];
         }
         $data['gnum'] = $gnum;
@@ -117,14 +140,10 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         // 物流费用，单位为分
         $data['transport_fee'] = $transport_fee;
         // 商品费用，单位为分
-        $product_fee = 0;
-        foreach ($goodsList as $goods) {
-            $product_fee += $goods['num'] * $goods['gprize'];
-        }
-        $data['product_fee'] = $product_fee; // $gprize * $gnum;
-                                             
+        $data['product_fee'] = $this->getProductFee($goodsList);
+        
         // 订单总金额
-        $data['total_fee'] = $data['transport_fee'] + $data['product_fee'];
+        $data['total_fee'] = $this->getTotalFee($data['transport_fee'], $data['product_fee']);
         
         // 订单生成的机器IP
         $ip = getIp();
@@ -194,12 +213,26 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         $data['consignee_tel'] = $consignee_tel;
         // 收货人
         $data['consignee_zipcode'] = $consignee_zipcode;
+        // 快递公司
+        $data['freight_campany'] = $freight_campany;
         
         // UMA订单状态
-        $data['uma_order_status'] = 0; // 未支付
-                                       
+        $data['uma_order_status'] = 0; // UMA订单状态:未支付
+        $data['uma_shipping_status'] = 0; // UMA发货状态:未发货
+        $data['uma_feedback_status'] = 0; // UMA维权状态:未维权
+        
+        $data['memo'] = ""; // 备注
+                            
         // 组合SKU编号
-        $data['composite_sku_no'] = "";
+        $composite_sku_no = "";
+        if (! empty($goodsList)) {
+            foreach ($goodsList as $gid => $goods) {
+                if (! empty($goods['composite_sku_no'])) {
+                    $composite_sku_no .= ($goods['composite_sku_no'] . ","); // 商品SKU
+                }
+            }
+        }
+        $data['composite_sku_no'] = trim($composite_sku_no, ",");
         
         // 获取Package
         $weixinPay = $this->getWeixinPayInstance();
@@ -215,17 +248,15 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
             "noncestr" => $data['nonceStr']
         );
         $data['AppSignature'] = $weixinPay->getPaySign($para);
-        $data['signType'] = 'sha1';
+        $data['signType'] = $signType;
         
         $data['details'] = $goodsList;
+        
+        // 减少库存数量
+        $this->subStock($data);
+        
+        // 生成订单
         $newOrderInfo = $this->insert($data);
-        
-        $modelGoods = new Weixinshop_Model_Goods();
-        foreach ($newOrderInfo['details'] as $goods) {
-            // 减少库存数量
-            $modelGoods->subStock($newOrderInfo['out_trade_no'], $goods['gid'], $goods['num']);
-        }
-        
         return $newOrderInfo;
     }
 
@@ -241,8 +272,9 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
      * @param string $consignee_address            
      * @param string $consignee_tel            
      * @param string $consignee_zipcode            
+     * @param string $freight_campany            
      */
-    public function updateOrder($orderInfo, $transport_fee, $consignee_province, $consignee_city, $consignee_area, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode)
+    public function updateOrder($orderInfo, $transport_fee, $consignee_province, $consignee_city, $consignee_area, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode, $freight_campany)
     {
         $data = array();
         // 收货人省份
@@ -259,12 +291,25 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         $data['consignee_tel'] = $consignee_tel;
         // 收货人
         $data['consignee_zipcode'] = $consignee_zipcode;
+        // 快递公司
+        $data['freight_campany'] = $freight_campany;
         // 物流费用，单位为分
         $data['transport_fee'] = $transport_fee;
         // 商品费用，单位为分
         $data['product_fee'] = $orderInfo['product_fee'];
         // 订单总金额
         $data['total_fee'] = $data['product_fee'] + $data['transport_fee'];
+        
+        // 订单生成的机器IP
+        $ip = getIp();
+        $data['client_ip'] = $ip;
+        $data['spbill_create_ip'] = ($ip);
+        // 订单生成时间， 格式为yyyyMMddHHmmss
+        $data['time_start'] = date("YmdHis");
+        $data['uma_time_start'] = new MongoDate();
+        // 订单失效时间， 格式为yyyyMMddHHmmss
+        $data['time_expire'] = "";
+        $data['uma_time_expire'] = new MongoDate(0);
         
         // 通知URL
         $config = Zend_Registry::get('config');
@@ -278,7 +323,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         
         // 获取Package
         $weixinPay = $this->getWeixinPayInstance();
-        $data['package'] = $weixinPay->getPackage4JsPay($orderInfo['body'], $orderInfo['attach'], $orderInfo['out_trade_no'], $data['total_fee'], $data['notify_url'], $orderInfo['spbill_create_ip'], $orderInfo['time_start'], $orderInfo['time_expire'], $data['transport_fee'], $data['product_fee'], $orderInfo['goods_tag'], $orderInfo['bank_type'], $orderInfo['fee_type'], $orderInfo['input_charset']);
+        $data['package'] = $weixinPay->getPackage4JsPay($orderInfo['body'], $orderInfo['attach'], $orderInfo['out_trade_no'], $data['total_fee'], $data['notify_url'], $data['spbill_create_ip'], $data['time_start'], $data['time_expire'], $data['transport_fee'], $data['product_fee'], $orderInfo['goods_tag'], $orderInfo['bank_type'], $orderInfo['fee_type'], $orderInfo['input_charset']);
         
         $data['appid'] = $weixinPay->getAppId();
         // 获取app_signature
@@ -303,6 +348,7 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         $return_result = $this->findAndModify($options);
         
         $newOrderInfo = $return_result["value"];
+        $newOrderInfo['order_id'] = myMongoId($newOrderInfo['_id']);
         return $newOrderInfo;
     }
 
@@ -341,10 +387,10 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
             $data["input_charset"] = $updateData['input_charset'];
         }
         if (isset($updateData['trade_state'])) {
-            $data["trade_state"] = $updateData['trade_state'];
+            $data["trade_state"] = intval($updateData['trade_state']);
         }
         if (isset($updateData['trade_mode'])) {
-            $data["trade_mode"] = $updateData['trade_mode'];
+            $data["trade_mode"] = intval($updateData['trade_mode']);
         }
         if (isset($updateData['partner'])) {
             $data["partner"] = $updateData['partner'];
@@ -356,10 +402,10 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
             $data["bank_billno"] = $updateData['bank_billno'];
         }
         if (isset($updateData['total_fee'])) {
-            $data["total_fee"] = $updateData['total_fee'];
+            $data["total_fee"] = intval($updateData['total_fee']);
         }
         if (isset($updateData['fee_type'])) {
-            $data["fee_type"] = $updateData['fee_type'];
+            $data["fee_type"] = intval($updateData['fee_type']);
         }
         if (isset($updateData['transaction_id'])) {
             $data["transaction_id"] = $updateData['transaction_id'];
@@ -375,19 +421,27 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         }
         if (isset($updateData['time_end'])) {
             $data["time_end"] = $updateData['time_end'];
+            // 20130702175943
+            // $year=substr($updateData['time_end'],0,4);//取得年份
+            // $month=substr($updateData['time_end'],4,2);//取得月份
+            // $day=substr($updateData['time_end'],6,2);//取得几号
+            // $hour=substr($updateData['time_end'],8,2);//取得年份
+            // $minute=substr($updateData['time_end'],10,2);//取得月份
+            // $second=substr($updateData['time_end'],12,2);//取得几号
+            // $data["uma_time_end"] = new MongoDate(mktime($hour,$minute,$second,$month,$day,$year));
             $data["uma_time_end"] = new MongoDate(strtotime($updateData['time_end']));
         }
-        if (isset($updateData['input_charset'])) {
-            $data["transport_fee"] = $updateData['transport_fee'];
+        if (isset($updateData['transport_fee'])) {
+            $data["transport_fee"] = intval($updateData['transport_fee']);
         }
-        if (isset($updateData['input_charset'])) {
-            $data["product_fee"] = $updateData['product_fee'];
+        if (isset($updateData['product_fee'])) {
+            $data["product_fee"] = intval($updateData['product_fee']);
         }
         if (isset($updateData['discount'])) {
-            $data["discount"] = $updateData['discount'];
+            $data["discount"] = intval($updateData['discount']);
         }
         if (isset($updateData['rmb_total_fee'])) {
-            $data["rmb_total_fee"] = $updateData['rmb_total_fee'];
+            $data["rmb_total_fee"] = intval($updateData['rmb_total_fee']);
         }
         
         // 订单状态修改时间
@@ -450,16 +504,9 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         if (empty($list)) {
             $list = $this->find($query, $sort, ($page - 1) * $limit, $limit);
             if (! empty($list['datas'])) {
-                $modelGoods = new Weixinshop_Model_Goods();
                 foreach ($list['datas'] as &$order) {
-                    // // 获取财富通的订单结果
-                    // $updateData = $this->queryTenpayInfo ( $order
-                    // ['out_trade_no'] );
-                    // // 更新订单状态
-                    // $order = $this->changeStatus ( $order, $updateData,
-                    // "orderquery4tenpay" );
-                    // 获取商品信息
-                    $order['goodsInfo'] = $modelGoods->getInfoByGid($order['ProductId']);
+                    // 获取财富通的订单结果并修改
+                    $order = $this->updateFromTenpay($order);
                 }
             }
         }
@@ -598,16 +645,9 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         if (empty($list)) {
             $list = $this->find($query, $sort, ($page - 1) * $limit, $limit);
             if (! empty($list['datas'])) {
-                $modelGoods = new Weixinshop_Model_Goods();
                 foreach ($list['datas'] as &$order) {
-                    // // 获取财富通的订单结果
-                    // $updateData = $this->queryTenpayInfo ( $order
-                    // ['out_trade_no'] );
-                    // // 更新订单状态
-                    // $order = $this->changeStatus ( $order, $updateData,
-                    // "orderquery4tenpay" );
-                    // 获取商品信息
-                    $order['goodsInfo'] = $modelGoods->getInfoByGid($order['ProductId']);
+                    // 获取财富通的订单结果并修改
+                    $order = $this->updateFromTenpay($order);
                 }
             }
         }
@@ -621,8 +661,20 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
      */
     public function createOutTradeNo()
     {
-        $var = new MongoId();
-        return $var->__toString();
+        // $var = new MongoId();
+        // return $var->__toString();
+        $modelSeq = new Weixinshop_Model_Seq();
+        $currentNum = $modelSeq->getRecordNum();
+        $currentNum = $currentNum % 1000;
+        $currentNum = str_pad($currentNum, 4, "0", STR_PAD_LEFT);
+        
+        // 年月日小时分钟+4位自增数
+        // 2014-04-08 13:50分下了一单，单号为：2014040813501234
+        // return date("YmdHi") . $currentNum;
+        
+        // 所以建议在订单规则中，“计数”部分前增加2位，设置为一个固定的值，如60，同时考虑订单号太长的话，可以将分钟去掉。这样订单规则为：
+        // “年月日时+渠道(2位)+计数(4位)” 示例：2014072314600018
+        return date("YmdH") . "60" . $currentNum;
     }
 
     /**
@@ -647,5 +699,144 @@ class Weixinshop_Model_Order extends iWebsite_Plugin_Mongo
         } else {
             return 0; // 未支付
         }
+    }
+
+    /**
+     * 计算运费
+     *
+     * @param array $orderInfo            
+     * @param string $campany            
+     * @param array $area            
+     * @return int
+     */
+    public function getTransportFee($orderInfo, $campany, array $area)
+    {
+        $transport_fee = 0; // 运费
+        $modelPrice = new Tools_Model_Freight_Price();
+        
+        $modelFreightGoods = new Tools_Model_Freight_Goods();
+        foreach ($orderInfo['details'] as $product) {
+            if (empty($product['transport_fee_mode'])) { // 按计算
+                $info = array();
+                $info['number'] = $product['num']; // 商品数量
+                $info['weight'] = empty($product['weight']) ? 0.0 : $product['weight'] * $info['number']; // 商品重量g
+                $info['volume'] = empty($product['volume']) ? 0.0 : $product['volume'] * $info['number']; // 商品体积m3
+                
+                $settings = $modelFreightGoods->getInfoByGoods($product['gid']);
+                if (! empty($settings)) {
+                    $calc_fee = $modelPrice->getPrice($settings['template'], $campany, $settings['warehouse'], $settings['unit'], $area, $info);
+                    if (empty($calc_fee)) {
+                        throw new Exception("商品号为{$product['gid']}的非免运费商品运费规则没有设置");
+                    }
+                    $transport_fee += $calc_fee;
+                } else {
+                    throw new Exception("商品号为{$product['gid']}的非免运费商品运费规则没有设置");
+                }
+            } else {
+                if (intval($product['transport_fee_mode']) === 1) { // 固定运费
+                    $transport_fee += intval(empty($product['transport_fee']) ? 0 : $product['transport_fee']);
+                }
+            }
+        }
+        
+        return $transport_fee;
+    }
+
+    /**
+     * 确认收货并评价
+     *
+     * @param array $orderInfo            
+     * @param string $comment            
+     * @param string $advice            
+     */
+    public function confirmShipping($orderInfo, $comment, $advice)
+    {
+        $data['uma_shipping_status'] = 2; // 已收货
+        $data['comment'] = $comment;
+        $data['advice'] = $advice;
+        
+        $this->update(array(
+            '_id' => $orderInfo['_id']
+        ), array(
+            '$set' => $data
+        ));
+    }
+
+    /**
+     * 更新维权的状态
+     *
+     * @param array $feedbackInfo            
+     */
+    public function updateFeedbackStatus(array $feedbackInfo)
+    {
+        $data['uma_feedback_status'] = empty($feedbackInfo['process_status']) ? 1 : $feedbackInfo['process_status']; // 维权中
+        
+        $this->update(array(
+            'transaction_id' => $feedbackInfo['TransId']
+        ), array(
+            '$set' => $data
+        ));
+    }
+
+    /**
+     * 减少商品库存
+     *
+     * @param array $orderInfo            
+     */
+    public function subStock(array $orderInfo)
+    {
+        $modelGoods = new Weixinshop_Model_Goods();
+        foreach ($orderInfo['details'] as $goods) {
+            // 减少库存数量
+            $modelGoods->subStock($orderInfo['out_trade_no'], $goods['gid'], $goods['num']);
+        }
+    }
+
+    /**
+     * 增加商品购买数量
+     *
+     * @param array $orderInfo            
+     */
+    public function incPurchaseNum(array $orderInfo)
+    {
+        $modelGoods = new Weixinshop_Model_Goods();
+        foreach ($orderInfo['details'] as $goods) {
+            // 增加商品购买数量
+            $modelGoods->incPurchaseNum($goods['gid'], $goods['num']);
+        }
+    }
+
+    /**
+     * 更新组合SKU编号
+     *
+     * @param string $out_trade_no            
+     * @param array $skuNoList            
+     */
+    public function updateCompositeSkuNo($out_trade_no, array $skuNoList)
+    {
+        $composite_sku_no = implode(",", $skuNoList);
+        $query = array(
+            'out_trade_no' => $out_trade_no
+        );
+        $data = array();
+        $data['composite_sku_no'] = $composite_sku_no;
+        $this->update($query, array(
+            '$set' => $data
+        ));
+    }
+
+    /**
+     * 从财付通获取查询订单信息并且修改
+     *
+     * @param array $order            
+     * @return array
+     */
+    public function updateFromTenpay(array $order)
+    {
+        // 获取财富通的订单结果
+        $updateData = $this->queryTenpayInfo($order['out_trade_no']);
+        // 更新订单状态
+        $order = $this->changeStatus($order, $updateData, "orderquery4tenpay");
+        return $order;
     }
 }

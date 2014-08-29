@@ -1468,7 +1468,7 @@ function array_copy($arr)
 
 /**
  * 递归方法unset数组里面的元素
- * 
+ *
  * @param array $array            
  * @param array|string $fields            
  * @param boolean $remove
@@ -1504,7 +1504,7 @@ function array_unset_recursive(&$array, $fields, $remove = true)
 
 /**
  * 判断是否为微信的浏览器
- * 
+ *
  * @return boolean
  */
 function isWeixinBrowser()
@@ -1518,7 +1518,7 @@ function isWeixinBrowser()
 
 /**
  * 获取微信版本
- * 
+ *
  * @return string unknown
  */
 function getWeixinVersion()
@@ -1534,7 +1534,7 @@ function getWeixinVersion()
 
 /**
  * 标准化数据返回结果json或jsonp返回信息
- * 
+ *
  * @param string $jsonpcallback            
  * @param boolean $stat            
  * @param string $msg            
@@ -1586,8 +1586,9 @@ function isRequestRestricted($cacheKey, $timeSpanLimit = 300, $numLimit = 10)
 }
 
 // 将对象转化成数组
-function object2Array($object) { 
-	return @json_decode(@json_encode($object),1); 
+function object2Array($object)
+{
+    return @json_decode(@json_encode($object), 1);
 }
 
 /**
@@ -1595,33 +1596,35 @@ function object2Array($object) {
  *
  * @return string
  */
-function createRandCode ($n = 32)
+function createRandCode($n = 32)
 {
-	$str = Array(); // 用来存储随机码
-	$string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	$code = "";
-	for ($i = 0; $i < $n; $i ++) {
-		$str[$i] = $string[rand(0, $n-1)];
-		$code .= $str[$i];
-	}
-	return $code;
+    $str = Array(); // 用来存储随机码
+    $string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    $code = "";
+    for ($i = 0; $i < $n; $i ++) {
+        $str[$i] = $string[rand(0, $n - 1)];
+        $code .= $str[$i];
+    }
+    return $code;
 }
 
 /**
  * 获取某个方法的参数的唯一签名
- * @param string $class
- * @param string $method
+ *
+ * @param string $class            
+ * @param string $method            
  * @return number
  */
-function getClassMethodArgumentCacheKey($class,$method) {
-    $obj = new ReflectionMethod($class,$method);
+function getClassMethodArgumentCacheKey($class, $method)
+{
+    $obj = new ReflectionMethod($class, $method);
     return crc32(serialize($obj->getParameters()));
 }
 
-
 /**
  * 显示金额
- * @param number $money
+ *
+ * @param number $money            
  * @return string
  */
 function showMoney($money)
@@ -1629,10 +1632,10 @@ function showMoney($money)
     return sprintf("%01.2f", $money);
 }
 
-
 /**
  * 获取弧度
- * @param number $d
+ *
+ * @param number $d            
  * @return number
  */
 function rad($d)
@@ -1642,10 +1645,11 @@ function rad($d)
 
 /**
  * 获取2个经纬度之间的距离（米）
- * @param number $lat1
- * @param number $lng1
- * @param number $lat2
- * @param number $lng2
+ *
+ * @param number $lat1            
+ * @param number $lng1            
+ * @param number $lat2            
+ * @param number $lng2            
  * @return number
  */
 function GetDistance($lat1, $lng1, $lat2, $lng2)
@@ -1655,9 +1659,64 @@ function GetDistance($lat1, $lng1, $lat2, $lng2)
     $radlat2 = rad($lat2);
     $a = $radlat1 - $radlat2;
     $b = rad($lng1) - rad($lng2);
-
+    
     $s = 2 * asin(sqrt(pow(sin($a / 2), 2) + cos($radlat1) * cos($radlat2) * pow(sin($b / 2), 2)));
     $s = $s * $EARTH_RADIUS;
     $s = round($s * 10000) / 10000;
     return $s * 1000; // 米
+}
+
+/**
+ * 删除整个目录
+ *
+ * @param string $dir            
+ * @return boolean
+ */
+function delDir($dir)
+{
+    $files = array_diff(scandir($dir), array(
+        '.',
+        '..'
+    ));
+    foreach ($files as $file) {
+        (is_dir("$dir/$file")) ? delDir("$dir/$file") : unlink("$dir/$file");
+    }
+    return rmdir($dir);
+}
+
+/**
+ * 调用其他资源
+ *
+ * @param string $module            
+ * @param string $controller            
+ * @param string $action            
+ * @param array $params
+ *            $_GET的方式传递参数
+ * @return string
+ */
+function invokeResource($module, $controller, $action, $params)
+{
+    $module = ucfirst(strtolower($module));
+    $controller = ucfirst(strtolower($module));
+    $action = preg_replace_callback("/-\[a-z]/", function ($match)
+    {
+        return strtoupper(str_replace('-', '', $match));
+    }, $action);
+    
+    $loader = new Zend_Application_Module_Autoloader(array(
+        'namespace' => $module,
+        'basePath' => APPLICATION_PATH . '/modules/' . strtolower($module)
+    ));
+    
+    $__OLD_GET__ = $_GET;
+    $_GET = array_merge($_GET, $params);
+    ob_start();
+    $invoke = call_user_func_array(array(
+        "{$module}_{$controller}Controller" => "{$action}Action"
+    ), array());
+    $response = ob_get_content();
+    ob_end_clean();
+    $_GET = $__OLD_GET__;
+    
+    return $response;
 }

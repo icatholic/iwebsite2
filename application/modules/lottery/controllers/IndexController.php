@@ -143,7 +143,7 @@ class Lottery_IndexController extends iWebsite_Controller_Action
             
             $identity_id = $identityInfo['_id']->__toString();
             // 检测是否存在未领取或者未激活的中奖奖品，有的话，再次让其中同样的奖品完善个人信息。
-            $invalidExchange = $this->_exchange->getExchangeInvalidById($identity_id);
+            $invalidExchange = $this->_exchange->getExchangeInvalidById($identity_id,$activity_id);
             if (! empty($invalidExchange)) {
                 if (isset($invalidExchange['_id'])) {
                     $invalidExchange['exchange_id'] = $invalidExchange['_id'] instanceof MongoId ? $invalidExchange['_id']->__toString() : $invalidExchange['_id'];

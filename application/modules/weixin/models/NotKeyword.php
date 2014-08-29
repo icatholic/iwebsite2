@@ -6,6 +6,8 @@ class Weixin_Model_NotKeyword extends iWebsite_Plugin_Mongo
     protected $name = 'iWeixin_not_keyword';
 
     protected $dbName = 'weixin';
+    
+    protected $secondary = true;
 
     public function record($msg)
     {

@@ -23,26 +23,31 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             // 从COOKIE中获取内容
             $cart = self::getCookie('cart');
             $cart = $cart ? $cart : array();
+            $total = 0;
             if (! empty($cart)) {
                 // 获取商品信息
                 $modelGoods = new Weixinshop_Model_Goods();
-                $goodsIds = key($cart);
-                $goodsList = $modelGoods->getList(0, $goodsIds);
+                $gids = array_keys($cart);
+                $goodsList = $modelGoods->getList(false, $gids);
                 
-                foreach ($cart as $goodsId => &$value) {
-                    if (array_key_exists($goodsId, $goodsList))                     // 存在
+                foreach ($cart as $gid => &$value) {
+                    if (array_key_exists($gid, $goodsList))                     // 存在
                     {
-                        $info = $goodsList[$goodsId];
-                        $value['name'] = $info['gname']; // 商品名
-                        $value['prize'] = $info['gprize']; // 商品单价
-                        $value['gpic'] = $info['gpic1']; // 商品图片
-                        $value['amount'] = $info['gprize'] * $value['num']; // 商品图片
+                        $info = $goodsList[$gid];
+                        $value['name'] = $info['name']; // 商品名
+                        $value['prize'] = $info['prize']; // 商品单价
+                        $value['pic'] = $info['gpic1']; // 商品图片
+                        $value['amount'] = $info['prize'] * $value['num']; // 商品金额
                         $value['stock_num'] = $info['stock_num']; // 商品库存;
+                        $value['spec'] = $info['spec']; // 商品规格;
+                        
+                        $total += $value['amount'];
                     } else {
                         unset($value); // 删除
                     }
                 }
             }
+            $this->assign('total', $total); // 总计
             $this->assign('cart', $cart);
         } catch (Exception $e) {
             exit($this->error($e->getCode(), $e->getMessage()));
@@ -55,24 +60,36 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
     public function checkoutAction()
     {
         try {
-            $OpenId = $this->getRequest()->getCookie("FromUserName", '');
+            $OpenId = $this->getRequest()->getCookie("openid", '');
             if (empty($OpenId)) {
                 throw new Exception("微信号为空");
             }
             
-            $ProductIds = trim($this->get('ProductIds', '')); // 商品号
-            if (empty($ProductIds)) {
-                throw new Exception("商品号为空");
+            $Products = trim($this->get('Products', '')); // 所选商品信息
+            if (empty($Products)) {
+                throw new Exception("商品为空");
+            }
+            if (! isJson($Products)) {
+                throw new Exception("格式不正确");
             }
             
-            $nums = trim($this->get('nums', '')); // 商品数量
-            if (empty($nums)) {
-                throw new Exception("商品数量为空");
+            $Products = json_decode($Products, true);
+            $ProductIds = array();
+            $nums = array();
+            foreach ($Products as $product) {
+                if (empty($product['gid'])) {
+                    throw new Exception("商品号为空");
+                }
+                if (empty($product['num'])) {
+                    throw new Exception("商品数量为空");
+                }
+                $ProductIds[] = $product['gid'];
+                $nums[] = $product['num'];
             }
             
             // 检查商品的信息
             $modelGoods = new Weixinshop_Model_Goods();
-            $goodsList = $modelGoods->getList(0, $ProductIds);
+            $goodsList = $modelGoods->getList(false, $ProductIds);
             foreach ($ProductIds as $index => $ProductId) {
                 if (! key_exists($ProductId, $goodsList)) {
                     throw new Exception("商品号{$ProductId}的商品不存在");
@@ -90,13 +107,19 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             $modelOrder = new Weixinshop_Model_Order();
             $orderInfo = $modelOrder->createOrder($OpenId, $goodsList);
             
-            // 画面跳转至订单支付页面
-            $orderId = $orderInfo['_id']->__toString();
-            $url = $this->_helper->url("pay", "order");
-            $url = $url . "?orderId={$orderId}";
-            $this->_redirect($url);
+            // 清空购物车
+            self::setCookie('cart', array());
+            
+            echo ($this->result("OK", myMongoId($orderInfo["_id"])));
+            
+            //$_SESSION['checkout']["goods"] = $goodsList;
+            //$_SESSION['checkout']["OpenId"] = $OpenId;
+            //echo ($this->result("OK",""));
+            
+            return true;
         } catch (Exception $e) {
-            exit($this->error($e->getCode(), $e->getMessage()));
+            echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
         }
     }
 
@@ -127,9 +150,9 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
     public function addAction()
     {
         try {
-            $goodsId = trim($this->get('goodsId', '')); // 商品ID
+            $gid = trim($this->get('gid', '')); // 商品ID
             $num = intval($this->get('num')); // 商品数量
-            if (empty($goodsId)) {
+            if (empty($gid)) {
                 echo ($this->error("-1", "商品ID为空"));
                 return false;
             }
@@ -145,19 +168,19 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             // 从COOKIE中获取内容
             $cart = self::getCookie('cart');
             $cart = $cart ? $cart : array();
-            if (key_exists($goodsId, $cart)) {
-                $cart[$goodsId]['num'] = intval($cart[$goodsId]) + $num;
+            if (key_exists($gid, $cart)) {
+                $cart[$gid]['num'] = intval($cart[$gid]['num']) + $num;
             } else {
                 // 判断商品ID是否正确
                 $modelGoods = new Weixinshop_Model_Goods();
-                $info = $modelGoods->getInfoById($goodsId);
+                $info = $modelGoods->getInfoByGid($gid);
                 if (empty($info)) {
                     echo ($this->error("-4", "商品ID不存在"));
                     return false;
                 }
-                $cart[$goodsId]['name'] = $info['gname']; // 商品名
-                $cart[$goodsId]['prize'] = $info['gprize']; // 商品单价
-                $cart[$goodsId]['num'] = $num;
+                $cart[$gid]['name'] = $info['name']; // 商品名
+                $cart[$gid]['prize'] = $info['prize']; // 商品单价
+                $cart[$gid]['num'] = $num;
             }
             // 最新的内容存入COOKIE中
             self::setCookie('cart', $cart);
@@ -175,9 +198,9 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
     public function updateNumAction()
     {
         try {
-            $goodsId = trim($this->get('goodsId', '')); // 商品ID
+            $gid = trim($this->get('gid', '')); // 商品ID
             $num = intval($this->get('num')); // 商品数量
-            if (empty($goodsId)) {
+            if (empty($gid)) {
                 echo ($this->error("-1", "商品ID为空"));
                 return false;
             }
@@ -192,8 +215,8 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             // 从COOKIE中获取内容
             $cart = self::getCookie('cart');
             $cart = $cart ? $cart : array();
-            if (key_exists($goodsId, $cart)) {
-                $cart[$goodsId]['num'] = $num;
+            if (key_exists($gid, $cart)) {
+                $cart[$gid]['num'] = $num;
             } else {
                 echo ($this->error("-4", "商品ID不存在"));
                 return false;
@@ -214,16 +237,16 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
     public function deleteAction()
     {
         try {
-            $goodsId = trim($this->get('goodsId', '')); // 商品ID
-            if (empty($goodsId)) {
+            $gid = trim($this->get('gid', '')); // 商品ID
+            if (empty($gid)) {
                 echo ($this->error("-1", "商品ID为空"));
                 return false;
             }
             // 从COOKIE中获取内容
             $cart = self::getCookie('cart');
             $cart = $cart ? $cart : array();
-            if (key_exists($goodsId, $cart)) {
-                unset($cart[$goodsId]);
+            if (key_exists($gid, $cart)) {
+                unset($cart[$gid]);
             } else {
                 echo ($this->error("-2", "商品ID不存在"));
                 return false;
@@ -271,11 +294,19 @@ class Weixinshop_ShoppingcartController extends iWebsite_Controller_Action
             $cart = $cart ? $cart : array();
             
             if (! empty($cart)) {
-                foreach ($cart as $goodsId => $goodsInfo) {
-                    $num = $goodsInfo['num'];
-                    $prize = $goodsInfo['prize'];
-                    $info['goods_count'] ++;
-                    $info['amount'] += $num * $prize;
+                // 获取商品信息
+                $modelGoods = new Weixinshop_Model_Goods();
+                $gids = array_keys($cart);
+                $goodsList = $modelGoods->getList(false, $gids);
+                
+                foreach ($cart as $gid => $goodsInfo) {
+                    if (array_key_exists($gid, $goodsList))                     // 存在
+                    {
+                        $num = $goodsInfo['num'];
+                        $prize = $goodsList[$gid]['prize'];
+                        $info['goods_count'] ++;
+                        $info['amount'] += $num * $prize;
+                    }
                 }
             }
             echo ($this->result("OK", $info));

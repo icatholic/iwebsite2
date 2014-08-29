@@ -13,10 +13,13 @@ class Weixin_SnsController extends Zend_Controller_Action
 
     private $_tracking;
 
+    private $_appConfig;
+
     public function init()
     {
         $this->getHelper('viewRenderer')->setNoRender(true);
         $this->_config = Zend_Registry::get('config');
+        
         $this->_user = new Weixin_Model_User();
         $this->_app = new Weixin_Model_Application();
         $this->_tracking = new Weixin_Model_ScriptTracking();
@@ -35,50 +38,92 @@ class Weixin_SnsController extends Zend_Controller_Action
     {
         $_SESSION['oauth_start_time'] = microtime(true);
         try {
-            $redirect = isset($_GET['redirect']) ? urlencode(trim($_GET['redirect'])) : ''; // 附加参数存储跳转地址
             $scope = isset($_GET['scope']) ? trim($_GET['scope']) : 'snsapi_userinfo';
-            
-            $appid = $this->_appConfig['appid'];
-            $secret = $this->_appConfig['secret'];
-            
-            $moduleName = $this->getRequest()->getModuleName();
-            $controllerName = $this->getRequest()->getControllerName();
-            $actionName = $this->getRequest()->getActionName();
-            
-            $redirectUri = 'http://';
-            $redirectUri .= $_SERVER["HTTP_HOST"];
-            $redirectUri .= '/' . $moduleName;
-            $redirectUri .= '/' . $controllerName;
-            $redirectUri .= '/callback';
-            $redirectUri .= '?redirect=' . urlencode($redirect);
             
             if (isset($_SESSION['iWeixin']['accessToken'])) {
                 $redirect = isset($_GET['redirect']) ? urldecode($_GET['redirect']) : '';
                 $arrAccessToken = $_SESSION['iWeixin']['accessToken'];
+                
                 if (isset($arrAccessToken['openid'])) {
-                    if (strpos($redirect, 'FromUserName') === false) {
-                        if (strpos($redirect, '?') === false)
-                            $redirect .= '?FromUserName=' . $arrAccessToken['openid'];
-                        else
-                            $redirect .= '&FromUserName=' . $arrAccessToken['openid'];
-                    }
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'FromUserName' => $arrAccessToken['openid']
+                    ));
                 }
+                
+                // 计算signkey
+                $timestamp = time();
+                $signkey = $this->getSignKey($arrAccessToken['openid'], $timestamp);
+                $redirect = $this->addUrlParameter($redirect, array(
+                    'signkey' => $signkey
+                ));
+                $redirect = $this->addUrlParameter($redirect, array(
+                    'timestamp' => $timestamp
+                ));
+                
+                if (isset($arrAccessToken['nickname'])) {
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'nickname' => $arrAccessToken['nickname']
+                    ));
+                }
+                
+                if (isset($arrAccessToken['headimgurl'])) {
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'headimgurl' => $arrAccessToken['headimgurl']
+                    ));
+                }
+                
                 $this->_tracking->record("授权session存在", $_SESSION['oauth_start_time'], microtime(true), $arrAccessToken['openid']);
                 header("location:{$redirect}");
                 exit();
             } elseif (! empty($_COOKIE['openid']) && $scope == 'snsapi_base') {
                 $redirect = isset($_GET['redirect']) ? urldecode($_GET['redirect']) : '';
-                $openid = $_COOKIE['openid'];
-                if (strpos($redirect, 'FromUserName') === false) {
-                    if (strpos($redirect, '?') === false)
-                        $redirect .= '?FromUserName=' . $openid;
-                    else
-                        $redirect .= '&FromUserName=' . $openid;
+                if (isset($_COOKIE['openid'])) {
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'FromUserName' => $_COOKIE['openid']
+                    ));
                 }
-                $this->_tracking->record("授权cookie存在", $_SESSION['oauth_start_time'], microtime(true), $openid);
+                
+                // 计算signkey
+                $timestamp = time();
+                $signkey = $this->getSignKey($_COOKIE['openid'], $timestamp);
+                $redirect = $this->addUrlParameter($redirect, array(
+                    'signkey' => $signkey
+                ));
+                $redirect = $this->addUrlParameter($redirect, array(
+                    'timestamp' => $timestamp
+                ));
+                
+                if (isset($_COOKIE['nickname'])) {
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'nickname' => $_COOKIE['nickname']
+                    ));
+                }
+                
+                if (isset($_COOKIE['headimgurl'])) {
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'headimgurl' => $_COOKIE['headimgurl']
+                    ));
+                }
+                
+                $this->_tracking->record("授权cookie存在", $_SESSION['oauth_start_time'], microtime(true), $_COOKIE['openid']);
                 header("location:{$redirect}");
                 exit();
             } else {
+                $redirect = isset($_GET['redirect']) ? urlencode(trim($_GET['redirect'])) : ''; // 附加参数存储跳转地址
+                
+                $moduleName = $this->getRequest()->getModuleName();
+                $controllerName = $this->getRequest()->getControllerName();
+                $actionName = $this->getRequest()->getActionName();
+                
+                $redirectUri = 'http://';
+                $redirectUri .= $_SERVER["HTTP_HOST"];
+                $redirectUri .= '/' . $moduleName;
+                $redirectUri .= '/' . $controllerName;
+                $redirectUri .= '/callback';
+                $redirectUri .= '?redirect=' . urlencode($redirect);
+                
+                $appid = $this->_appConfig['appid'];
+                $secret = $this->_appConfig['secret'];
                 $sns = new \Weixin\Token\Sns($appid, $secret);
                 $sns->setRedirectUri($redirectUri);
                 $sns->setScope($scope);
@@ -99,18 +144,17 @@ class Weixin_SnsController extends Zend_Controller_Action
     public function callbackAction()
     {
         try {
+            $redirect = isset($_GET['redirect']) ? urldecode($_GET['redirect']) : '';
+            if (empty($redirect)) {
+                throw new Exception("回调地址未定义");
+            }
+            
             $appid = $this->_appConfig['appid'];
             $secret = $this->_appConfig['secret'];
-            
             $sns = new \Weixin\Token\Sns($appid, $secret);
             $arrAccessToken = $sns->getAccessToken();
             
             if (! isset($arrAccessToken['errcode'])) {
-                $_SESSION['iWeixin']['accessToken'] = $arrAccessToken;
-                $redirect = isset($_GET['redirect']) ? urldecode($_GET['redirect']) : '';
-                if (empty($redirect)) {
-                    throw new Exception("回调地址未定义");
-                }
                 // 授权成功后，记录该微信用户的基本信息
                 if ($arrAccessToken['scope'] === 'snsapi_userinfo') {
                     $this->_weixin->setSnsAccessToken($arrAccessToken['access_token']);
@@ -124,12 +168,51 @@ class Weixin_SnsController extends Zend_Controller_Action
                 }
                 
                 if (isset($arrAccessToken['openid'])) {
-                    setcookie('openid', $arrAccessToken['openid'], time() + 365 * 24 * 3600, '/');
-                    if (strpos($redirect, 'FromUserName') === false) {
-                        if (strpos($redirect, '?') === false)
-                            $redirect .= '?FromUserName=' . $arrAccessToken['openid'];
-                        else
-                            $redirect .= '&FromUserName=' . $arrAccessToken['openid'];
+                    
+                    if (! empty($userInfo)) {
+                        if (! empty($userInfo['nickname'])) {
+                            $arrAccessToken['nickname'] = $userInfo['nickname'];
+                        }
+                        
+                        if (! empty($userInfo['headimgurl'])) {
+                            $arrAccessToken['headimgurl'] = urlencode($userInfo['headimgurl']);
+                        }
+                    }
+                    $_SESSION['iWeixin']['accessToken'] = $arrAccessToken;
+                    
+                    $path = $this->_config['global']['path'];
+                    setcookie('openid', $arrAccessToken['openid'], time() + 365 * 24 * 3600, $path);
+                    if (! empty($arrAccessToken['nickname'])) {
+                        setcookie('nickname', $arrAccessToken['nickname'], time() + 365 * 24 * 3600, $path);
+                    }
+                    if (! empty($arrAccessToken['headimgurl'])) {
+                        setcookie('headimgurl', $arrAccessToken['headimgurl'], time() + 365 * 24 * 3600, $path);
+                    }
+                    
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'FromUserName' => $arrAccessToken['openid']
+                    ));
+                    
+                    // 计算signkey
+                    $timestamp = time();
+                    $signkey = $this->getSignKey($arrAccessToken['openid'], $timestamp);
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'signkey' => $signkey
+                    ));
+                    $redirect = $this->addUrlParameter($redirect, array(
+                        'timestamp' => $timestamp
+                    ));
+                    
+                    if (! empty($arrAccessToken['nickname'])) {
+                        $redirect = $this->addUrlParameter($redirect, array(
+                            'nickname' => $arrAccessToken['nickname']
+                        ));
+                    }
+                    
+                    if (! empty($arrAccessToken['headimgurl'])) {
+                        $redirect = $this->addUrlParameter($redirect, array(
+                            'headimgurl' => $arrAccessToken['headimgurl']
+                        ));
                     }
                 }
                 
@@ -145,6 +228,26 @@ class Weixin_SnsController extends Zend_Controller_Action
             print_r($e->getLine());
             print_r($e->getMessage());
         }
+    }
+
+    private function addUrlParameter($url, array $params)
+    {
+        if (! empty($params)) {
+            foreach ($params as $key => $value) {
+                if (strpos($url, $key) === false) {
+                    if (strpos($url, '?') === false)
+                        $url .= "?{$key}=" . $value;
+                    else
+                        $url .= "&{$key}=" . $value;
+                }
+            }
+        }
+        return $url;
+    }
+
+    private function getSignKey($openid, $timestamp = 0)
+    {
+        return $this->_app->getSignKey($openid, $this->_appConfig['secretKey'], $timestamp);
     }
 }
 

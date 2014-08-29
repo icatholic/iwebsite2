@@ -7,6 +7,8 @@ abstract class iWebsite_Plugin_Mongo
 
     protected $dbName = 'default';
 
+    protected $secondary = false;
+
     private $_db;
 
     /**
@@ -30,7 +32,7 @@ abstract class iWebsite_Plugin_Mongo
                 exit('Zend_Registry::isRegistered(\'db\') is undefined');
             }
             
-            $this->_db->setCollection($this->name);
+            $this->_db->setCollection($this->name, $this->secondary);
         } catch (Exception $e) {
             var_dump($e);
         }

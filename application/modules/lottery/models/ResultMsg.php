@@ -6,6 +6,8 @@ class Lottery_Model_ResultMsg extends iWebsite_Plugin_Mongo
     protected $name = 'iLottery_result_msg';
 
     protected $dbName = 'lottery';
+    
+    protected $secondary = true;
 
     private $_result = null;
 

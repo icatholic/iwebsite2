@@ -1,5 +1,7 @@
 <form action='/question/index/answer' method='post'>
 <?php 
+echo '您当前的积分是：'.$this->score.'<br>';
+echo '<a href="/exchange/?user_id='.$this->user.'">兑换奖品</a><br>';
 foreach ($this->question['question'] as $key => $val)
 {
 	echo $key.'、';

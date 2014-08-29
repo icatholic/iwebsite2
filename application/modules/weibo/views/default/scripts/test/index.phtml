@@ -45,8 +45,8 @@
 	function authorizeTest(){
 	    $("#authorize1").on("click",
 	        function(){
-	        	var callbackUrl = encodeURIComponent("http://140324fg0120icc/weibo/test/index?packageId=3456");
-	    		window.location.href = "http://140324fg0120icc/weibo/sns/index?redirect="+callbackUrl;
+	        	var callbackUrl = encodeURIComponent("http://iwebsite2/weibo/test/index?packageId=3456");
+	    		window.location.href = "http://iwebsite2/weibo/sns/index?appid=<?php echo $this->appid ?>&redirect="+callbackUrl;
 	        }
 	    )
 	}

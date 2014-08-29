@@ -12,7 +12,7 @@ function tabbar_div_mouseenter(e)
 		obj.className = "tab-hover";
 	}
 }
-function tabbar_div_mouseleave(event)
+function tabbar_div_mouseleave(e)
 {
 	var obj = e.target;
 

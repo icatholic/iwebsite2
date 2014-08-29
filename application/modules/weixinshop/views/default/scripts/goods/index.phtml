@@ -1,125 +1,109 @@
-<!DOCTYPE HTML>
-<html lang="zh-CN">
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
-<meta charset="UTF-8">
-<meta content="width=device-width" name="viewport" />
-<meta content="yes" name="apple-mobile-web-app-capable" />
-<meta content="black" name="apple-mobile-web-app-status-bar-style" />
-<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>微信商城-商品详细页面</title>
-<link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/main.css?<?php echo time();?>"/>
-<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/jquery-2.0.3.min.js"></script>
-<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/jquery.query.js"></script>
-<script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/swipe.js"></script>
-<script type="text/javascript">
-		var web_path = "<?php echo $this->config['global']['path']?>";
-</script>
-</head>
-<body id="index">
-    <header class="header_index">
-        <div class="header_wrapper_index">
-            <h2 class="logo"><img src="<?php echo $this->getResourceUrl()?>img/logo.jpg" alt="logo"></h2>
-            微信专享价
-            <nav>
-               <a href="<?php echo $this->config['global']['path']?>mobile/order/list">我的<br/>订单</a>
-               <a href="<?php echo $this->config['global']['path']?>mobile/index/help">帮助</a>
-            </nav>
-        </div>
-    </header>
-	<div class="wrapper">
-		<section class="main_box" id="box_pro">
-                <div id='slider' class='swipe'>
-                  <div class='swipe-wrap'>
-                       <div>
-                        <div class="pd58">
-                            <div class="pd04">
-                                <p class="pro_show">
-                                    <img src="<?php echo $this->goods['gpic1']?>">
-                                    <span class="img_promotion">
-                                        <img src="<?php echo $this->goods['prize_pic'] ?>">
-                                    </span>
-                                    <span class="timer_mask"></span>
-                                    <span class="timer">
-                                       <img src="<?php echo $this->getResourceUrl()?>img/clock.png">仅剩<em>00:00:00</em>
-                                    </span>
-                                    <span class="saleoff">
-                                    </span>
-                                </p>
-                                <div class="pro_info">
-                                    <h3>【<?php echo $this->goods['gname']?>】</h3>
-                                    <span class="pro_group pro_group2">
-                                    	<?php echo nl2br($this->goods['headline'])?>
-                                    </span>
-                                </div>
-                            </div>
-                            <p class="btn w100p btn_buy_now btn_disable" gid="<?php echo $this->goods['gid']?>"><a href="javascript:;"><img src="<?php echo $this->getResourceUrl()?>img/icon_cart.png"><em>放入购物车</em></a></p>
-                            <p class="btn w100p btn_buy_now btn_disable" gid="<?php echo $this->goods['gid']?>"><a href="javascript:;"><img src="<?php echo $this->getResourceUrl()?>img/icon_cart.png"><em>立即购买</em></a></p>
-                            
-                            <div class="pro_detail pd04">
-                             <h4>商品描述 </h4>
-                               <p class="brief"><?php echo $this->goods['brief']?></p>
-                               <div class="desc">
-                                  <?php echo $this->goods['desc']?>
-                               </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-               
-        </section>
-	</div>
-    <input type="hidden" id="time_now" value="<?php echo $this->currentTime?>"/>
-    <input type="hidden" id="time_over" value="<?php echo $this->offsaleTime?>"/>
-    <div id="loading"></div>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>微信商城</title>
+    <meta name="description" content="">
+    <!--移动平台-->
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no, address=no, email=no">
+    <meta http-equiv="cleartype" content="on">
+
+
+    <!--For iOS web apps. Delete if not needed. https://github.com/h5bp/mobile-boilerplate/issues/94-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="">
+
+
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/style.css"/>
+    <style>body{ overflow-x: hidden;}</style>
     <script type="text/javascript">
-
-        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-             WeixinJSBridge.call('hideToolbar');
-        });
-        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-            // 发送给好友
-            WeixinJSBridge.on('menu:share:appmessage', function(argv){
-                shareFriendOrTimeline("sendAppMessage","send_msg");
-            });
-            // 分享到朋友圈
-            WeixinJSBridge.on('menu:share:timeline', function(argv){
-                shareFriendOrTimeline("shareTimeline","timeline");
-            });
-         }, false);
-
-        var shareFriendOrTimeline = function(invokeType,reportType) {
-            WeixinJSBridge.invoke(invokeType,{
-                //"appid":window.shareData.appid,
-                "img_url":'http://wx.laiyifen.com/html/m/img/share.jpg',
-                "img_width":"100",
-                "img_height":"100",
-                "link":"http://wx.laiyifen.com/mobile/goods/index",
-                "desc":"",
-                "title":"微商城19.9元限时包邮"
-                }, function(res) {
-                     _report(reportType, res.err_msg);
-            });
-        };
-        $(function(){
-          $("#loading").height($("body").height());
-          // alert("<?php echo time();?>"+","+$("#time_now").val()+","+$("#time_over").val()+","+($("#time_over").val() - $("#time_now").val()));
-        })
-        window.onload = function(){
-
-            $("#loading").addClass('none');
-        }
-    </script>
-    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/lyfen.js?t=<?php echo time()?>"></script>
-	<script language="javascript">
-		//购买
-		$(".btn_buy_now").on("click",
-	     function(){
-         if(!$(this).hasClass("btn_disable")){
-            window.location.href = web_path+'lyfwx_pay/order.php?showwxpaytitle=1&ProductId='+$(this).attr("gid");
-            return;
-         }
-  	   }
-	  );
+		var web_path = "<?php echo $this->config['global']['path']?>";
+		var html_web_path = "<?php echo $this->getResourceUrl()?>";
 	</script>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/seajs/sea.js"></script>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/seajs/seajsConfig.js"></script>
+</head>
+<body>
+    <div id="loading"></div>
+
+    <div class="wrapper" id="productDetail">
+       <header id="header">
+            <ul>
+                <li><a class="pCenter" href="<?php echo $this->config['global']['path']?>weixinshop/shoppingcart2/index">购物车</a></li>
+                <li><a class="shapping-cat" href="<?php echo $this->config['global']['path']?>weixinshop/order/list">个人中心</a></li>
+           </ul>
+           <a href="javascript:window.history.go(-1);" class="btn-back"></a>
+        </header> 
+       <div class="banner">
+            <ul class="swipe-wrap">
+                <?php for ($i = 2; $i < 11; $i++) {?>
+                <?php if(!empty($this->goods['gpic'.$i])){?>
+                <li><img class="img100" src="<?php echo $this->goods['gpic'.$i]?>"></li>  
+                <?php }?>
+                <?php }?>
+            </ul>
+            <ul class="dot clearfix" >
+                <?php $picNum = 0;?>
+                <?php for ($i = 2; $i < 11; $i++) {?>
+                <?php if(!empty($this->goods['gpic'.$i])){?>
+                <?php $picNum ++;?>
+                <li <?php if($picNum == 1){?>class="on"<?php }?>><?php echo $picNum?></li>
+                <?php }?>
+                <?php }?>
+            </ul>
+        </div>
+        
+        <div class="bar-top-bottom">
+            <h2><?php echo $this->goods['name']?></h2>
+            <p>售价：<strong>￥<?php echo showMoney($this->goods['prize']/100)?></strong></p>
+        </div>
+        
+        <div class="bar-top-bottom">
+           
+        </div>
+        
+        
+        <ul class="detail-tab">
+            <li class="on">产品详情</li>
+            <li>产品参数</li>
+        </ul>
+        <ul class="detail-tab-cont">
+        <!-- 
+            <li class="on"><img src="<?php echo $this->goods['gdetail_pic1']?>" alt=""></li>
+             -->
+            <li class="on"><?php echo $this->goods['desc']?></li>
+            <li><img src="<?php echo $this->goods['gparams_pic1']?>" alt=""></li>
+        </ul>
+        
+        <div class="fixed-bottom">
+            <?php if(!empty($this->goods['stock_num']) && $this->goods['stock_num']>0 ){?>
+            <a href="javascript:;" class="btn-buy" gid="<?php echo $this->goods['gid']?>">立即购买</a>
+            <a href="javascript:;" class="btn-put" gid="<?php echo $this->goods['gid']?>">放入购物车</a>
+            <?php }else{?>
+            <a href="javascript:;" class="btn-disabled">暂时缺货</a>                  
+            <?php }?>
+        </div>
+    </div>
+    
+    <div class="pop" id="pop-confirm">
+    	<p>该商品已加入购物车</p>
+        <div><a class="popUpBtn" data-rule="close" href="javascript:;">继续购物</a>&nbsp;&nbsp;<a class="popUpBtn" href="<?php echo $this->config['global']['path']?>weixinshop/shoppingcart2/index">立即结算</a></div>
+    </div>
+	
+    <script type="text/javascript">
+        window.onload = function() {
+            document.getElementById("loading").style.display = "none";
+       }
+        seajs.use("app/views-productDetail");
+    </script>
 </body>
 </html>

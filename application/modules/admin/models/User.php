@@ -57,6 +57,15 @@ class Admin_Model_User extends iWebsite_Plugin_Mongo
      */
     public function login($user)
     {
+        // 获取角色信息
+        if (! empty($user['role'])) {
+            $adminRole = new Admin_Model_Role();
+            $roleInfo = $adminRole->getInfoById($user['role']);
+            $_SESSION['roleInfo'] = $roleInfo;
+        }else{
+            $_SESSION['roleInfo'] = array();
+        }
+        
         $_SESSION['admin_id'] = myMongoId($user['_id']);
         $_SESSION['admin_name'] = $user['username'];
         $_SESSION['last_check'] = ""; // 用于保存最后一次检查订单的时间
@@ -123,7 +132,7 @@ class Admin_Model_User extends iWebsite_Plugin_Mongo
 
     /**
      * 检查用户有效性
-     * 
+     *
      * @param string $username            
      * @param string $password            
      * @throws Exception
@@ -153,7 +162,7 @@ class Admin_Model_User extends iWebsite_Plugin_Mongo
         setcookie('ECSCP[admin_id]', myMongoId($userInfo['_id']), $time, "/admin/");
         setcookie('ECSCP[admin_pass]', md5($userInfo['password']), $time, "/admin/");
     }
-    
+
     /**
      * 清空COOKIES
      */

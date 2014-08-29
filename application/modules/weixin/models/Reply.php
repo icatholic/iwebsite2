@@ -7,6 +7,8 @@ class Weixin_Model_Reply extends iWebsite_Plugin_Mongo
     protected $name = 'iWeixin_reply';
 
     protected $dbName = 'weixin';
+    
+    protected $secondary = true;
 
     private $_weixin;
 

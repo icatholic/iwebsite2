@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * 后台用户管理
+ */
 class Admin_UserController extends iWebsite_Controller_Admin_Action
 {
 

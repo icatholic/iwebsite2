@@ -15,8 +15,7 @@ class iWebsite_Plugin_Files extends Zend_Controller_Plugin_Abstract
             $body = $this->getResponse()->getBody();
             
             // 正则替换页面中的全部url路径信息，仅限图片、视频等文件
-            // $regexVar = 'src[\s|\n|\t|\r]*=[\s|\n|\t|\r]*[\"|\']http://scrm.umaman.com/soa/(?:image|file2|file)';
-            $regexVar = '(http:(?:\\\)?/(?:\\\)?/cloud.umaman.com(?:\\\)?)/(?:file)';
+            $regexVar = '(http:(?:\\\)?/(?:\\\)?/cloud.umaman.com(?:\\\)?)/(?:image|js|css|file)';
             $body = preg_replace_callback("#{$regexVar}#im", function ($matchs) use($cdnDomain)
             {
                 if (strpos($matchs[1], '\\') !== false) {

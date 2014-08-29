@@ -20,11 +20,11 @@ class Weixinshop_GoodsController extends iWebsite_Controller_Action
     public function indexAction()
     {
         try {
-            $goodsId = trim($this->get('goodsId', '')); // 商品ID
+            $gid = trim($this->get('gid', '')); // 商品ID
                                                         
             // 根据分类ID获取商品列表
             $modelGoods = new Weixinshop_Model_Goods();
-            $info = $modelGoods->getInfoByGid($goodsId);
+            $info = $modelGoods->getInfoByGid($gid);
             $this->assign("goods", $info);
         } catch (Exception $e) {
             exit($this->error($e->getCode(), $e->getMessage()));
@@ -39,7 +39,7 @@ class Weixinshop_GoodsController extends iWebsite_Controller_Action
         try {
             // 根据分类ID获取商品列表
             $modelGoods = new Weixinshop_Model_Goods();
-            $goodsList = $modelGoods->getList(1); // 内购
+            $goodsList = $modelGoods->getList(true); // 内购
             $this->assign("goodsList", $goodsList);
         } catch (Exception $e) {
             exit($this->error($e->getCode(), $e->getMessage()));

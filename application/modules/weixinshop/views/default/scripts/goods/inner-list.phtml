@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta content="width=device-width" name="viewport" />
 <meta content="yes" name="apple-mobile-web-app-capable" />
 <meta content="black" name="apple-mobile-web-app-status-bar-style" />
-<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no, address=no, email=no">
 <title>微信商城-商品内购页面</title>
 <link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/main.css?<?php echo time();?>"/>
 <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/libs/jquery-2.0.3.min.js"></script>
@@ -46,7 +46,7 @@
                                     </span>
                                 </p>
                                 <div class="pro_info">
-                                    <h3>【<?php echo $this->goods['gname']?>】</h3>
+                                    <h3>【<?php echo $this->goods['name']?>】</h3>
                                     <span class="pro_group pro_group2">
                                     	<?php echo nl2br($this->goods['headline'])?>
                                     </span>

@@ -15,7 +15,7 @@
 <input type="checkbox" name="ids[]" value="<?php echo $order["_id"];?>" >
 <a href="<?php echo $this->config['global']['path']?>admin/order/info/order_id/<?php echo $order["_id"];?>" name = "<?php echo $order["_id"];?>" id="order_<?php echo $okey;?>"><?php echo $order["out_trade_no"];?></a>
 </td>
-<td valign="top" nowrap="nowrap"><?php echo $this->escape($order["OpenId"]);?><br /><?php echo !empty($order["uma_time_start"]) ?$order["uma_time_start"]:'';?></td>
+<td valign="top" nowrap="nowrap"><?php echo $this->escape($order["OpenId"]);?><br /><?php echo !empty($order["uma_time_start"]) ?date("Y-m-d H:i:s",$order["uma_time_start"]->sec):'';?></td>
 <td align="left" valign="top">
 <?php echo $this->escape($order["consignee_name"]);?>
 <br /><?php echo $this->escape($order["consignee_tel"]);?> 

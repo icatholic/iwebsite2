@@ -41,12 +41,54 @@ class Admin_IndexController extends iWebsite_Controller_Admin_Action
     public function mainAction()
     {
         $modelOrder = new Admin_Model_Order();
+        $now = date("Ymd");
+        $year = intval(substr($now, 0, 4));
+        $month = intval(substr($now, 4, 2));
+        $day = intval(substr($now, 6, 2));
+        //die(date('Y-m-d H:i:s',$start)."|".date('Y-m-d H:i:s',$end));
+        // 今日订单
+        $start = mktime(0, 0, 0, $month, $day, $year);
+        $end = mktime(0, 0, 0, $month, $day + 1, $year) - 1;        
+        $start = new MongoDate($start);
+        $end = new MongoDate($end);
+        /* 未支付订单数(今日) */
+        $order['daily_unpay'] = $modelOrder->getUnPayCount($start, $end);
+        /* 已支付,待发货订单数(今日) */
+        $order['daily_paid_unship'] = $modelOrder->getPaidUnshipCount($start, $end);
+        /* 已发货订单数(今日) */
+        $order['daily_shipped'] = $modelOrder->getShippedCount($start, $end);
+        /* 已取消订单数(今日) */
+        $order['daily_cancel'] = $modelOrder->getCanceledCount($start, $end);
         
-        /* 已完成的订单 */
-        $order['paid'] = $modelOrder->getPaidCount();
+        // 本周订单
+        $week = date('N'); // 1（表示星期一）到 7（表示星期天）
+        $start = mktime(0, 0, 0, $month, $day - $week, $year);
+        $end = mktime(0, 0, 0, $month, $day + 7 - $week, $year) - 1;
+        $start = new MongoDate($start);
+        $end = new MongoDate($end);
+        /* 未支付订单数(本周) */
+        $order['weekly_unpay'] = $modelOrder->getUnPayCount($start, $end);
+        /* 已支付,待发货订单数(本周) */
+        $order['weekly_paid_unship'] = $modelOrder->getPaidUnshipCount($start, $end);
+        /* 已发货订单数(本周) */
+        $order['weekly_shipped'] = $modelOrder->getShippedCount($start, $end);
+        /* 已取消订单数(本周) */
+        $order['weekly_cancel'] = $modelOrder->getCanceledCount($start, $end);
         
-        /* 待付款的订单： */
-        $order['await_pay'] = $modelOrder->getAwaitPayCount();
+        // 本月订单
+        $start = mktime(0, 0, 0, $month, 1, $year);
+        $end = mktime(0, 0, 0, $month + 1, 1, $year) - 1;
+        
+        $start = new MongoDate($start);
+        $end = new MongoDate($end);
+        /* 未支付订单数(本月) */
+        $order['monthly_unpay'] = $modelOrder->getUnPayCount($start, $end);
+        /* 已支付,待发货订单数(本月) */
+        $order['monthly_paid_unship'] = $modelOrder->getPaidUnshipCount($start, $end);
+        /* 已发货订单数(本月) */
+        $order['monthly_shipped'] = $modelOrder->getShippedCount($start, $end);
+        /* 已取消订单数(本月) */
+        $order['monthly_cancel'] = $modelOrder->getCanceledCount($start, $end);
         
         $this->view->assign('order', $order);
         
@@ -63,6 +105,6 @@ class Admin_IndexController extends iWebsite_Controller_Admin_Action
         $sys_info['mysql_ver'] = "5.1";
         $sys_info['gd'] = "2";
         $this->view->assign('sys_info', $sys_info);
-        $this->_helper->layout()->enableLayout();
+        $this->enableLayout();
     }
 }

@@ -72,7 +72,7 @@ class Weixininvitation_Model_InvitationWaitGetDetail extends iWebsite_Plugin_Mon
      * 是否存在
      *
      * @param string $invitation_id            
-     * @param string $wait_FromUserName            
+     * @param string $wait_FromUserName          
      * @return boolean
      */
     public function isExisted($invitation_id, $wait_FromUserName)

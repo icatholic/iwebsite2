@@ -25,10 +25,10 @@
 <tr>
 <td><div align="right"><strong>下单时间：</strong></div></td>
 <td>
-<input type="text" name="start_time" maxlength="60" size="20"  id="start_time_id" />
+<input type="text" name="start_time" maxlength="60" size="20"  id="start_time_id" value='<?php echo date('Y-m-d H:i:s', $this->start_time);?>' />
 <input name="start_time_btn" type="button" id="start_time_btn" onclick="return showCalendar('start_time_id', '%Y-%m-%d %H:%M:%S', '24', false, 'start_time_btn');" value="选择" class="button"/>
 ~
-<input type="text" name="end_time" maxlength="60" size="20"  id="end_time_id" />
+<input type="text" name="end_time" maxlength="60" size="20"  id="end_time_id" value='<?php echo date('Y-m-d H:i:s', $this->end_time);?>'/>
 <input name="end_time_btn" type="button" id="end_time_btn" onclick="return showCalendar('end_time_id', '%Y-%m-%d %H:%M:%S', '24', false, 'end_time_btn');" value="选择" class="button"/>
 </td>
 </tr>
@@ -38,7 +38,9 @@
 <td  colspan="3">
 <?php echo $this->showOrderPaymentStatusSelect("pay_status");?>
 <strong>退款状态：</strong>
-<?php echo $this->showRefundStatusSelect("refund_status");?>
+<?php echo $this->showRefundStatusSelect("refund_status","1");?>
+<strong>维权状态：</strong>
+<?php echo $this->showFeedbackStatusSelect("feedback_status");?>
 </td>
 </tr>
 
@@ -46,6 +48,7 @@
 <td colspan="4">
 <div align="center">
 <input name="query" type="submit" class="button" id="query" value="搜索" />
+<input name="export" type="submit" class="button" id="export" value="导出" />
 <input name="reset" type="reset" class='button' value='重置' />
 </div>
 </td>

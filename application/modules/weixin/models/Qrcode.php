@@ -12,6 +12,8 @@ class Weixin_Model_Qrcode extends iWebsite_Plugin_Mongo
     protected $name = 'iWeixin_qrcode';
 
     protected $dbName = 'weixin';
+    
+    protected $secondary = true;
 
     public function record($openid, $event, $eventKey, $ticket)
     {

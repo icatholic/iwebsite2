@@ -149,13 +149,13 @@ class Weixinshop_TestController extends Zend_Controller_Action
             $modelOrder = new Weixinshop_Model_Order();
             $out_trade_no = "5368e9c47f50ea000a000000";
             $info = $modelOrder->getInfoByOutTradeNo($out_trade_no);
-            print_r ( $info['details'] );
-            die ( 'ok' );
+            print_r($info['details']);
+            die('ok');
             
             $OpenId = "guoyongrong1234567890";
             $ProductId = "777111666";
             $body = "说明";
-            $gprize = 1;
+            $prize = 1;
             $gnum = 1;
             $notify_url = "http://wx.laiyifen.com/service/order/notify";
             $attach = "";
@@ -174,7 +174,7 @@ class Weixinshop_TestController extends Zend_Controller_Action
             $bank_type = "WX";
             $signType = 'sha1';
             // $info = $modelOrder->createOrder($OpenId, $ProductId, $body,
-            // $gprize, $gnum, $notify_url, $attach, $goods_tag, $transport_fee,
+            // $prize, $gnum, $notify_url, $attach, $goods_tag, $transport_fee,
             // $composite_sku_no, $consignee_province, $consignee_city,
             // $consignee_area, $consignee_name, $consignee_address,
             // $consignee_tel, $consignee_zipcode, $fee_type, $input_charset,
@@ -301,7 +301,7 @@ class Weixinshop_TestController extends Zend_Controller_Action
     public function payFeedbackAction()
     {
         try {
-            $client = new Client("http://iwebsite2/");
+            $client = new Client("http://140428fg0183/");
             $postStr = "<xml>
 				<OpenId><![CDATA[111222]]></OpenId>
 				<AppId><![CDATA[wwwwb4f85f3a797777]]></AppId>
@@ -417,18 +417,21 @@ class Weixinshop_TestController extends Zend_Controller_Action
             echo $e->getMessage();
         }
     }
-    
-    
+
     public function createOrderAction()
     {
         try {
-            $ProductIds=array('777111666');
-            $nums = array(1);
+            $ProductIds = array(
+                '111111'
+            );
+            $nums = array(
+                1
+            );
             $OpenId = "test1";
             
             // 检查商品的信息
             $modelGoods = new Weixinshop_Model_Goods();
-            $goodsList = $modelGoods->getList(0, $ProductIds);
+            $goodsList = $modelGoods->getList(false, $ProductIds);
             foreach ($ProductIds as $index => $ProductId) {
                 if (! key_exists($ProductId, $goodsList)) {
                     throw new Exception("商品号{$ProductId}的商品不存在");
@@ -444,13 +447,13 @@ class Weixinshop_TestController extends Zend_Controller_Action
             
             // 生成订单
             $modelOrder = new Weixinshop_Model_Order();
-            $orderInfo = $modelOrder->createOrder($OpenId, $goodsList);
+            $orderInfo = $modelOrder->createOrder($OpenId, $goodsList);           
             die("OK");
         } catch (Exception $e) {
-            die( $e->getMessage());
+            die($e->getMessage());
         }
     }
-    
+
     public function updateOrderAction()
     {
         try {
@@ -475,7 +478,217 @@ class Weixinshop_TestController extends Zend_Controller_Action
             
             die("OK");
         } catch (Exception $e) {
-            die( $e->getMessage());
+            die($e->getMessage());
+        }
+    }
+
+    public function freightcampanyAction()
+    {
+        try {
+            // 获取快递信息
+            $modelFreightCampany = new Tools_Model_Freight_Campany();
+            $freightCampanyList = $modelFreightCampany->getList();
+            print_r($freightCampanyList);
+            die("OK");
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function calcAction()
+    {
+        try {
+            
+            // $orderId = "539fda4b48961980338b456a";
+            $orderId = "53a923904a9619706c8b4575";
+            $modelOrder = new Weixinshop_Model_Order();
+            $orderInfo = $modelOrder->getInfoById($orderId);
+            // $campany = "538f279a4a96193b618b45b0"; // 顺风快递
+            // $campany = "538f2793489619d1448b45b1"; // EMS
+            $campany = "538f278a4996192a7f8b45b6"; // 普通邮寄
+            $province = 110000; // 北京市
+                                // $area = $province; // 目的地
+                                // $template = "538fea3e489619fb648b458d"; // 默认模板
+                                // $warehouse = "538fea2a4a961910768b458a"; // 创库
+                                // $unit = "1"; // 按数量
+                                // $transport_fee = $modelOrder->getTransportFee($orderInfo, $template, $campany, $warehouse, $unit, $area);
+            
+            $area = array();
+            $area['target_province'] = intval($province); // 目的地
+            $area['target_city'] = intval(110100); // 目的地
+            $area['target_county'] = intval(110112); // 目的地
+            
+            $transport_fee = $modelOrder->getTransportFee($orderInfo, $campany, $area); // 运费
+            
+            die("OK" . $transport_fee);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    /**
+     * 获取微信支付对象
+     *
+     * @return \Weixin\Pay
+     */
+    public function getWeixinPayInstance()
+    {
+        $config = Zend_Registry::get('config');
+        $token = $config['iWeixin']['token'];
+        $project_id = $config['iWeixin']['project_id'];
+        
+        $modelWeixinApplication = new Weixin_Model_Application();
+        $token = $modelWeixinApplication->getToken();
+        
+        $iWeixinPay = new Weixin\Pay();
+        $iWeixinPay->setAppId($config['iWeixin']['pay']['appId']);
+        $iWeixinPay->setAppSecret($config['iWeixin']['pay']['appSecret']);
+        $iWeixinPay->setPaySignKey($config['iWeixin']['pay']['paySignKey']);
+        $iWeixinPay->setPartnerId($config['iWeixin']['pay']['partnerId']);
+        $iWeixinPay->setPartnerKey($config['iWeixin']['pay']['partnerKey']);
+        $iWeixinPay->setAccessToken($token['access_token']);
+        return $iWeixinPay;
+    }
+
+    public function packageAction()
+    {
+        try {
+            // // 通知URL
+            // $config = Zend_Registry::get('config');
+            // $notify_url = $config['iWeixin']['pay']['notify_url'];
+            // $data['notify_url'] = $notify_url;
+            // $ip = getIp();
+            $data = array();
+            // $data['body']="testgoods1";
+            // $data['attach']="";
+            // $data['out_trade_no']="2014050912345678";
+            // $data['total_fee']=1;
+            // $data['notify_url']=$notify_url;
+            // $data['spbill_create_ip']=$ip;
+            // $data['time_start']=date("YmdHis");
+            // $data['time_expire']="";
+            // $data['transport_fee']=0;
+            // $data['product_fee']=1;
+            // $data['goods_tag']="";
+            // $data['bank_type']="WX";
+            // $data['fee_type']="1";
+            // $data['input_charset']="UTF-8";
+            // // timeStamp 时间戳；
+            // $data['timeStamp'] = time();
+            // // nonceStr 随机串。
+            // $data['nonceStr'] = createRandCode(32);
+            
+            // 获取Package
+            $modelOrder = new Weixinshop_Model_Order();
+            $out_trade_no = "5395accc4a96198a678b4584";
+            $data = $modelOrder->getInfoByOutTradeNo($out_trade_no);
+            
+            $weixinPay = $this->getWeixinPayInstance();
+            // 获取app_signature
+            $para = array(
+                "appid" => $data['appid'],
+                "appkey" => $weixinPay->getPaySignKey(),
+                "package" => $data['package'],
+                "timestamp" => $data['timeStamp'],
+                "noncestr" => $data['nonceStr']
+            );
+            
+            $data['AppSignature'] = $weixinPay->getPaySign($para);
+            die($data['AppSignature']);
+        } catch (Exception $e) {}
+    }
+
+    public function payFeedback1Action()
+    {
+        try {
+            $client = new Client("http://140428fg0183/");
+            $postStr = "<xml><OpenId><![CDATA[ogW8rt3jC5EHZxvvgckIYFV3Chu8]]></OpenId>
+<AppId><![CDATA[wx138d31eb396f8a8f]]></AppId>
+<TimeStamp>1407219021</TimeStamp>
+<MsgType><![CDATA[request]]></MsgType>
+<FeedBackId>13198765732981206926</FeedBackId>
+<TransId><![CDATA[1218088301201407293243658907]]></TransId>
+<Reason><![CDATA[测试]]></Reason>
+<Solution><![CDATA[ces]]></Solution>
+<ExtInfo><![CDATA[ ]]></ExtInfo>
+<AppSignature><![CDATA[ed1b7a3e816f279dc685d000d90fefea6d9c1bf8]]></AppSignature>
+<SignMethod><![CDATA[sha1]]></SignMethod>
+</xml>";
+            $client->setDefaultOption('body', $postStr);
+            $request = $client->post('weixinshop/pay/pay-feedback');
+            $response = $client->send($request);
+            if ($response->isSuccessful()) {
+                echo $response->getBody();
+            } else {
+                throw new Exception("微信服务器未有效的响应请求");
+            }
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function payFeedback2Action()
+    {
+        try {
+            $client = new Client("http://140428fg0183/");
+            $postStr = "<xml><OpenId><![CDATA[ogW8rt3jC5EHZxvvgckIYFV3Chu8]]></OpenId>
+<AppId><![CDATA[wx138d31eb396f8a8f]]></AppId>
+<TimeStamp>1407219094</TimeStamp>
+<MsgType><![CDATA[confirm]]></MsgType>
+<FeedBackId>13198765732981206926</FeedBackId>
+<Reason><![CDATA[]]></Reason>
+<AppSignature><![CDATA[43e1ad64769dcd68edef409bc07b6af49bb1c708]]></AppSignature>
+<SignMethod><![CDATA[sha1]]></SignMethod>
+</xml>
+            ";
+            $client->setDefaultOption('body', $postStr);
+            $request = $client->post('weixinshop/pay/pay-feedback');
+            $response = $client->send($request);
+            if ($response->isSuccessful()) {
+                echo $response->getBody();
+            } else {
+                throw new Exception("微信服务器未有效的响应请求");
+            }
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+    
+    public function payFeedback3Action()
+    {
+        try {
+            $postStr = "<xml><OpenId><![CDATA[ogW8rt3jC5EHZxvvgckIYFV3Chu8]]></OpenId>
+<AppId><![CDATA[wx138d31eb396f8a8f]]></AppId>
+<TimeStamp>1407219094</TimeStamp>
+<MsgType><![CDATA[confirm]]></MsgType>
+<FeedBackId>13198765732981206926</FeedBackId>
+<Reason><![CDATA[]]></Reason>
+<AppSignature><![CDATA[43e1ad64769dcd68edef409bc07b6af49bb1c708]]></AppSignature>
+<SignMethod><![CDATA[sha1]]></SignMethod>
+</xml>
+            ";
+            function filter_xml($matches) {
+                return "";
+            }
+            //$postStr = preg_replace_callback('/<!\[CDATA\[(.*)\]\]>/', 'filter_xml', $postStr);
+            //die($postStr);
+            $postData = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NOBLANKS);
+            //echo Zend_Json::encode($postData);
+            //var_dump($postData);
+            //die('ccccccccccc');
+            //echo json_encode($postData);
+            //die('bbbbbb');
+            
+            $postData = json_encode($postData);
+            $postData =  preg_replace('/{}/', '""', $postData);            
+            //die($postData);
+            $postData = json_decode($postData,1);            
+            
+            //$postData = object2Array($postData);
+            print_r($postData);
+            die('aaaaaaaaaaaa');
+        } catch (Exception $e) {
+            die($e->getMessage());
         }
     }
 }

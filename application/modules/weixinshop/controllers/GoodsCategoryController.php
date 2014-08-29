@@ -25,13 +25,13 @@ class Weixinshop_GoodsCategoryController extends iWebsite_Controller_Action
             // 获取商品分类信息
             $modelGoodsCategory = new Weixinshop_Model_GoodsCategory();
             $categoryInfo = $modelGoodsCategory->getInfoById($categoryId);
-            $this->assign("categoryInfo", $categoryInfo);
+            $this->assign("category", $categoryInfo);
             
-            // // 根据分类ID获取商品列表
-            // $modelGoods = new Weixinshop_Model_Goods();
-            // $goodsList = $modelGoods->getList($categoryId);
-            // $this->assign("goodsList", $goodsList);
-            $this->assign('currentTime', date("Y/m/d H:i:s"));
+            // 根据分类ID获取商品列表
+            $modelGoods = new Weixinshop_Model_Goods();
+            $goodsList = $modelGoods->getListByCategory(array($categoryId));
+            $this->assign("goodsList", $goodsList);
+            
         } catch (Exception $e) {
             exit($this->error($e->getCode(), $e->getMessage()));
         }

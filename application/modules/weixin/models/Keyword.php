@@ -6,6 +6,8 @@ class Weixin_Model_Keyword extends iWebsite_Plugin_Mongo
     protected $name = 'iWeixin_keyword';
 
     protected $dbName = 'weixin';
+    
+    protected $secondary = true;
 
     /**
      * 获取符合指定类型的关键词列表

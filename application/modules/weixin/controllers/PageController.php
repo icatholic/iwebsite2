@@ -26,8 +26,8 @@ class Weixin_PageController extends Zend_Controller_Action
             if ($id == null) {
                 $this->getHelper('viewRenderer')->setNoRender(true);
             }
-            
-            $page = (new Weixin_Model_Page())->findOne(array(
+            $modelPage = new Weixin_Model_Page();
+            $page = $modelPage->findOne(array(
                 '_id' => new MongoId($id)
             ));
             

@@ -1,4 +1,4 @@
 eclipse.preferences.version=1
-include_path=5;org.eclipse.dltk.USER_LIBRARY/org.eclipse.php.core.PHPNature\#Zend Framework 1\u00050;/iWebsite2
+include_path=0;/iWebsite2.0\u00055;org.eclipse.dltk.USER_LIBRARY/org.eclipse.php.core.PHPNature\#Zend Framework 1\u00055;org.eclipse.dltk.USER_LIBRARY/org.eclipse.php.core.PHPNature\#PHPUnit
 phpVersion=php5.4
 use_asp_tags_as_php=false

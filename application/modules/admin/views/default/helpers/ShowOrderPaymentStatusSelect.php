@@ -7,7 +7,7 @@ class Zend_View_Helper_ShowOrderPaymentStatusSelect extends Zend_View_Helper_Abs
 										$attribs = null,
 										$listsep = "<br />\n")
 	{
-		/* 付款状态 */
+		/* 付款状态 */	    
 		$list["0"] = "请选择";		
 		$list["1"] = '未付款';
 		$list["2"] = '已付款';

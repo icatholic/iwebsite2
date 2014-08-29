@@ -7,6 +7,18 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
 
     protected $dbName = 'weixininvitation';
 
+    private $isExclusive = true;
+
+    /**
+     * 设置排他
+     *
+     * @param unknown $isExclusive            
+     */
+    public function setIsExclusive($isExclusive)
+    {
+        $this->isExclusive = $isExclusive;
+    }
+
     /**
      * 根据ID获取信息
      *
@@ -27,16 +39,48 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      *
      * @param string $FromUserName            
      * @param number $activity            
+     * @param array $otherCondition            
      * @return array
      */
-    public function getInfoByFromUserName($FromUserName, $activity = 0)
+    public function getInfoByFromUserName($FromUserName, $activity = 0, array $otherCondition = array())
     {
         $query = array(
             'FromUserName' => $FromUserName,
             'activity' => $activity
         );
+        if (! empty($otherCondition)) {
+            $query = array_merge($query, $otherCondition);
+        }
         $info = $this->findOne($query);
         return $info;
+    }
+
+    /**
+     * 根据邀请内容ID获取最新信息
+     *
+     * @param string $FromUserName            
+     * @param number $activity            
+     * @param array $otherCondition            
+     * @return array
+     */
+    public function getLatestInfoByFromUserName($FromUserName, $activity = 0, array $otherCondition = array())
+    {
+        $query = array(
+            'FromUserName' => $FromUserName,
+            'activity' => $activity
+        );
+        if (! empty($otherCondition)) {
+            $query = array_merge($query, $otherCondition);
+        }
+        $sort = array(
+            'send_time' => - 1
+        );
+        $list = $this->find($query, $sort, 0, 1);
+        if (! empty($list['datas'])) {
+            return $list['datas'][0];
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -122,11 +166,15 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      * 加锁
      *
      * @param string $invitationId            
+     * @param boolean $isExclusive            
      * @throws Exception
      * @return boolean
      */
     public function lock($invitationId)
     {
+        if (! $this->isExclusive) { // 非排他
+            return false;
+        }
         // 锁定之前，先清除过期锁
         $this->expire($invitationId);
         
@@ -151,7 +199,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
                 'expire' => new MongoDate(time() + 300)
             )
         );
-        $options['new'] = false;
+        $options['new'] = false; // 返回更新之前的值
         
         $rst = $this->findAndModify($options);
         if (empty($rst['ok'])) {
@@ -174,6 +222,9 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
      */
     public function unlock($invitationId)
     {
+        if (! $this->isExclusive) { // 非排他
+            return;
+        }
         return $this->update(array(
             '_id' => myMongoId($invitationId)
         ), array(
@@ -192,13 +243,13 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
     public function expire($invitationId)
     {
         return $this->update(array(
-            '_id' => myMongoId($invitationId)
+            '_id' => myMongoId($invitationId),
+            'expire' => array(
+                '$lte' => new MongoDate()
+            )
         ), array(
             '$set' => array(
-                'lock' => false,
-                'expire' => array(
-                    '$lte' => new MongoDate()
-                )
+                'lock' => false
             )
         ));
     }
@@ -218,14 +269,20 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         if (empty($info)) {
             throw new Exception("邀请函记录不存在");
         }
-        
         $query = array(
-            '_id' => $info['_id'],
-            'lock' => true,
-            'invited_num' => array(
-                '$lt' => $info['invited_total']
-            )
+            '_id' => $info['_id']
         );
+        
+        if ($this->isExclusive) { // 排他
+            $query['lock'] = true;
+        }
+        
+        if (! empty($info['invited_total'])) {
+            $query['invited_num'] = array(
+                '$lt' => $info['invited_total']
+            );
+        }
+        
         $options = array();
         $options['query'] = $query;
         $options['update'] = array(
@@ -234,7 +291,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
                 'worth' => $minusWorth
             )
         );
-        $options['new'] = false;
+        $options['new'] = true; // 返回更新之后的值
         
         $rst = $this->findAndModify($options);
         if (empty($rst['ok'])) {
@@ -242,7 +299,7 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
         }
         
         if (! empty($rst['value'])) {
-            return true;
+            return $rst['value'];
         } else {
             throw new Exception("接受邀请次数增加失败");
         }
@@ -293,5 +350,48 @@ class Weixininvitation_Model_Invitation extends iWebsite_Plugin_Mongo
     {
         $isOver = (! empty($info['invited_total']) && $info['invited_num'] >= $info['invited_total']) ? true : false;
         return $isOver;
+    }
+
+    /**
+     * 获取总价值和总邀请次数
+     *
+     * @param string $FromUserName            
+     * @param number $activity            
+     * @return number
+     */
+    public function getTotalByFromUserName($FromUserName, $activity = 0)
+    {
+        /**
+         * [
+         * { $match: { status: "A" } },
+         * { $group: { _id: "$cust_id", total: { $sum: "$amount" } } },
+         * { $sort: { total: -1 } }
+         * ]
+         */
+        $rst = $this->aggregate(array(
+            array(
+                '$match' => array(
+                    'FromUserName' => $FromUserName,
+                    'activity' => $activity
+                )
+            ),
+            array(
+                '$group' => array(
+                    '_id' => '$FromUserName',
+                    'totalWorth' => array(
+                        '$sum' => '$worth'
+                    ),
+                    'totalInvitedNum' => array(
+                        '$sum' => '$invited_num'
+                    )
+                )
+            )
+        ));
+        
+        if (! empty($rst['result'])) {
+            return $rst['result'][0];
+        } else {
+            return 0;
+        }
     }
 }

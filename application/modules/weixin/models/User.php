@@ -7,6 +7,8 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
     protected $name = 'iWeixin_user';
 
     protected $dbName = 'weixin';
+    
+    protected $secondary = false;
 
     private $_weixin;
 
@@ -16,7 +18,7 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
     }
 
     /**
-     * 检测用户是否已经关注或者曾经关注过微信账号
+     * 检测用户是否授权过
      *
      * @param string $openid            
      * @return boolean
@@ -54,14 +56,14 @@ class Weixin_Model_User extends iWebsite_Plugin_Mongo
             'openid' => $openid
         ));
         
-        $range = (rand(0, 100) === 1);
+        $range = (rand(0, 10) === 1);
         if ($check == null || empty($check['subscribe']) || $range) {
             $userInfo = $this->_weixin->getUserManager()->getUserInfo($openid);
             if (! isset($userInfo['errcode'])) {
                 $userInfo['subscribe'] = $userInfo['subscribe'] == 1 ? true : false;
                 $userInfo['subscribe_time'] = new MongoDate($userInfo['subscribe_time']);
             } elseif (! $range) {
-                //针对订阅号的情况，记录关注用户的openid
+                // 针对订阅号的情况，记录关注用户的openid
                 $userInfo = array();
                 $userInfo['subscribe'] = true;
                 $userInfo['subscribe_time'] = new MongoDate();

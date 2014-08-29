@@ -115,7 +115,7 @@ listTable.toggle = function(obj, act, id, fieldname)
 					}
 					if (result.error == 0)
 					{
-						obj.src = listTable.imagepath + ((result.content > 0) ? 'images/yes.gif' : 'images/no.gif');
+						obj.src = listTable.imagepath + ((result.content > 0) ? 'img/yes.gif' : 'img/no.gif');
 					}
 				 },
 		dataType: "json"
@@ -206,6 +206,31 @@ listTable.remove = function(id, cfm, opt)
 	}
 };
 
+/**
+ * 处理列表中的一个记录
+ */
+listTable.process = function(id, cfm, opt)
+{
+	if (opt == null)
+	{
+		opt = "process";
+	}
+
+	if (confirm(cfm))
+	{
+		var data = listTable.compileFilter();
+		data.id = encodeURIComponent(id);
+		
+		$.ajax({
+			type: 'POST',
+			url: listTable.url + "/" + opt,
+			data:  data,
+			success: listTable.listCallback,
+			dataType: "json"
+		});
+	}
+};
+
 listTable.gotoPageFirst = function()
 {
 	if (listTable.filter.page > 1)
@@ -262,16 +287,17 @@ listTable.compileFilter = function()
 
 listTable.getPageSize = function()
 {
-	var ps = 15;
+	var ps = 10;
 
 	//var pageSize = $("#pageSize");
 	//var pageSize = document.getElementById("pageSize");
 	
 	//if (pageSize)
 	{
-		ps = Utils.isInt($("#pageSize").val()) ? $("#pageSize").val() : 15;
+		ps = Utils.isInt($("#pageSize").val()) ? $("#pageSize").val() : ps;
 		document.cookie = "ECSCP[page_size]=" + ps + ";";
 	}
+	return ps;
 };
 
 listTable.listCallback = function(result)
@@ -352,7 +378,7 @@ listTable.addRow = function(checkFunc)
 		{
 			var saveBtn = document.createElement("input");
 			saveBtn.type= "image";
-			saveBtn.src = "./images/icon_add.gif";
+			saveBtn.src = "./img/icon_add.gif";
 			saveBtn.value = save;
 			newCel.appendChild(saveBtn);
 			this.saveFunc = function(){
@@ -392,7 +418,7 @@ listTable.addRow = function(checkFunc)
 		
 		//var delBtn = document.createElement("input");
 		//delBtn.type= "image";
-		//delBtn.src = "./images/no.gif";
+		//delBtn.src = "./img/no.gif";
 		//delBtn.value = cancel;
 		//newCel.appendChild(delBtn);
 		}

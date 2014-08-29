@@ -7,12 +7,6 @@ class Weibo_Model_Application extends iWebsite_Plugin_Mongo
 
     protected $dbName = 'weibo';
 
-    public function getConfig()
-    {
-        $config = $this->findOne(array());
-        return $config;
-    }
-    
     /**
      * 根据ID获取信息
      *
@@ -25,5 +19,10 @@ class Weibo_Model_Application extends iWebsite_Plugin_Mongo
         $query["_id"] = myMongoId($id);
         $info = $this->findOne($query);
         return $info;
+    }
+    
+    public function getSignKey($uid, $secretKey, $timestamp = 0)
+    {
+        return sha1($uid . "|" . $secretKey . "|" . $timestamp);
     }
 }

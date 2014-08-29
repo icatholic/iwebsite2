@@ -6,6 +6,8 @@ class Weixin_Model_Menu extends iWebsite_Plugin_Mongo
     protected $name = 'iWeixin_menu';
 
     protected $dbName = 'weixin';
+    
+    protected $secondary = true;
 
     private $_weixin;
 

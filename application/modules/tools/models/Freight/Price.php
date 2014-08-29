@@ -17,8 +17,8 @@ class Tools_Model_Freight_Price extends iWebsite_Plugin_Mongo
         
         if (empty($this->_priceList) || $this->_priceKey != $priceKey) {
             $this->_priceList = $this->findAll(array(
-                'template' => $template,
-                'campany' => $campany,
+                'template_name' => $template,
+                'freight_campany' => $campany,
                 'warehouse' => $warehouse,
                 'unit' => $unit
             ), array(
@@ -32,7 +32,6 @@ class Tools_Model_Freight_Price extends iWebsite_Plugin_Mongo
                 'add' => true
             ));
         }
-        
         return $this->_priceList;
     }
 
@@ -43,25 +42,36 @@ class Tools_Model_Freight_Price extends iWebsite_Plugin_Mongo
      * @param string $campany            
      * @param string $warehouse            
      * @param int $unit            
-     * @param int $area            
-     * @param int $number            
+     * @param array $area            
+     * @param array $info            
      */
-    public function getPrice($template, $campany, $warehouse, $unit, $area, $number)
+    public function getPrice($template, $campany, $warehouse, $unit, array $area, $info)
     {
         $priceList = $this->getPriceList($template, $campany, $warehouse, $unit);
         if (! empty($priceList)) {
             foreach ($priceList as $price) {
                 $match = false;
-                if (strpos($area, $price['target_county']) !== false) {
+                if (! empty($area['target_county']) && ($area['target_county'] == $price['target_county'])) {
                     $match = true;
-                } elseif (strpos($area, $price['target_city']) !== false) {
+                } elseif (! empty($area['target_city']) && ($area['target_city'] == $price['target_city'])) {
                     $match = true;
-                } elseif (strpos($area, $price['target_province']) !== false) {
+                } elseif (! empty($area['target_province']) && ($area['target_province'] == $price['target_province'])) {
                     $match = true;
                 }
                 
-                if ($match)
-                    return $this->calculate($number, $price['first'], $price['add']);
+                if ($match) {
+                    if ($unit == "number") { // 按件数
+                        $value = $info['number'];
+                    } else
+                        if ($unit == "weight") { // 按重量g
+                        $value = $info['weight']/1000;
+                    } else
+                        if ($unit == "volume") { // 按体积m3
+                        $value = $info['volume'];
+                    }
+                    
+                    return $this->calculate($value, $price['first'], $price['add']);
+                }
             }
         }
         
@@ -71,17 +81,17 @@ class Tools_Model_Freight_Price extends iWebsite_Plugin_Mongo
     /**
      * 计算运费
      *
-     * @param int $number            
+     * @param double $value            
      * @param double $first            
      * @param double $add            
      * @return number
      */
-    public function calculate($number, $first, $add)
+    public function calculate($value, $first, $add)
     {
-        $number = (int) $number;
-        if ($number == 0) {
+        $value = ceil($value);
+        if (empty($value)) {
             return 0;
         }
-        return $first + $add * ($number - 1);
+        return $first + $add * ($value - 1);
     }
 }

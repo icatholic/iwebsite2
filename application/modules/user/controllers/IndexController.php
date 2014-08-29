@@ -32,7 +32,11 @@ class User_IndexController extends iWebsite_Controller_Action
 //         {
 //         	var_dump($_REQUEST);
 //         }
-        $oUserWeixin = new User_Model_Weixin();
+//         $oBind = new User_Model_Bind();
+//         $x = $oBind->getSchema();
+//         var_dump($x);exit;
+        $oUserWeixin = new Exchange_Model_Rule();
+        var_dump($oUserWeixin->findAll(array()));exit;
         $arrayInfo = array('openid'=>'abc');
         echo $oUserWeixin->add($arrayInfo,'aaaaab');
         echo '<br>';

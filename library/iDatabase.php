@@ -140,7 +140,9 @@ class iDatabase
         $this->_rand = sha1(time());
         $this->_key_id = $key_id;
         
-        $this->setLocal(APPLICATION_ENV === 'production' ? true : false);
+        if (defined('APPLICATION_ENV')) {
+            $this->setLocal(APPLICATION_ENV === 'production' ? true : false);
+        }
     }
 
     /**
@@ -225,7 +227,6 @@ class iDatabase
             ));
             return $this->_client;
         } else {
-            fb("local", "LOG");
             $this->_client = new iWebsite_Local_Database();
             $this->_client->authenticate($this->_project_id, $this->_rand, $this->sign(), $this->_key_id);
             $this->_client->setCollection($this->_collection_alias);
@@ -237,11 +238,16 @@ class iDatabase
      * 设定被操作集合别名
      *
      * @param string $alias            
+     * @param bool $secondary
+     *            是否在从上面获取数据
      */
-    public function setCollection($alias)
+    public function setCollection($alias, $secondary = false)
     {
         $this->_collection_alias = $alias;
-        $this->connect();
+        $this->_client = $this->connect();
+        if ($this->_local) {
+            $this->_client->setReadFromSecondary($secondary);
+        }
     }
 
     /**

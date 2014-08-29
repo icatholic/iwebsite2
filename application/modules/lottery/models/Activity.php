@@ -6,6 +6,8 @@ class Lottery_Model_Activity extends iWebsite_Plugin_Mongo
     protected $name = 'iLottery_activity';
 
     protected $dbName = 'lottery';
+    
+    protected $secondary = true;
 
     private $_activityInfo = null;
 

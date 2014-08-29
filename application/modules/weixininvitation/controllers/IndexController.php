@@ -3,6 +3,8 @@
 class Weixininvitation_IndexController extends iWebsite_Controller_Action
 {
 
+    private $activity = 0;
+
     public function init()
     {
         parent::init();
@@ -21,12 +23,12 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             
             // 获取发送过几次邀请函
             $modelInvitation = new Weixininvitation_Model_Invitation();
-            $count = $modelInvitation->getSentCount($FromUserName);
+            $count = $modelInvitation->getSentCount($FromUserName, $this->activity);
             $this->assign('sendNum', $count);
             
             // 判断是否已领过
             $modelInvitationGotDetail = new Weixininvitation_Model_InvitationGotDetail();
-            $info = $modelInvitationGotDetail->getInfoByFromUserName($FromUserName);
+            $info = $modelInvitationGotDetail->getInfoByFromUserName($FromUserName, $this->activity);
             $this->assign("info", $info);
             $this->assign('isGot', empty($info) ? 0 : 1);
         } catch (Exception $e) {
@@ -77,7 +79,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             
             // 获取发送过几次邀请函
             $modelInvitation = new Weixininvitation_Model_Invitation();
-            $count = $modelInvitation->getSentCount($FromUserName);
+            $count = $modelInvitation->getSentCount($FromUserName, $this->activity);
             // 业务逻辑开始
             // 增加积分或者是抽奖什么的
             if ($count > 0) { // 不是第一次
@@ -85,7 +87,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             // 业务逻辑结束
             
             // 生成邀请函
-            $recordInfo = $modelInvitation->create($FromUserName, $url, $nickname, $desc, $worth, $invited_total, $personal_receive_num, $is_need_subscribed, $subscibe_hint_url);
+            $recordInfo = $modelInvitation->create($FromUserName, $url, $nickname, $desc, $worth, $invited_total, $personal_receive_num, $is_need_subscribed, $subscibe_hint_url, $this->activity);
             $recordInfo['invitationId'] = myMongoId($recordInfo['_id']);
             // 发送成功
             echo ($this->result("OK", $recordInfo));
@@ -107,7 +109,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             $this->assign('FromUserName', $FromUserName);
             // 获取邀请函列表
             $modelInvitation = new Weixininvitation_Model_Invitation();
-            $list = $modelInvitation->getListByPage($FromUserName, 1, 100);
+            $list = $modelInvitation->getListByPage($FromUserName, $this->activity, 1, 100);
             $this->assign('list', $list['datas']);
         } catch (Exception $e) {
             var_dump(exceptionMsg($e));
@@ -135,7 +137,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             }
             // 获取领过的邀请函列表
             $modelInvitationGotDetail = new Weixininvitation_Model_InvitationGotDetail();
-            $list = $modelInvitationGotDetail->getListByPage($invitationId, 1, $invitation['invited_total']);
+            $list = $modelInvitationGotDetail->getListByPage($invitationId, $this->activity, 1, $invitation['invited_total']);
             $this->assign('list', $list['datas']);
         } catch (Exception $e) {
             var_dump(exceptionMsg($e));
@@ -180,7 +182,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             if ($isOver) {
                 if (! empty($invitation['url'])) {
                     $this->gotoUrl($invitation['url'], $FromUserName);
-                }else{
+                } else {
                     throw new Exception("领完了", - 5);
                 }
             }
@@ -192,7 +194,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
             if ($isGot) {
                 if (! empty($invitation['url'])) {
                     $this->gotoUrl($invitation['url'], $FromUserName);
-                }else{
+                } else {
                     throw new Exception("已领过或领取次数已到达", - 6);
                 }
             }
@@ -232,7 +234,7 @@ class Weixininvitation_IndexController extends iWebsite_Controller_Action
                 $got_worth = rand(0, $invitation['worth']);
                 $this->assign('got_worth', $got_worth);
                 
-                $invitationGotInfo = $modelInvitationGotDetail->create($invitationId, $invitation['FromUserName'], $FromUserName, $got_worth);
+                $invitationGotInfo = $modelInvitationGotDetail->create($invitationId, $invitation['FromUserName'], $FromUserName, $got_worth, $this->activity);
                 $this->assign('invitationGotInfo', $invitationGotInfo);
                 
                 // 将等待信息记录删除

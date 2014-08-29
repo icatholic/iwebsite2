@@ -73,6 +73,101 @@ class Zend_View_Helper_ShowNav extends Zend_View_Helper_Abstract
                 );
                 break;
             // order end
+            
+            //category start
+            case "admin/category/list":
+                $ur_here = '商品分类';
+                $action_link = array('text' => '添加商品分类', 'href'=>'category/add');
+                break;
+            case "admin/category/add":
+                $ur_here = '添加商品分类';
+                $action_link = array('text' => '商品分类', 'href'=>'category/list');
+                break;
+            case "admin/category/edit":
+                $ur_here = '编辑商品分类';
+                $action_link = array('text' => '商品分类', 'href'=>'category/list/uselastfilter/1');
+                break;
+            case "admin/category/move":
+                $ur_here = '转移商品';
+                $action_link = array('text' => '商品分类', 'href'=>'category/list');
+                break;
+            //category end
+                	
+            //brand start
+            case "admin/brand/list":
+                $ur_here = '商品品牌';
+                $action_link = array('text' => '添加品牌', 'href'=>'brand/add');
+                break;
+            case "admin/brand/add":
+                $ur_here = '添加品牌';
+                $action_link = array('text' => '商品品牌', 'href'=>'brand/list');
+                break;
+            case "admin/brand/edit":
+                $ur_here = '编辑品牌';
+                $action_link = array('text' => '商品品牌', 'href'=>'brand/list/uselastfilter/1');
+                break;
+            //brand end
+            //goods start
+            case "admin/goods/list":
+                $ur_here = '商品列表';
+                $action_link = array('text' => '添加商品', 'href'=>'goods/add');
+                
+                break;
+            case "admin/goods/trash":
+                $ur_here = '商品回收站';
+                $action_link = array('text' => '商品列表', 'href'=>'goods/list');
+                break;
+            case "admin/goods/add":
+                $ur_here = '添加商品';
+                $action_link = array('text' => '商品列表', 'href'=>'goods/list');               
+                break;
+            case "admin/goods/edit":
+                $ur_here = '编辑商品';
+                $action_link = array('text' => '商品列表', 'href'=>'goods/list/uselastfilter/1');
+                break;
+            case "admin/goods/copy":
+                $ur_here = '复制商品';
+                $action_link = array('text' => '商品列表', 'href'=>'goods/list/uselastfilter/1');
+                break;
+            //goods end
+            
+            //sku start
+            case "admin/sku/list":
+                $ur_here = 'SKU列表';
+                $action_link = array('text' => '添加SKU', 'href'=>'sku/add');
+                break;
+            case "admin/sku/add":
+                $ur_here = '添加SKU';
+                $action_link = array('text' => 'SKU列表', 'href'=>'sku/list');
+                break;
+            case "admin/sku/edit":
+                $ur_here = '编辑SKU';
+                $action_link = array('text' => 'SKU列表', 'href'=>'sku/list/uselastfilter/1');
+                break;
+            case "admin/sku/copy":
+                $ur_here = '复制SKU';
+                $action_link = array('text' => 'SKU列表', 'href'=>'sku/list/uselastfilter/1');
+                break;
+            //sku end
+
+            //trace start
+            case "admin/trace/list":
+                $ur_here = '溯源列表';
+                $action_link = array('text' => '添加溯源', 'href'=>'trace/add');
+                break;
+            case "admin/trace/add":
+                $ur_here = '添加溯源';
+                $action_link = array('text' => '溯源列表', 'href'=>'trace/list');
+                break;
+            case "admin/trace/edit":
+                $ur_here = '编辑溯源';
+                $action_link = array('text' => '溯源列表', 'href'=>'trace/list/uselastfilter/1');
+                break;
+            case "admin/trace/copy":
+                $ur_here = '复制溯源';
+                $action_link = array('text' => '溯源列表', 'href'=>'trace/list/uselastfilter/1');
+                break;
+            //trace end
             default:
                 break;
         }

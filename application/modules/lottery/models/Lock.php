@@ -9,16 +9,18 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
 
     private $_lockInfo = null;
 
-    private static $activity_id;
+    private $_activity_id;
 
-    private static $uniqueId;
+    private $_uniqueId;
+
+    private $_isLocked = false;
 
     /**
      * 获取锁定信息,在活动使用锁之前，请在锁集合中创建该活动的锁
      *
      * @param string $activity_id            
      */
-    public function getLockByActivity($activity_id)
+    private function getLockByActivity($activity_id)
     {
         if ($this->_lockInfo == null) {
             $this->_lockInfo = $this->findOne(array(
@@ -44,8 +46,8 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
      */
     public function lock($activity_id, $uniqueId)
     {
-        static::$activity_id = $activity_id;
-        static::$uniqueId = $uniqueId;
+        $this->_activity_id = $activity_id;
+        $this->_uniqueId = $uniqueId;
         
         $uniqueId = strval($uniqueId);
         $lockInfo = $this->getLockByActivity($activity_id);
@@ -82,6 +84,7 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
         if (! empty($rst['value'])) {
             if (in_array($uniqueId, $rst['value']['unique_array'], true)) {
                 // 已经被锁定
+                $this->_isLocked = true;
                 return true;
             }
         } else {
@@ -98,13 +101,13 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
      * @param string $uniqueId            
      * @throws Exception
      */
-    public function release($activity_id = null, $uniqueId = null)
+    private function release($activity_id = null, $uniqueId = null)
     {
         if (empty($activity_id))
-            $activity_id = static::$activity_id;
+            $activity_id = $this->_activity_id;
         
         if (empty($uniqueId))
-            $uniqueId = static::$uniqueId;
+            $uniqueId = $this->_uniqueId;
         
         $uniqueId = strval($uniqueId);
         $lockInfo = $this->getLockByActivity($activity_id);
@@ -127,10 +130,10 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
      * @param string $activity_id            
      * @param int $expire            
      */
-    public function expireRelease($activity_id = null, $expire = 300)
+    private function expireRelease($activity_id = null, $expire = 300)
     {
         if (empty($activity_id))
-            $activity_id = static::$activity_id;
+            $activity_id = $this->_activity_id;
         
         $expire = intval($expire);
         $lockInfo = $this->findOne(array(
@@ -162,5 +165,16 @@ class Lottery_Model_Lock extends iWebsite_Plugin_Mongo
         }
         
         return true;
+    }
+
+    /**
+     * 自动在析构函数中解锁和清理过期的锁
+     */
+    public function __destruct()
+    {
+        //只有上锁的人有资格开锁，而有上锁资格的人看到的一定是没锁的门；面对已经加锁的门，别人没资格打开噢~
+        if (!$this->_isLocked)
+            $this->release();
+        $this->expireRelease();
     }
 }

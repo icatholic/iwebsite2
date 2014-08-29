@@ -41,4 +41,38 @@ class Tools_Model_Freight_Area extends iWebsite_Plugin_Mongo
         
         return true;
     }
+
+    public function getProvinces()
+    {
+        $areas = $this->findAll(array(
+            'level' => 1
+        ));
+        return $areas;
+    }
+
+    public function getCitys($province)
+    {
+        $areas = $this->findAll(array(
+            'parent_code' => $province,
+            'level' => 2
+        ));
+        return $areas;
+    }
+
+    public function getAreas($city)
+    {
+        $areas = $this->findAll(array(
+            'parent_code' => $city,
+            'level' => 3
+        ));
+        return $areas;
+    }
+
+    public function getInfoByCode($code)
+    {
+        $info = $this->findOne(array(
+            'code' => $code
+        ));
+        return $info;
+    }
 }

@@ -3,13 +3,27 @@
 <form action="javascript:searchOrder()" name="searchForm">
 <img src="<?php echo $this->getResourceUrl()?>img/icon_search.gif" width="26" height="22" border="0" alt="SEARCH" />
 订单号
-<input name="out_trade_no" type="text" id="out_trade_no" size="15">
-收货人
-<input name="consignee_name" type="text" id="consignee_name" size="15">
-<!-- 
+<input name="out_trade_no" type="text" id="out_trade_no" size="10">
+微信号
+<input name="OpenId" type="text" id="OpenId" size="10">
 订单状态
-<?php echo $this->showOrderStatusSelect("status");?>
- -->
+<?php echo $this->showOrderStatusSelect("order_status");?>
+支付状态
+<?php echo $this->showOrderPaymentStatusSelect("pay_status");?>
+发货状态
+<?php echo $this->showOrderShippingStatusSelect("ship_status");?>
+退款状态
+<?php echo $this->showRefundStatusSelect("refund_status");?>
+维权状态
+<?php echo $this->showFeedbackStatusSelect("feedback_status");?>
+收货人
+<input name="consignee_name" type="text" id="consignee_name" size="5">
+下单时间
+<input type="text" name="start_time" maxlength="60" size="19"  id="start_time_id" />
+<input name="start_time_btn" type="button" id="start_time_btn" onclick="return showCalendar('start_time_id', '%Y-%m-%d %H:%M:%S', '24', false, 'start_time_btn');" value="选择" class="button"/>
+~
+<input type="text" name="end_time" maxlength="60" size="19"  id="end_time_id" />
+<input name="end_time_btn" type="button" id="end_time_btn" onclick="return showCalendar('end_time_id', '%Y-%m-%d %H:%M:%S', '24', false, 'end_time_btn');" value="选择" class="button"/>
 <input type="submit" value="搜索" class="button" />
 </form>
 </div>
@@ -40,8 +54,16 @@
 function searchOrder()
 {
 	listTable.filter['out_trade_no'] = Utils.trim(document.forms['searchForm'].elements['out_trade_no'].value);
+	listTable.filter['OpenId'] = Utils.trim(document.forms['searchForm'].elements['OpenId'].value);
 	listTable.filter['consignee_name'] = Utils.trim(document.forms['searchForm'].elements['consignee_name'].value);
-	//listTable.filter['uma_order_status'] = document.forms['searchForm'].elements['status'].value;
+	listTable.filter['start_time'] = Utils.trim(document.forms['searchForm'].elements['start_time'].value);
+	listTable.filter['end_time'] = Utils.trim(document.forms['searchForm'].elements['end_time'].value);
+	listTable.filter['order_status'] = document.forms['searchForm'].elements['order_status'].value;
+	listTable.filter['pay_status'] = document.forms['searchForm'].elements['pay_status'].value;
+	listTable.filter['ship_status'] = document.forms['searchForm'].elements['ship_status'].value;
+	listTable.filter['refund_status'] = document.forms['searchForm'].elements['refund_status'].value;
+	listTable.filter['feedback_status'] = document.forms['searchForm'].elements['feedback_status'].value;
+	
 	listTable.filter['page'] = 1;
 	listTable.loadList();
 }

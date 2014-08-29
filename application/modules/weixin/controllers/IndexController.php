@@ -25,6 +25,10 @@ class Weixin_IndexController extends Zend_Controller_Action
 
     private $_qrcode;
 
+    private $_scene;
+
+    private $_appConfig;
+
     public function init()
     {
         try {
@@ -37,7 +41,7 @@ class Weixin_IndexController extends Zend_Controller_Action
             $this->_not_keyword = new Weixin_Model_NotKeyword();
             $this->_menu = new Weixin_Model_Menu();
             $this->_qrcode = new Weixin_Model_Qrcode();
-            
+            $this->_scene = new Weixin_Model_Scene();
             $this->_appConfig = $this->_app->getToken();
             
             $this->_weixin = new Weixin\Client();
@@ -95,7 +99,11 @@ class Weixin_IndexController extends Zend_Controller_Action
             $content = isset($datas['Content']) ? strtolower(trim($datas['Content'])) : '';
             
             $FromUserName = isset($datas['FromUserName']) ? trim($datas['FromUserName']) : '';
+            $__TIME_STAMP__ = time();
+            $__SIGN_KEY__ = $this->_app->getSignKey($FromUserName, $this->_appConfig['secretKey'], $__TIME_STAMP__);
             Zend_Registry::set('__FROM_USER_NAME__', $FromUserName);
+            Zend_Registry::set('__TIME_STAMP__', $__TIME_STAMP__);
+            Zend_Registry::set('__SIGN_KEY__', $__SIGN_KEY__);
             $ToUserName = isset($datas['ToUserName']) ? trim($datas['ToUserName']) : '';
             $MsgType = isset($datas['MsgType']) ? trim($datas['MsgType']) : '';
             $Event = isset($datas['Event']) ? trim($datas['Event']) : '';
@@ -146,7 +154,7 @@ class Weixin_IndexController extends Zend_Controller_Action
                     }
                 } elseif ($Event == 'SCAN') { // 扫描带参数二维码事件 用户已关注时的事件推送
                     $this->_qrcode->record($FromUserName, $Event, $EventKey, $Ticket);
-                    //$onlyRevieve = true;
+                    // $onlyRevieve = true;
                     // EventKey 事件KEY值，是一个32位无符号整数
                     // Ticket 二维码的ticket，可用来换取二维码图片
                     // 不同项目特定的业务逻辑开始
@@ -196,6 +204,12 @@ class Weixin_IndexController extends Zend_Controller_Action
             
             // 不同项目特定的业务逻辑开始
             if ($MsgType == 'text') { // 接收普通消息----文本消息
+                if ($content == "客服测试") {
+                    echo $this->_weixin->getMsgManager()
+                        ->getReplySender()
+                        ->replyCustomerService();
+                    return false;
+                }
             }
             // 不同项目特定的业务逻辑结束
             
@@ -289,9 +303,40 @@ class Weixin_IndexController extends Zend_Controller_Action
      */
     public function syncMenuAction()
     {
-        $menus = $this->_menu->buildMenu();
-        var_dump($this->_weixin->getMenuManager()->create($menus));
-        return true;
+        try {
+            $menus = $this->_menu->buildMenu();
+            var_dump($this->_weixin->getMenuManager()->create($menus));
+            return true;
+        } catch (Exception $e) {
+            var_dump($e);
+            return false;
+        }
+    }
+
+    /**
+     * 创建二维码ticket的Hook
+     */
+    public function createQrcodeAction()
+    {
+        try {
+            $scenes = $this->_scene->getAll();
+            foreach ($scenes as $scene) {
+                if (empty($scene['is_temporary']) && ! empty($scene['is_created'])) { // 如果是永久并且已生成的话
+                    continue;
+                }
+                if (! empty($scene['is_temporary']) && ! empty($scene['is_created']) && ($scene['ticket_time']->sec + $scene['expire_seconds']) > (time())) { // 如果是临时并且已生成并且没有过期
+                    continue;
+                }
+                $ticketInfo = $this->_weixin->getQrcodeManager()->create($scene['sence_id'], $scene['is_temporary'], $scene['expire_seconds']);
+                $ticket = urlencode($ticketInfo['ticket']);
+                $ticket = $this->_weixin->getQrcodeManager()->getQrcodeUrl($ticket);
+                $this->_scene->recordTicket($scene, $ticket);
+            }
+            return true;
+        } catch (Exception $e) {
+            var_dump($e);
+            return false;
+        }
     }
 
     /**

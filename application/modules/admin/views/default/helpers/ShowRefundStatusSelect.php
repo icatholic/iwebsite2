@@ -3,7 +3,7 @@
 class Zend_View_Helper_ShowRefundStatusSelect extends Zend_View_Helper_Abstract
 {    
     public function showRefundStatusSelect($name,
-    									$value = "1",
+    									$value = "0",
 										$attribs = null,
 										$listsep = "<br />\n")
 	{

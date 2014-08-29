@@ -104,19 +104,22 @@ class Weixininvitation_Model_InvitationGotDetail extends iWebsite_Plugin_Mongo
     }
 
     /**
-     * 分页读取某个用户邀请函的邀请记录列表
+     * 分页读取朋友帮我的列表
      *
      * @param string $FromUserName            
      * @param number $activity            
      * @param number $page            
      * @param number $limit            
+     * @param array $sort            
      * @return array
      */
-    public function getPageFriendListByFromUserName($FromUserName, $activity = 0, $page = 1, $limit = 10)
+    public function getListByOwnerFromUserName($FromUserName, $activity = 0, $page = 1, $limit = 10, array $sort = array())
     {
-        $sort = array(
-            'got_time' => - 1
-        );
+        if (empty($sort)) {
+            $sort = array(
+                'got_time' => - 1
+            );
+        }
         $query = array();
         $query['owner_FromUserName'] = $FromUserName;
         $query['activity'] = $activity;
@@ -125,23 +128,106 @@ class Weixininvitation_Model_InvitationGotDetail extends iWebsite_Plugin_Mongo
     }
 
     /**
-     * 分页读取某个用户帮朋友的列表
+     * 分页读取我帮朋友的列表
      *
      * @param string $FromUserName            
      * @param number $activity            
      * @param number $page            
      * @param number $limit            
+     * @param array $sort            
      * @return array
      */
-    public function getPageListByFromUserName($FromUserName, $activity = 0, $page = 1, $limit = 10)
+    public function getListByGotFromUserName($FromUserName, $activity = 0, $page = 1, $limit = 10, array $sort = array())
     {
-        $sort = array(
-            'got_time' => - 1
-        );
+        if (empty($sort)) {
+            $sort = array(
+                'got_time' => - 1
+            );
+        }
         $query = array();
         $query['got_FromUserName'] = $FromUserName;
         $query['activity'] = $activity;
         $list = $this->find($query, $sort, ($page - 1) * $limit, $limit);
         return $list;
+    }
+
+    /**
+     * 获取朋友帮我收集的总价值
+     *
+     * @param string $FromUserName            
+     * @param number $activity            
+     * @return number
+     */
+    public function getTotalByOwnerFromUserName($FromUserName, $activity = 0)
+    {
+        /**
+         * [
+         * { $match: { status: "A" } },
+         * { $group: { _id: "$cust_id", total: { $sum: "$amount" } } },
+         * { $sort: { total: -1 } }
+         * ]
+         */
+        $rst = $this->aggregate(array(
+            array(
+                '$match' => array(
+                    'owner_FromUserName' => $FromUserName,
+                    'activity' => $activity
+                )
+            ),
+            array(
+                '$group' => array(
+                    '_id' => '$owner_FromUserName',
+                    'total' => array(
+                        '$sum' => '$got_worth'
+                    )
+                )
+            )
+        ));
+        
+        if (! empty($rst['result'])) {
+            return $rst['result'][0]['total'];
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 获取我帮朋友收集的总价值
+     *
+     * @param string $FromUserName            
+     * @param number $activity            
+     * @return number
+     */
+    public function getTotalByGotFromUserName($FromUserName, $activity = 0)
+    {
+        /**
+         * [
+         * { $match: { status: "A" } },
+         * { $group: { _id: "$cust_id", total: { $sum: "$amount" } } },
+         * { $sort: { total: -1 } }
+         * ]
+         */
+        $rst = $this->aggregate(array(
+            array(
+                '$match' => array(
+                    'got_FromUserName' => $FromUserName,
+                    'activity' => $activity
+                )
+            ),
+            array(
+                '$group' => array(
+                    '_id' => '$got_FromUserName',
+                    'total' => array(
+                        '$sum' => '$got_worth'
+                    )
+                )
+            )
+        ));
+        
+        if (! empty($rst['result'])) {
+            return $rst['result'][0]['total'];
+        } else {
+            return 0;
+        }
     }
 }

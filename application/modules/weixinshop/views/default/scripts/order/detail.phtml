@@ -1,84 +1,117 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="format-detection" content="telephone=no; address=no; email=no">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>微信商城</title>
+    <meta name="description" content="">
+    <!-- 移动平台-->
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no, address=no, email=no">
+    <meta http-equiv="cleartype" content="on">
+
+
+    <!--For iOS web apps. Delete if not needed. https://github.com/h5bp/mobile-boilerplate/issues/94-->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="stylesheet" href="<?php echo $this->getResourceUrl()?>css/main.css">
+    <meta name="apple-mobile-web-app-title" content="">
+
+
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->getResourceUrl()?>css/style.css"/>
+    <script type="text/javascript">
+		var web_path = "<?php echo $this->config['global']['path']?>";
+		var html_web_path = "<?php echo $this->getResourceUrl()?>";
+	</script>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/seajs/sea.js"></script>
+    <script type="text/javascript" src="<?php echo $this->getResourceUrl()?>js/seajs/seajsConfig.js"></script>
 </head>
-<body id="detail">
-	<header class="header">
-		<h1>订单详情<a href="<?php echo $this->config['global']['path']?>mobile/order/list"><img src="<?php echo $this->getResourceUrl()?>img/arrow-left.png" alt=""></a></h1>
-	</header>
-	<div class="wrapper">
-		<div class="cont">
-			<h3 class="row">
-				<p>订单号：<span><?php echo $this->orderInfo['out_trade_no']?></span></p>
-				<i class="payed">已支付</i>
-			</h3>
-			<table class="table">
-				<tr>
-					<td>总额：</td>
-					<td class="price">￥<em><?php echo showMoney($this->orderInfo['total_fee']/100)?></em></td>
-				</tr>
-				<tr>
-					<td>时间：</td>
-					<td><?php echo date("Y-m-d",strtotime($this->orderInfo['time_end']))?></td>
-				</tr>
-				<tr>
-					<td>收货地址：</td>
-					<td><?php echo $this->orderInfo['consignee_address']?></td>
-				</tr>
-				<tr>
-					<td>收货人：</td>
-					<td><?php echo $this->orderInfo['consignee_name']?></td>
-				</tr>
-			</table>
-			<div class="num"><span>共<em><?php echo $this->orderInfo['gnum']?></em>件</span>商品信息：</div>
-			<div class="pro">
-				<div class="pic">
-					<img src="<?php echo $this->goods['gpic1']?>" alt="">
-				</div>
-				<div class="det">
-					<h4>【<span><?php echo $this->goods['gname']?></span>】</h4>
-					<p><?php echo nl2br($this->goods['headline'])?></p>
-					<p class="pri"><span>￥<em><?php echo showMoney($this->goods['gprize']/100)?></em></span></p>
-				</div>
-			</div>
-
-		</div>
-	</div>
-	 <script type="text/javascript">
-
-        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-             WeixinJSBridge.call('hideToolbar');
-        });
-        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-            // 发送给好友
-            WeixinJSBridge.on('menu:share:appmessage', function(argv){
-                shareFriendOrTimeline("sendAppMessage","send_msg");
-            });
-            // 分享到朋友圈
-            WeixinJSBridge.on('menu:share:timeline', function(argv){
-                shareFriendOrTimeline("shareTimeline","timeline");
-            });
-         }, false);
-
-        var shareFriendOrTimeline = function(invokeType,reportType) {
-            WeixinJSBridge.invoke(invokeType,{
-                //"appid":window.shareData.appid,
-                "img_url":'http://wx.laiyifen.com/html/m/img/share.jpg',
-                "img_width":"100",
-                "img_height":"100",
-                "link":"http://wx.laiyifen.com/mobile/goods/index",
-                "desc":"",
-                "title":"微商城19.9元限时包邮"
-                }, function(res) {
-                     _report(reportType, res.err_msg);
-            });
-        };
-    </script>
+<body>
+    <div class="wrapper" id="orderinfo">
+       <header id="header">
+           <a href="javascript:window.history.go(-1);" class="btn-back"></a>
+           <span class="headerTitle">订单明细</span>
+       </header>
+       <div class="orderContainer clearfix">
+           <div class="orderNoBox clearfix">
+               <span class="orderNo">订单号: <?php echo $this->orderInfo['out_trade_no']?></span>
+               <span class="orderStatus"><?php echo $this->renderOrderStatus($this->orderInfo);?></span>
+           </div>
+           <div class="orderControl">
+               <div class="consulting"><a href="javascript:;">订单问题咨询</a></div>
+               <?php if($this->orderInfo["uma_shipping_status"] == SS_SHIPPED && $this->orderInfo["uma_order_status"] != OS_CANCELED){//已发货&&不是取消 ?>
+               <div out_trade_no="<?php echo $this->orderInfo['out_trade_no']?>" class="assessment" style="margin-left:0; width: 85%;"><a href="javascript:;">确认收货并评价</a></div>
+               <?php }?>
+           </div>
+           <div class="deliveryInfo">
+               <div class="info"><span class="infoLable">总额: </span><span class="infoValue">￥<?php echo showMoney($this->orderInfo['total_fee']/100)?></span></div>
+               <div class="info"><span class="infoLable">时间: </span><span class="infoValue"><?php echo date("Y-m-d",strtotime($this->orderInfo['time_end']))?></span></div>
+               <div class="info"><span class="infoLable">收货地址: </span><span class="infoValue"><?php echo $this->orderInfo['consignee_address']?></span></div>
+               <div class="info"><span class="infoLable">收货人: </span><span class="infoValue"><?php echo $this->orderInfo['consignee_name']?></span></div>
+               <?php if(empty($this->orderInfo["uma_shipping_status"])){?>
+               <div class="info"><span class="infoLable">快递信息: </span><span class="infoValue"><?php echo $this->orderInfo['freight_campany']?></span></div>
+               <?php } else {?>
+               <div class="info"><span class="infoLable">快递信息: </span><span class="infoValue"><?php echo $this->orderInfo['uma_shipping_memo']['shipping_express_name']?></span></div>
+               <div class="info"><span class="infoLable">快递单号: </span><span class="infoValue"><?php echo $this->orderInfo['uma_shipping_memo']['shipping_no']?></span></div>
+               <?php }?>
+           </div>
+           <div class="itemBox">
+               <div class="boxTitle">商 品 信 息</div>
+               <ul class="itemList">
+               <?php foreach ($this->orderInfo['details'] as $goods) {?>
+                   <li>
+                       <img class="itemPic" src="<?php echo $goods['gpic1']?>">
+                       <div class="itemInfo">
+                            <a class="itemName"><?php echo $goods['name']?></a>
+                            <div class="itemFormat">规格: <?php echo $goods['spec']?></div>
+                            <hr>
+                            <span class="price">￥<?php echo showMoney($goods['prize']/100)?> *<?php echo $goods['num']?>件</span>
+                       </div>
+                   </li>
+               <?php }?>
+               </ul>
+           </div>
+       </div>
+       <div class="popUp">
+           <div class="consultBox pop" id="consultBox">
+               <div>请点击微信自定义菜单<br>"在线服务"进行咨询</div>
+               <a href="javascript:;" class="popUpBtn" data-rule="close">确 定</a>
+           </div>
+           <div class="deliveryDetail pop" id="deliveryDetail">
+               <div class="deliveryTitle">中通快递: 3245343445</div>
+               <div class="deliveryInfoBox">
+                   <div>2014-05-04 20:42:46 上海市闵行区莘庄公司已收件</div>
+                   <div>2014-05-04 20:46:34 上海市闵行区莘庄公司已打包</div>
+                   <div>2014-05-04 20:54:45 上海市闵行区莘庄公司已发出</div>
+                   <div>2014-05-04 20:55:23 上海转运中心公司已收入</div>
+                   <div>2014-05-04 20:42:46 上海转运中心公司已拆包</div>
+               </div>
+               <div class="deliveryFooter">以上信息由物流公司提供, 如无跟踪信息或有疑问, 请登录XX速递官方网站或联系其公示电话</div>
+           </div>
+           <div class="assessmentBox pop" id="assessmentBox">
+               <div class="deliveryTitle">确认收货并评价</div>
+               <div class="assessmentControl">
+                   <label for="goodAssess"><input id="goodAssess" type="radio" name="assess" checked value="满意">满意</label>
+                   <label for="normalAssess"><input id="normalAssess" type="radio" name="assess" value="一般">一般</label>
+                   <label for="badAssess"><input id="badAssess" type="radio" name="assess" value="不满意">不满意</label>
+               </div>
+               <textarea class="assessmentText" placeholder="选填, 您可以发表对我们服务的建议."></textarea>
+               <div class="popUpNote">请选择满意度后提交</div>
+               <a href="javascript:;" class="popUpBtn submit"  data-rule="close">提 交</a>
+               <a href="javascript:;" class="popUpBtn"  data-rule="close">取 消</a>
+           </div>
+       </div>
+    </div>
+    
+<script type="text/javascript">
+    seajs.use("app/viewItem", function(viewItem){
+        viewItem.initOrderInfo();
+    });
+</script>
 </body>
 </html>

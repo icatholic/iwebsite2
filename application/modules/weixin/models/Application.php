@@ -6,8 +6,11 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
     protected $name = 'iWeixin_application';
 
     protected $dbName = 'weixin';
+    
+    protected $secondary = true;
 
     private $_params = array();
+    
 
     private $_expire = 30;
 
@@ -167,5 +170,10 @@ class Weixin_Model_Application extends iWebsite_Plugin_Mongo
                 break;
         }
         return $datas;
+    }
+    
+    public function getSignKey($openid, $secretKey, $timestamp = 0)
+    {
+        return sha1($openid . "|" . $secretKey . "|" . $timestamp);
     }
 }

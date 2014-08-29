@@ -4,17 +4,21 @@
 <td scope="col"><div align="center"><strong>商品号</strong></div></td>
 <td scope="col"><div align="center"><strong>价格</strong></div></td>
 <td scope="col"><div align="center"><strong>数量</strong></div></td>
+<!-- 
 <td scope="col"><div align="center"><strong>库存</strong></div></td>
+ -->
 <td scope="col"><div align="center"><strong>小计</strong></div></td>
 </tr>
 <?php foreach ($this->goods_list as $goods) {?>
 <tr>
-<td><?php echo $goods["gname"];?></td>
+<td><?php echo $goods["name"];?></td>
 <td><?php echo $goods["gid"];?></td>
-<td><div align="right"><?php echo $this->renderPrice($this->order["gprize"]);?></div></td>
+<td><div align="right"><?php echo $this->renderPrice($goods["prize"]);?></div></td>
 <td><div align="right"><?php echo $this->order["gnum"];?></div></td>
+<!-- 
 <td><div align="right"><?php echo $goods["stock_num"];?></div></td>
-<td><div align="right"><?php echo $this->renderPrice($this->order["gnum"] * $this->order["gprize"]);?></div></td>
+ --> 
+<td><div align="right"><?php echo $this->renderPrice($this->order["gnum"] * $goods["prize"]);?></div></td>
 </tr>
 <?php } ?>
 </table>

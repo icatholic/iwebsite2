@@ -6,6 +6,8 @@ class Weixin_Model_Source extends iWebsite_Plugin_Mongo
     protected $name = 'iWeixin_source';
 
     protected $dbName = 'weixin';
+    
+    protected $secondary = true;
 
     private $_params = array();
 
@@ -58,10 +60,11 @@ class Weixin_Model_Source extends iWebsite_Plugin_Mongo
     /**
      * 转化方法 很重要
      *
-     * @param object $object            
+     * @param object $object
      */
     public function object2array($object)
     {
-        return @json_decode(@json_encode($object), 1);
+        //return @json_decode(@json_encode($object), 1);
+        return @json_decode(preg_replace('/{}/', '""', @json_encode($object)), 1);
     }
 }

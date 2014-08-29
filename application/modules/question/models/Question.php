@@ -123,6 +123,8 @@ class Question_Model_Question  extends iWebsite_Plugin_Mongo
     public function answer($arrayAnswer,$userId,$naireId,$randId = '')
     {
         $oNaire = new Question_Model_Naire();
+        $oAnswer = new Question_Model_Answer();
+        
         $this->arrayNaire = $oNaire->findOne(array('_id'=>$naireId));
     	foreach ($arrayAnswer as $key => $val)
     	{
@@ -132,10 +134,13 @@ class Question_Model_Question  extends iWebsite_Plugin_Mongo
     	if($randId)
     	{
     		$oRand = new Question_Model_Rand();
-    		$oRand->update(array('_id'=>$randId),array('$set'=>array('is_finish'=>true,'finish_time'=>new MongoDate())));
+    		$rst = $oRand->update(array('_id'=>$randId,'is_finish'=>false),array('$set'=>array('is_finish'=>true,'finish_time'=>new MongoDate())));
+    		if($rst['updatedExisting'] == false)
+    		{
+    		    throw new Exception('该问卷已完成过！',1011);
+    		    return false;
+    		}
     	}
-    	
-    	$oAnswer = new Question_Model_Answer();
     	$arrayData = array();
     	$arrayData['user_id'] = $userId;
     	$arrayData['naire_id'] = $naireId;

@@ -24,13 +24,12 @@ class User_Model_Other extends User_Model_Member
             $arrayTmp = $this->findOne(array('other_id'=>$arrayInfo['other_id']));
             if($arrayTmp == null)   //新数据
             {
-            	$this->insertRef($arrayData);
+            	$arrayData = $this->insertRef($arrayData);
             }
             else 
             {
                 $arrayData = $arrayTmp;
             }
-            
             if($uniqueValue)    //需要绑定,返回用户ID
             {
                 $oBind = new User_Model_Bind();

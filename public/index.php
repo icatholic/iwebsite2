@@ -1,6 +1,7 @@
 <?php
 // 酌情考虑该参数是否开启，如果遇到CC请关闭此参数，默认关闭，有特殊需求再开启
 ignore_user_abort(false);
+
 // 计算脚本的执行时间与CPU使用时间，仅限linux系统使用
 if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
     if (! isset($_SERVER["REQUEST_TIME_FLOAT"]))
@@ -10,7 +11,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
 }
 
 defined('APPLICATION_PATH') || define('APPLICATION_PATH', realpath(dirname(__FILE__) . '/../application'));
-defined('APPLICATION_ENV') || define('APPLICATION_ENV', 'production'); // [production|development]
+defined('APPLICATION_ENV') || define('APPLICATION_ENV', isset($_SERVER['APPLICATION_ENV']) ? $_SERVER['APPLICATION_ENV'] : 'development'); // [production|development]
 
 set_include_path(implode(PATH_SEPARATOR, array(
     realpath(APPLICATION_PATH . '/../library'),

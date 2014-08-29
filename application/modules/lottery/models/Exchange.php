@@ -48,10 +48,11 @@ class Lottery_Model_Exchange extends iWebsite_Plugin_Mongo
      * @param
      *            string
      */
-    public function getExchangeInvalidById($identity_id)
+    public function getExchangeInvalidById($identity_id,$activity_id)
     {
         return $this->findOne(array(
             'identity_id' => $identity_id,
+            'activity_id'=>$activity_id,
             'is_valid' => array(
                 '$ne' => true
             )

@@ -157,7 +157,7 @@ class iWebsite_Local_Database
             'key' => true
         ));
         if ($rst === null) {
-            var_dump(iterator_to_array($this->_key->find(array())), $query,$key_id);
+            var_dump(iterator_to_array($this->_key->find(array())), $query, $key_id);
             throw new \Exception('授权密钥无效');
         }
         return $rst;
@@ -181,7 +181,7 @@ class iWebsite_Local_Database
                 'alias' => $collectionAlias
             ));
             if ($collectionInfo === null) {
-                throw new \Exception('访问集合不存在');
+                throw new \Exception($collectionAlias . '访问集合不存在');
             }
             
             $this->_collection_id = myMongoId($collectionInfo['_id']);
@@ -201,6 +201,15 @@ class iWebsite_Local_Database
         } catch (Exception $e) {
             var_dump($e);
         }
+    }
+
+    /**
+     * 设定数据来自于从库
+     * @param string $flag
+     */
+    public function setReadFromSecondary($flag = false)
+    {
+        $this->_model->setReadPreference($flag == true ? 'secondaryPreferred' : 'primaryPreferred');
     }
 
     /**
@@ -614,7 +623,7 @@ class iWebsite_Local_Database
      */
     private function toArray($rst)
     {
-        if(is_array($rst)){
+        if (is_array($rst)) {
             array_walk_recursive($rst, function (&$value, $key)
             {
                 if ($key === '_id' && strlen($value) === 24) {
@@ -624,12 +633,12 @@ class iWebsite_Local_Database
             });
         }
         return $rst;
-
     }
 
     /**
      * 集合名称
-     * @param mixed $_id
+     *
+     * @param mixed $_id            
      * @throws \Exception
      * @return string
      */

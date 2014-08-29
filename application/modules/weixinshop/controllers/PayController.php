@@ -14,13 +14,15 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
 
     private $errorLog = null;
 
+    private $modelOrder = null;
+
     public function init()
     {
         parent::init();
         $this->getHelper('viewRenderer')->setNoRender(true);
         $this->errorLog = new Weixinshop_Model_PayErrorLog();
-        $modelOrder = new Weixinshop_Model_Order();
-        $this->weixinPay = $modelOrder->getWeixinPayInstance();
+        $this->modelOrder = new Weixinshop_Model_Order();
+        $this->weixinPay = $this->modelOrder->getWeixinPayInstance();
     }
 
     /**
@@ -30,23 +32,80 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
     {
         // http://iwebsite2/weixinshop/pay/create-order?jsonpcallback=?&OpenId=xxx&ProductId=xxxx&gnum=xxxx
         try {
-            $OpenId = $this->getRequest()->getCookie("FromUserName", '');
+            $OpenId = $this->getRequest()->getCookie("openid", '');
             // $OpenId = trim ( $this->get ( 'OpenId', '' ) ); // 微信号
             if (empty($OpenId)) {
                 throw new Exception("微信号为空");
             }
-            $ProductIds = trim($this->get('ProductIds', '')); // 商品号
+            
+            if (empty($_SESSION['checkout'])) {
+                throw new Exception("未购买商品");
+            }
+            
+            $consignee_province = trim($this->get('consignee_province', '')); // 收货人省份
+            if (empty($consignee_province)) {
+                // throw new Exception("收货人省份为空");
+            }
+            $consignee_city = trim($this->get('consignee_city', '')); // 收货人城市
+            if (empty($consignee_city)) {
+                // throw new Exception("收货人城市为空");
+            }
+            $consignee_area = trim($this->get('consignee_area', '')); // 收货人区或县
+            if (empty($consignee_area)) {
+                // throw new Exception("收货人区或县为空");
+            }
+            $consignee_address = trim($this->get('consignee_address', '')); // 收货地址
+            if (empty($consignee_address)) {
+                // throw new Exception("收货地址为空");
+            }
+            $consignee_name = trim($this->get('consignee_name', '')); // 收货人
+            if (empty($consignee_name)) {
+                // throw new Exception("收货人为空");
+            }
+            $consignee_tel = trim($this->get('consignee_tel', '')); // 收货人手机
+            if (empty($consignee_tel)) {
+                // throw new Exception("收货人手机为空");
+            }
+            if (! isValidMobile($consignee_tel)) {
+                // throw new Exception("收货人手机格式不正确");
+            }
+            $consignee_zipcode = trim($this->get('consignee_zipcode', '')); // 邮政编码
+            if (empty($consignee_zipcode)) {
+                // throw new Exception("邮政编码为空");
+            }
+            
+            $freight_campany = trim($this->get('freight_campany', '')); // 快递公司
+            if (empty($freight_campany)) {
+                // throw new Exception("快递公司为空");
+            }
+            
+            // $ProductIds = trim($this->get('ProductIds', '')); // 商品号
+            // $nums = trim($this->get('nums', '')); // 商品数量
+            $goodList = $_SESSION['checkout']['goods'];
+            $ProductIds = array();
+            $nums = array();
+            
+            foreach ($goodList as $product) {
+                if (empty($product['gid'])) {
+                    throw new Exception("商品号为空");
+                }
+                if (empty($product['num'])) {
+                    throw new Exception("商品数量为空");
+                }
+                $ProductIds[] = $product['gid'];
+                $nums[] = $product['num'];
+            }
+            
             if (empty($ProductIds)) {
                 throw new Exception("商品号为空");
             }
-            $nums = trim($this->get('nums', '')); // 商品数量
             if (empty($nums)) {
                 throw new Exception("商品数量为空");
             }
             
             // 检查商品的信息
             $modelGoods = new Weixinshop_Model_Goods();
-            $goodsList = $modelGoods->getList(0, $ProductIds);
+            $goodsList = $modelGoods->getList(false, $ProductIds);
             foreach ($ProductIds as $index => $ProductId) {
                 if (! key_exists($ProductId, $goodsList)) {
                     throw new Exception("商品号{$ProductId}的商品不存在");
@@ -59,9 +118,67 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
                 }
             }
             
+            // 或者是其他一些判断条件
+            $modelFreightArea = new Tools_Model_Freight_Area();
+            $consignee_province_name = "";
+            if (! empty($consignee_province)) {
+                $provinceInfo = $modelFreightArea->getInfoByCode(intval($consignee_province));
+                if (empty($provinceInfo)) {
+                    // throw new Exception("省份不存在");
+                } else {
+                    $consignee_province_name = $provinceInfo['name'];
+                }
+            }
+            $consignee_city_name = "";
+            if (! empty($consignee_city)) {
+                $cityInfo = $modelFreightArea->getInfoByCode(intval($consignee_city));
+                if (empty($cityInfo)) {
+                    // throw new Exception("城市不存在");
+                } else {
+                    $consignee_city_name = trim($cityInfo['name']);
+                    if ($consignee_city_name == "市辖区") {
+                        $consignee_city_name = $consignee_province_name;
+                    }
+                }
+            }
+            
+            $consignee_area_name = "";
+            if (! empty($consignee_area)) {
+                $areaInfo = $modelFreightArea->getInfoByCode(intval($consignee_area));
+                if (empty($areaInfo)) {
+                    // throw new Exception("区或县不存在");
+                } else {
+                    $consignee_area_name = $areaInfo['name'];
+                }
+            }
+            $freight_campany_name = "";
+            $modelFreightCampany = new Tools_Model_Freight_Campany();
+            if (! empty($freight_campany)) {
+                $companyInfo = $modelFreightCampany->getInfoById($freight_campany);
+                if (empty($companyInfo)) {
+                    // throw new Exception("快递不存在");
+                } else {
+                    $freight_campany_name = $companyInfo['name'];
+                }
+            }
+            
             // 生成订单
-            $modelOrder = new Weixinshop_Model_Order();
-            $orderInfo = $modelOrder->createOrder($OpenId, $goodsList);
+            
+            $orderInfo = $this->modelOrder->createOrder($OpenId, $goodsList);
+            
+            $area = array();
+            $area['target_province'] = intval($consignee_province); // 目的地
+            $area['target_city'] = intval($consignee_city); // 目的地
+            $area['target_county'] = intval($consignee_area); // 目的地
+            
+            $transport_fee = $this->modelOrder->getTransportFee($orderInfo, $freight_campany, $area); // 运费
+                                                                                                      
+            // 更新订单
+            $orderInfo = $this->modelOrder->updateOrder($orderInfo, $transport_fee, $consignee_province_name, $consignee_city_name, $consignee_area_name, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode, $freight_campany_name);
+            
+            // 记录收货人信息
+            $modelConsignee = new Weixinshop_Model_Consignee();
+            $modelConsignee->log($orderInfo['consignee_province'], $orderInfo['consignee_city'], $orderInfo['consignee_area'], $orderInfo['consignee_name'], $orderInfo['consignee_address'], $orderInfo['consignee_tel'], $orderInfo['consignee_zipcode'], $orderInfo['OpenId'], $orderInfo['_id']->__toString());
             
             $_SESSION['orderInfo'] = $orderInfo;
             echo ($this->result("处理结束", $orderInfo));
@@ -78,7 +195,7 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
      */
     public function updateOrderAction()
     {
-        // http://iwebsite2/weixinshop/pay/update-order?jsonpcallback=?&orderId=xxx&ProductId=xxxx&gnum=xxxx
+        // http://iwebsite2/weixinshop/pay/update-order?jsonpcallback=?&orderId=539fda4b48961980338b456a&consignee_province=110000&consignee_city=110100&consignee_area=110112&consignee_address=上海杨浦&&consignee_name=郭永荣&consignee_tel=13564100096&consignee_zipcode=200093&freight_campany=538f279a4a96193b618b45b0
         try {
             $orderId = trim($this->get('orderId', '')); // 订单号
             if (empty($orderId)) {
@@ -86,51 +203,103 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             }
             $consignee_province = trim($this->get('consignee_province', '')); // 收货人省份
             if (empty($consignee_province)) {
-                throw new Exception("收货人省份为空");
+                // throw new Exception("收货人省份为空");
             }
             $consignee_city = trim($this->get('consignee_city', '')); // 收货人城市
             if (empty($consignee_city)) {
-                throw new Exception("收货人城市为空");
+                // throw new Exception("收货人城市为空");
             }
             $consignee_area = trim($this->get('consignee_area', '')); // 收货人区或县
             if (empty($consignee_area)) {
-                throw new Exception("收货人区或县为空");
+                // throw new Exception("收货人区或县为空");
             }
             $consignee_address = trim($this->get('consignee_address', '')); // 收货地址
             if (empty($consignee_address)) {
-                throw new Exception("收货地址为空");
+                // throw new Exception("收货地址为空");
             }
             $consignee_name = trim($this->get('consignee_name', '')); // 收货人
             if (empty($consignee_name)) {
-                throw new Exception("收货人为空");
+                // throw new Exception("收货人为空");
             }
             $consignee_tel = trim($this->get('consignee_tel', '')); // 收货人手机
             if (empty($consignee_tel)) {
-                throw new Exception("收货人手机为空");
+                // throw new Exception("收货人手机为空");
             }
             if (! isValidMobile($consignee_tel)) {
-                throw new Exception("收货人手机格式不正确");
+                // throw new Exception("收货人手机格式不正确");
             }
-            
             $consignee_zipcode = trim($this->get('consignee_zipcode', '')); // 邮政编码
             if (empty($consignee_zipcode)) {
-                throw new Exception("邮政编码为空");
+                // throw new Exception("邮政编码为空");
             }
             
-            $modelOrder = new Weixinshop_Model_Order();
-            $orderInfo = $modelOrder->getInfoById($orderId);
+            $freight_campany = trim($this->get('freight_campany', '')); // 快递公司
+            if (empty($freight_campany)) {
+                // throw new Exception("快递公司为空");
+            }
+            
+            $orderInfo = $this->modelOrder->getInfoById($orderId);
             if (empty($orderInfo)) {
                 throw new Exception("订单不存在");
             }
-            $isOK = $modelOrder->isOK($orderInfo['trade_state'], $orderInfo['trade_mode']);
+            
+            $isOK = $this->modelOrder->isOK($orderInfo['trade_state'], $orderInfo['trade_mode']);
             if ($isOK) {
                 throw new Exception("订单已支付");
             }
             // 或者是其他一些判断条件
-            $transport_fee = 0;
+            $modelFreightArea = new Tools_Model_Freight_Area();
+            $consignee_province_name = "";
+            if (! empty($consignee_province)) {
+                $provinceInfo = $modelFreightArea->getInfoByCode(intval($consignee_province));
+                if (empty($provinceInfo)) {
+                    // throw new Exception("省份不存在");
+                } else {
+                    $consignee_province_name = $provinceInfo['name'];
+                }
+            }
+            $consignee_city_name = "";
+            if (! empty($consignee_city)) {
+                $cityInfo = $modelFreightArea->getInfoByCode(intval($consignee_city));
+                if (empty($cityInfo)) {
+                    // throw new Exception("城市不存在");
+                } else {
+                    $consignee_city_name = trim($cityInfo['name']);
+                    if ($consignee_city_name == "市辖区") {
+                        $consignee_city_name = $consignee_province_name;
+                    }
+                }
+            }
             
+            $consignee_area_name = "";
+            if (! empty($consignee_area)) {
+                $areaInfo = $modelFreightArea->getInfoByCode(intval($consignee_area));
+                if (empty($areaInfo)) {
+                    // throw new Exception("区或县不存在");
+                } else {
+                    $consignee_area_name = $areaInfo['name'];
+                }
+            }
+            $freight_campany_name = "";
+            $modelFreightCampany = new Tools_Model_Freight_Campany();
+            if (! empty($freight_campany)) {
+                $companyInfo = $modelFreightCampany->getInfoById($freight_campany);
+                if (empty($companyInfo)) {
+                    // throw new Exception("快递不存在");
+                } else {
+                    $freight_campany_name = $companyInfo['name'];
+                }
+            }
+            
+            $area = array();
+            $area['target_province'] = intval($consignee_province); // 目的地
+            $area['target_city'] = intval($consignee_city); // 目的地
+            $area['target_county'] = intval($consignee_area); // 目的地
+            
+            $transport_fee = $this->modelOrder->getTransportFee($orderInfo, $freight_campany, $area); // 运费
+                                                                                                      
             // 更新订单
-            $orderInfo = $modelOrder->updateOrder($orderInfo, $transport_fee, $consignee_province, $consignee_city, $consignee_area, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode);
+            $orderInfo = $this->modelOrder->updateOrder($orderInfo, $transport_fee, $consignee_province_name, $consignee_city_name, $consignee_area_name, $consignee_name, $consignee_address, $consignee_tel, $consignee_zipcode, $freight_campany_name);
             
             // 记录收货人信息
             $modelConsignee = new Weixinshop_Model_Consignee();
@@ -197,7 +366,8 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             $nums = array(
                 1
             );
-            $goodsList = $modelGoods->getList(0, $ProductIds);
+            $modelGoods = new Weixinshop_Model_Goods();
+            $goodsList = $modelGoods->getList(false, $ProductIds);
             foreach ($ProductIds as $index => $ProductId) {
                 if (! key_exists($ProductId, $goodsList)) {
                     throw new Exception("商品号{$ProductId}的商品不存在");
@@ -210,8 +380,8 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
                 }
             }
             // 生成订单
-            $modelOrder = new Weixinshop_Model_Order();
-            $orderInfo = $modelOrder->createOrder($postData['OpenId'], $goodsList);
+            
+            $orderInfo = $this->modelOrder->createOrder($postData['OpenId'], $goodsList);
             
             // 获取Package
             $package = $orderInfo['package'];
@@ -440,32 +610,32 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             }
             
             // 检查订单
-            $modelOrder = new Weixinshop_Model_Order();
-            $orderInfo = $modelOrder->getInfoByOutTradeNo($out_trade_no);
+            
+            $orderInfo = $this->modelOrder->getInfoByOutTradeNo($out_trade_no);
             if (empty($orderInfo)) {
                 throw new Exception("out_trade_no无效:{$out_trade_no}", - 2);
             }
             // 如果微信ID为空的话，就更新
             if (empty($orderInfo['OpenId'])) {
-                $modelOrder->updateOpenId($out_trade_no, $postData["OpenId"]);
+                $this->modelOrder->updateOpenId($out_trade_no, $postData["OpenId"]);
             }
             // 是否支付成功
-            $isOk = $modelOrder->isOK($data['trade_state'], $data['trade_mode']);
+            $isOk = $this->modelOrder->isOK($data['trade_state'], $data['trade_mode']);
             if ($isOk) {
                 // 处理订单的状态
-                $newOrderInfo = $modelOrder->changeStatus($orderInfo, $data, 'notify');
+                $newOrderInfo = $this->modelOrder->changeStatus($orderInfo, $data, 'notify');
                 
                 // 是否支付成功
-                $isOk = $modelOrder->isOK($newOrderInfo['trade_state'], $newOrderInfo['trade_mode']);
+                $isOk = $this->modelOrder->isOK($newOrderInfo['trade_state'], $newOrderInfo['trade_mode']);
                 
                 // 为了更好地跟踪订单的情况，需要第三方在收到最终支付通知之后，
                 // 调用发货通知API告知微信后台该订单的发货状态。
                 // 请在收到支付通知发货后，一定调用发货通知接口，否则可能影响商户信誉和资金结算。
                 // 调用发货通知接口
                 if ($isOk) {
-                    // $delivernotityResult = $this->weixinPay->delivernotify(
-                    // $newOrderInfo['OpenId'], $newOrderInfo['transaction_id'],
-                    // $newOrderInfo['out_trade_no'], time(), 1, "已发货");
+                    // 更新该商品的购买数量
+                    $this->modelOrder->incPurchaseNum($newOrderInfo);
+                    $delivernotityResult = $this->weixinPay->delivernotify($newOrderInfo['OpenId'], $newOrderInfo['transaction_id'], $newOrderInfo['out_trade_no'], time(), 1, "已发货");
                     $ret['notify_result'] = "success";
                 }
             }
@@ -511,14 +681,13 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
                 throw new Exception('商户订单号out_trade_no为空');
             }
             
-            $modelOrder = new Weixinshop_Model_Order();
-            $orderInfo = $modelOrder->getInfoByOutTradeNo($out_trade_no);
+            $orderInfo = $this->modelOrder->getInfoByOutTradeNo($out_trade_no);
             if (empty($orderInfo)) {
                 throw new Exception("订单号out_trade_no无效:{$out_trade_no}");
             }
             
             // 是否支付成功
-            $isOk = $modelOrder->isOK($orderInfo['trade_state'], $orderInfo['trade_mode']);
+            $isOk = $this->modelOrder->isOK($orderInfo['trade_state'], $orderInfo['trade_mode']);
             if (! $isOk) {
                 // 调用订单查询 orderquery
                 $ret = $this->weixinPay->orderquery($out_trade_no, time());
@@ -527,10 +696,10 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
                 $ret_msg = $order_info['ret_msg'];
                 
                 // 订单状态的改变
-                $newOrderInfo = $modelOrder->changeStatus($orderInfo, $order_info, 'orderquery');
+                $newOrderInfo = $this->modelOrder->changeStatus($orderInfo, $order_info, 'orderquery');
                 
                 // 是否支付成功
-                $isOk = $modelOrder->isOK($newOrderInfo['trade_state'], $newOrderInfo['trade_mode']);
+                $isOk = $this->modelOrder->isOK($newOrderInfo['trade_state'], $newOrderInfo['trade_mode']);
             }
             
             $result = array();
@@ -634,13 +803,27 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             $postData = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
             $postData = object2Array($postData);
             $picInfoList = array();
-            foreach ($postData['PicInfo']['item'] as $picInfo) {
-                if (! empty($picInfo['PicUrl'])) {
-                    $picInfoList[] = $picInfo['PicUrl'];
+            if (! empty($postData['PicInfo']) && ! empty($postData['PicInfo']['item'])) {
+                foreach ($postData['PicInfo']['item'] as $picInfo) {
+                    if (! empty($picInfo['PicUrl'])) {
+                        $picInfoList[] = empty($picInfo['PicUrl']) ? "" : trim($picInfo['PicUrl']);
+                    }
                 }
             }
             $postData['PicInfo'] = implode("\n", $picInfoList);
-            
+            foreach (array(
+                'FeedBackId',
+                'TransId',
+                'Reason',
+                'Solution',
+                'ExtInfo'
+            ) as $key) {
+                if (! key_exists($key, $postData)) {
+                    $postData[$key] = "";
+                } else {
+                    $postData[$key] = empty($postData[$key]) ? "" : trim($postData[$key]);
+                }
+            }
             // 参于签名的字段为：appid、appkey、timestamp、openid
             // 签名校验
             $paySignPara = array();
@@ -652,12 +835,15 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
             $checkRet = $this->checkAppSignature($paySignPara, $postData['AppSignature']);
             $calc_appSignature = $checkRet['sign'];
             if (empty($checkRet['isvalid'])) {
-                throw new Exception("AppSignature签名校验无效:{$checkRet['sign']}", - 1);
+                // throw new Exception("AppSignature签名校验无效:{$checkRet['sign']}", - 1);
             }
             
             // 处理投诉
             $modelPayFeedback = new Weixinshop_Model_PayFeedback();
             $feedbackInfo = $modelPayFeedback->handle($postData['AppId'], $postData['TimeStamp'], $postData['OpenId'], $postData['MsgType'], $postData['FeedBackId'], $postData['TransId'], $postData['Reason'], $postData['Solution'], $postData['ExtInfo'], $postData['PicInfo'], $postData['AppSignature'], $postData['SignMethod'], $postStr, $calc_appSignature);
+            
+            // 更新订单的维权状态
+            $this->modelOrder->updateFeedBackStatus($feedbackInfo);
             echo ($this->result("处理结束"));
             return true;
         } catch (Exception $e) {
@@ -668,12 +854,82 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
     }
 
     /**
+     * 告警通知
+     * 为了及时通知商户异常，提高商户在微信平台的服务质量。微信后台会向商户推送告警
+     * 通知，包括发货延迟、调用失败、通知失败等情况，通知的地址是商户在申请支付时填写的
+     * 告警通知URL，在“公众平台-服务-服务中心-商户功能-商户基本资料-告警通知URL”可
+     * 以查看。商户接收到告警通知后请尽快修复其中提到的问题，以免影响线上经营。（发货时
+     * 间要求请参考5.3.1）
+     * 商户收到告警通知后，需要成功返回success。在通过功能发布检测时，请保证已调通。
+     */
+    public function alertAction()
+    {
+        /**
+         * 告警通知URL 接收的postData 中还将含xml 数据，格式如下：
+         * 签名字段：alarmcontent、appid、appkey、description、errortype、timestamp。签名
+         * 方式与2.7 节步骤和方式相同
+         * <xml>
+         * <AppId><![CDATA[wxf8b4f85f3a794e77]]></AppId>
+         * <ErrorType>1001</ErrorType>
+         * <Description><![CDATA[错误描述]]></Description>
+         * <AlarmContent><![CDATA[错误详情]]></AlarmContent>
+         * <TimeStamp>1393860740</TimeStamp>
+         * <AppSignature><![CDATA[f8164781a303f4d5a944a2dfc68411a8c7e4fbea]]></AppSignature>
+         * <SignMethod><![CDATA[sha1]]></SignMethod>
+         * </xml>
+         * 错误描述
+         * ErrorType Description AlarmContent
+         * 1001 发货超时 transaction_id=XXXXX
+         */
+        try {
+            // $postStr = "<xml>
+            // <AppId><![CDATA[wxf8b4f85f3a794e77]]></AppId>
+            // <ErrorType>1001</ErrorType>
+            // <Description><![CDATA[错误描述]]></Description>
+            // <AlarmContent><![CDATA[错误详情]]></AlarmContent>
+            // <TimeStamp>1393860740</TimeStamp>
+            // <AppSignature><![CDATA[f8164781a303f4d5a944a2dfc68411a8c7e4fbea]]></AppSignature>
+            // <SignMethod><![CDATA[sha1]]></SignMethod>
+            // </xml>";
+            $postStr = file_get_contents('php://input');
+            $postData = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
+            $postData = object2Array($postData);
+            
+            // 参于签名的字段为：alarmcontent、appid、appkey、description、errortype、timestamp
+            // 签名校验
+            $paySignPara = array();
+            $paySignPara['alarmcontent'] = $postData['AlarmContent'];
+            $paySignPara['appid'] = $postData['AppId'];
+            $paySignPara['description'] = $postData['Description'];
+            $paySignPara['errortype'] = $postData['ErrorType'];
+            $paySignPara['timestamp'] = $postData['TimeStamp'];
+            // $paySign = $this->weixinPay->getPaySign ( $paySignPara );
+            // die($paySign);
+            $checkRet = $this->checkAppSignature($paySignPara, $postData['AppSignature']);
+            $calc_appSignature = $checkRet['sign'];
+            if (empty($checkRet['isvalid'])) {
+                throw new Exception("AppSignature签名校验无效:{$checkRet['sign']}", - 1);
+            }
+            
+            // 处理投诉
+            $modelPayAlert = new Weixinshop_Model_PayAlert();
+            $modelPayAlert->handle($postData['AppId'], $postData['ErrorType'], $postData['Description'], $postData['AlarmContent'], $postData['TimeStamp'], $postData['AppSignature'], $postData['SignMethod'], $postStr, $calc_appSignature);
+            echo "success";
+            return true;
+        } catch (Exception $e) {
+            $this->errorLog->log($e);
+            echo "fail";
+            return false;
+        }
+    }
+
+    /**
      * 获取收货人的信息
      */
     public function getConsigneeInfoAction()
     {
         try {
-            $OpenId = $this->getRequest()->getCookie("FromUserName", '');
+            $OpenId = $this->getRequest()->getCookie("openid", '');
             $modelConsignee = new Weixinshop_Model_Consignee();
             $consigneeInfo = $modelConsignee->getLastInfoByOpenid($OpenId);
             echo ($this->result("处理结束", $consigneeInfo));
@@ -681,6 +937,76 @@ class Weixinshop_PayController extends iWebsite_Controller_Action
         } catch (Exception $e) {
             $this->errorLog->log($e);
             echo ($this->error($e->getCode(), $e->getMessage()));
+            return false;
+        }
+    }
+
+    /**
+     * 计算运价接口
+     */
+    public function calculateAction()
+    {
+        // http://iwebsite2/weixinshop/pay/calculate?jsonpcallback=?&orderId=538fe4af499619b8218b457c&campany=538f279a4a96193b618b45b0&province=110000&city=110000&area=110000
+        try {
+            $orderId = trim($this->get('orderId', ''));
+            // if (empty($orderId)) {
+            // echo $this->error(500, '订单信息不能为空');
+            // return false;
+            // }
+            
+            $campany = trim($this->get('campany', ''));
+            if (empty($campany)) {
+                echo $this->error(502, '快递信息不能为空');
+                return false;
+            }
+            
+            $province = intval($this->get('province', '0'));
+            if (empty($province)) {
+                echo $this->error(503, '省份信息不能为空');
+                return false;
+            }
+            
+            $city = intval($this->get('city', '0'));
+            // if (empty($city)) {
+            // echo $this->error(504, '城市信息不能为空');
+            // return false;
+            // }
+            
+            $area = intval($this->get('area', '0'));
+            // if (empty($area)) {
+            // echo $this->error(505, '区或县信息不能为空');
+            // return false;
+            // }
+            
+            if (! empty($orderId)) {
+                $orderInfo = $this->modelOrder->getInfoById($orderId);
+                if (empty($orderInfo)) {
+                    echo $this->error(501, '订单不存在');
+                    return false;
+                }
+            } else {
+                if (empty($_SESSION['checkout'])) {
+                    echo $this->error(506, '未购买商品');
+                    return false;
+                }
+                $orderInfo['details'] = $_SESSION['checkout']['goods'];
+            }
+            
+            $area = array();
+            $area['target_province'] = intval($province); // 目的地
+            $area['target_city'] = intval($city); // 目的地
+            $area['target_county'] = intval($area); // 目的地
+            
+            $transport_fee = $this->modelOrder->getTransportFee($orderInfo, $campany, $area); // 运费
+            
+            echo $this->result('计算完成', array(
+                'transport_fee' => $transport_fee,
+                'isOK' => 1
+            ));
+            return true;
+        } catch (Exception $e) {
+            $this->errorLog->log($e);
+            echo ($this->error($e->getCode(), "您的地区该快递暂不支持配送!"));
             return false;
         }
     }
