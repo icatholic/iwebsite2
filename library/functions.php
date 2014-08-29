@@ -78,7 +78,7 @@ function isValidEmail($email, $getmxrr = 0)
  */
 function isValidMobile($mobile)
 {
-    if (preg_match("/^1[3,4,5,8]{1}[0-9]{9}$/", $mobile))
+    if (preg_match("/^1[3,4,5,7,8]{1}[0-9]{9}$/", $mobile))
         return true;
     return false;
 }
