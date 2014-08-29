@@ -4,25 +4,7 @@
  * @author yangming
  * 
  */
-defined('IDATABASE_INDEXES') || define('IDATABASE_INDEXES', 'idatabase_indexes');
-defined('IDATABASE_COLLECTIONS') || define('IDATABASE_COLLECTIONS', 'idatabase_collections');
-defined('IDATABASE_STRUCTURES') || define('IDATABASE_STRUCTURES', 'idatabase_structures');
-defined('IDATABASE_PROJECTS') || define('IDATABASE_PROJECTS', 'idatabase_projects');
-defined('IDATABASE_PLUGINS') || define('IDATABASE_PLUGINS', 'idatabase_plugins');
-defined('IDATABASE_PLUGINS_COLLECTIONS') || define('IDATABASE_PLUGINS_COLLECTIONS', 'idatabase_plugins_collections');
-defined('IDATABASE_PLUGINS_STRUCTURES') || define('IDATABASE_PLUGINS_STRUCTURES', 'idatabase_plugins_structures');
-defined('IDATABASE_PROJECT_PLUGINS') || define('IDATABASE_PROJECT_PLUGINS', 'idatabase_project_plugins');
-defined('IDATABASE_VIEWS') || define('IDATABASE_VIEWS', 'idatabase_views');
-defined('IDATABASE_STATISTIC') || define('IDATABASE_STATISTIC', 'idatabase_statistic');
-defined('IDATABASE_PROMISSION') || define('IDATABASE_PROMISSION', 'idatabase_promission');
-defined('IDATABASE_KEYS') || define('IDATABASE_KEYS', 'idatabase_keys');
-defined('IDATABASE_COLLECTION_ORDERBY') || define('IDATABASE_COLLECTION_ORDERBY', 'idatabase_collection_orderby');
-defined('IDATABASE_MAPPING') || define('IDATABASE_MAPPING', 'idatabase_mapping');
-defined('IDATABASE_LOCK') || define('IDATABASE_LOCK', 'idatabase_lock');
-defined('IDATABASE_QUICK') || define('IDATABASE_QUICK', 'idatabase_quick');
-defined('IDATABASE_DASHBOARD') || define('IDATABASE_DASHBOARD', 'idatabase_dashboard');
-defined('IDATABASE_FILES') || define('IDATABASE_FILES', 'idatabase_files');
-defined('DOMAIN') || define('DOMAIN', 'http://cloud.umaman.com');
+
 
 class iWebsite_Local_Database
 {

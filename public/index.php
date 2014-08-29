@@ -22,6 +22,7 @@ if (APPLICATION_ENV === 'production') {
     require 'iWebsite2/define.php';
     require 'iWebsite2/vendor/autoload.php';
 } else {
+    require APPLICATION_PATH . '/configs/constant.php';
     require APPLICATION_PATH . '/../vendor/autoload.php';
 }
 require 'Zend/Application.php';

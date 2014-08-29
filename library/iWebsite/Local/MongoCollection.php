@@ -18,20 +18,7 @@
  * 3. 同理，对于db->command操作内部，诸如mapreduce等操作时，如涉及到数据修改，请注意以上三个参数的变更与保留，以免引起不必要的问题。
  * 
  */
-defined('DEFAULT_DATABASE') || define('DEFAULT_DATABASE', 'ICCv1');
-defined('DEFAULT_CLUSTER') || define('DEFAULT_CLUSTER', 'default');
 
-defined('DB_ADMIN') || define('DB_ADMIN', 'admin');
-defined('DB_BACKUP') || define('DB_BACKUP', 'backup');
-defined('DB_MAPREDUCE') || define('DB_MAPREDUCE', 'mapreduce');
-defined('DB_LOGS') || define('DB_LOGS', 'logs');
-defined('GRIDFS_PREFIX') || define('GRIDFS_PREFIX', 'icc');
-
-defined('MONGOS_DEFAULT_01') || define('MONGOS_DEFAULT_01', '10.0.0.30:57017');
-defined('MONGOS_DEFAULT_02') || define('MONGOS_DEFAULT_02', '10.0.0.31:57017');
-defined('MONGOS_DEFAULT_03') || define('MONGOS_DEFAULT_03', '10.0.0.32:57017');
-
-defined('MONGOS_LOCAL') || define('MONGOS_LOCAL', '127.0.0.1:27017');
 
 class iWebsite_Local_MongoCollection extends \MongoCollection
 {
